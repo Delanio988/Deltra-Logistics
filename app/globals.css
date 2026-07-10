@@ -1,0 +1,99 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Brand palette — mirrors tailwind.config.ts so raw CSS (SVG, canvas, etc.)
+     can reference the same values without duplicating hex codes. */
+  --color-navy: #0b2545;
+  --color-navy-900: #071831;
+  --color-navy-950: #040e1d;
+  --color-accent: #1e4fd8;
+  --color-gold: #d4af37;
+  --color-white: #ffffff;
+  --color-offwhite: #f7f8fa;
+  --color-ink: #0a0e17;
+
+  --cursor-size: 16px;
+  --header-height: 88px;
+}
+
+* {
+  scrollbar-color: var(--color-gold) var(--color-navy-950);
+}
+
+html {
+  scroll-behavior: auto; /* Lenis takes over smooth scrolling; avoid double-smoothing */
+  background: var(--color-offwhite);
+}
+
+body {
+  background: var(--color-offwhite);
+  color: var(--color-ink);
+  font-family: var(--font-poppins), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Hide the native cursor only once the custom cursor is confirmed active
+   (see components/ui/CustomCursor.tsx), and never on touch devices. */
+html.has-custom-cursor,
+html.has-custom-cursor * {
+  cursor: none !important;
+}
+
+@media (hover: none) and (pointer: coarse) {
+  html.has-custom-cursor,
+  html.has-custom-cursor * {
+    cursor: auto !important;
+  }
+}
+
+::selection {
+  background: var(--color-gold);
+  color: var(--color-navy-950);
+}
+
+/* Reusable gold underline / label accent used sparingly across sections */
+.gold-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--color-gold);
+}
+
+.gold-label::before {
+  content: "";
+  display: block;
+  width: 2.25rem;
+  height: 1px;
+  background: var(--color-gold);
+}
+
+/* Tasteful film-grain overlay for cinematic depth (components/ui/Noise.tsx) */
+.noise-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+  opacity: 0.035;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* Respect reduced-motion preference globally: collapse scroll/parallax-driven
+   transforms and let content appear in place instead of animating in. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

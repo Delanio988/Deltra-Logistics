@@ -1,10 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 import { NAV_LINKS } from "@/lib/data";
 import { useLenis } from "@/components/layout/SmoothScrollProvider";
 import MagneticButton from "@/components/ui/MagneticButton";
+import Wordmark from "@/components/ui/Wordmark";
 import { cn } from "@/lib/utils";
 
 export default function Header() {
@@ -36,7 +38,7 @@ export default function Header() {
       className={cn(
         "fixed inset-x-0 top-0 z-50 transition-colors duration-500",
         isScrolled || isMobileOpen
-          ? "bg-navy-950/90 backdrop-blur-md shadow-[0_1px_0_0_rgba(212,175,55,0.15)]"
+          ? "bg-navy-950/90 backdrop-blur-md shadow-[0_1px_0_0_rgba(255,101,56,0.15)]"
           : "bg-transparent"
       )}
     >
@@ -45,11 +47,9 @@ export default function Header() {
           href="#top"
           onClick={(e) => handleNavClick(e, "#top")}
           data-cursor-hover="Home"
-          className="font-extrabold tracking-tight text-white"
+          className="text-white"
         >
-          <span className="text-lg lg:text-xl">
-            MERIDIAN <span className="text-gold">FREIGHT</span>
-          </span>
+          <Wordmark className="text-lg lg:text-xl" />
         </a>
 
         <nav className="hidden items-center gap-10 lg:flex" aria-label="Primary">
@@ -59,7 +59,7 @@ export default function Header() {
               href={link.href}
               onClick={(e) => handleNavClick(e, link.href)}
               data-cursor-hover={link.label}
-              className="text-sm font-medium tracking-wide text-white/80 transition-colors hover:text-gold"
+              className="text-sm font-medium tracking-wide text-white/80 transition-colors hover:text-accent"
             >
               {link.label}
             </a>
@@ -68,11 +68,11 @@ export default function Header() {
 
         <div className="hidden lg:block">
           <MagneticButton
-            href="#contact"
-            cursorLabel="Quote"
-            className="bg-gold text-navy-950 shadow-gold hover:bg-gold-light"
+            href="/login"
+            cursorLabel="Login"
+            className="bg-accent text-navy-950 shadow-accent hover:bg-accent-dark hover:text-white"
           >
-            Get a Quote
+            Login
           </MagneticButton>
         </div>
 
@@ -125,13 +125,13 @@ export default function Header() {
                   {link.label}
                 </a>
               ))}
-              <a
-                href="#contact"
-                onClick={(e) => handleNavClick(e, "#contact")}
-                className="mt-4 rounded-full bg-gold px-6 py-3 text-center text-sm font-semibold text-navy-950"
+              <Link
+                href="/login"
+                onClick={() => setIsMobileOpen(false)}
+                className="mt-4 rounded-full bg-accent px-6 py-3 text-center text-sm font-semibold text-navy-950"
               >
-                Get a Quote
-              </a>
+                Login
+              </Link>
             </div>
           </motion.nav>
         )}

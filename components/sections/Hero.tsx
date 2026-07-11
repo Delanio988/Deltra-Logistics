@@ -33,8 +33,8 @@ export default function Hero() {
         style={{ y: bgY }}
         className="absolute inset-0 bg-navy-radial"
       >
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(30,79,216,0.35),transparent_45%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_75%,rgba(212,175,55,0.12),transparent_40%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(255,46,46,0.35),transparent_45%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_75%,rgba(255,101,56,0.15),transparent_40%)]" />
         <div className="absolute inset-0 opacity-40 [background:repeating-linear-gradient(115deg,transparent,transparent_2px,rgba(255,255,255,0.02)_2px,rgba(255,255,255,0.02)_3px)]" />
       </motion.div>
 
@@ -65,7 +65,7 @@ export default function Hero() {
           className="mt-8 max-w-xl text-lg text-white/70 lg:text-xl"
         >
           Ocean, air, and ground freight engineered for reliability at scale.
-          Meridian Freight connects 180+ countries with one accountable partner.
+          Deltra Logistics connects 180+ countries with one accountable partner.
         </motion.p>
 
         <motion.div
@@ -74,13 +74,13 @@ export default function Hero() {
           transition={{ duration: 0.8, delay: 1.3 }}
           className="mt-12 flex flex-wrap items-center gap-5"
         >
-          <MagneticButton href="#contact" cursorLabel="Quote" className="bg-gold text-navy-950 shadow-gold hover:bg-gold-light">
+          <MagneticButton href="#contact" cursorLabel="Quote" className="bg-accent text-navy-950 shadow-accent hover:bg-accent-dark hover:text-white">
             Get a Quote
           </MagneticButton>
           <MagneticButton
             href="#network"
             cursorLabel="Explore"
-            className="border border-white/25 text-white hover:border-gold hover:text-gold"
+            className="border border-white/25 text-white hover:border-accent hover:text-accent"
           >
             Explore Our Network
           </MagneticButton>
@@ -97,7 +97,7 @@ export default function Hero() {
           href="#stats"
           data-cursor-hover="Scroll"
           aria-label="Scroll to next section"
-          className="flex flex-col items-center gap-3 text-white/60 transition-colors hover:text-gold"
+          className="flex flex-col items-center gap-3 text-white/60 transition-colors hover:text-accent"
         >
           <span className="text-[11px] font-medium uppercase tracking-widest2">Scroll</span>
           <span className="relative h-12 w-[1px] overflow-hidden bg-white/20">

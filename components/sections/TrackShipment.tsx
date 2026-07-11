@@ -5,6 +5,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { TRACKING_DATA } from "@/lib/data";
 import ScrollReveal from "@/components/ui/ScrollReveal";
 import MagneticButton from "@/components/ui/MagneticButton";
+import StatusTimeline from "@/components/ui/StatusTimeline";
 
 export default function TrackShipment() {
   const [query, setQuery] = useState("");
@@ -45,7 +46,7 @@ export default function TrackShipment() {
                 type="text"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="e.g. MF10293847"
+                placeholder="e.g. DL10293847"
                 className="w-full rounded-full border border-navy-950/15 bg-white px-6 py-4 text-sm text-navy-950 outline-none transition-colors focus:border-accent"
               />
               <MagneticButton
@@ -72,50 +73,7 @@ export default function TrackShipment() {
                   <p className="text-sm font-medium text-navy-950/50">
                     Tracking number <span className="font-semibold text-navy-950">{activeNumber}</span>
                   </p>
-                  <ol className="mt-8 space-y-0">
-                    {timeline.map((step, i) => {
-                      const isComplete = i <= currentStepIndex;
-                      const isLast = i === timeline.length - 1;
-                      return (
-                        <li key={step.label} className="relative flex gap-5 pb-10 last:pb-0">
-                          {!isLast && (
-                            <span
-                              aria-hidden
-                              className="absolute left-[11px] top-6 h-full w-px bg-navy-950/10"
-                            >
-                              <motion.span
-                                className="block w-full bg-gold"
-                                initial={{ height: 0 }}
-                                animate={{ height: isComplete ? "100%" : "0%" }}
-                                transition={{ duration: 0.6, delay: i * 0.15 }}
-                              />
-                            </span>
-                          )}
-                          <motion.span
-                            initial={{ scale: 0.6, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            transition={{ duration: 0.4, delay: i * 0.15 }}
-                            className={`relative z-10 mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 ${
-                              isComplete ? "border-gold bg-gold" : "border-navy-950/15 bg-white"
-                            }`}
-                          >
-                            {isComplete && (
-                              <svg viewBox="0 0 12 12" className="h-3 w-3 text-navy-950" fill="none">
-                                <path d="M2 6l2.5 2.5L10 3" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" />
-                              </svg>
-                            )}
-                          </motion.span>
-                          <div>
-                            <p className={`font-semibold ${isComplete ? "text-navy-950" : "text-navy-950/40"}`}>
-                              {step.label}
-                            </p>
-                            <p className="mt-1 text-sm text-navy-950/50">{step.description}</p>
-                            <p className="mt-1 text-xs text-navy-950/35">{step.timestamp}</p>
-                          </div>
-                        </li>
-                      );
-                    })}
-                  </ol>
+                  <StatusTimeline steps={timeline} currentStepIndex={currentStepIndex} className="mt-8" />
                 </motion.div>
               ) : (
                 <motion.div

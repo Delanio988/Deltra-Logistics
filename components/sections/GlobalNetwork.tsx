@@ -65,7 +65,7 @@ export default function GlobalNetwork() {
             ref={svgRef}
             viewBox={`0 0 ${VIEW_W} ${VIEW_H}`}
             role="img"
-            aria-label="Stylized map of Meridian Freight's global hub network with connecting trade routes"
+            aria-label="Stylized map of the Deltra Logistics global hub network with connecting trade routes"
             className="h-auto w-full"
           >
             {/* Faint global grid to suggest a world map without literal geography */}
@@ -74,8 +74,8 @@ export default function GlobalNetwork() {
                 <path d="M5 0H0V5" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="0.15" />
               </pattern>
               <radialGradient id="hubGlow" cx="50%" cy="50%" r="50%">
-                <stop offset="0%" stopColor="#D4AF37" stopOpacity="0.9" />
-                <stop offset="100%" stopColor="#D4AF37" stopOpacity="0" />
+                <stop offset="0%" stopColor="#FF2E2E" stopOpacity="0.9" />
+                <stop offset="100%" stopColor="#FF2E2E" stopOpacity="0" />
               </radialGradient>
             </defs>
             <rect x="0" y="0" width={VIEW_W} height={VIEW_H} fill="url(#grid)" />
@@ -93,11 +93,11 @@ export default function GlobalNetwork() {
                       id={id}
                       className="route-path"
                       d={arcPath(from, to)}
-                      stroke="#D4AF37"
+                      stroke="#FF6538"
                       opacity={0.55}
                     />
                     {!prefersReducedMotion && (
-                      <circle r="0.5" fill="#F7F8FA">
+                      <circle r="0.5" fill="#F5F5F5">
                         <animateMotion
                           dur={`${4 + (i % 4)}s`}
                           repeatCount="indefinite"
@@ -122,11 +122,11 @@ export default function GlobalNetwork() {
                     cy={hub.y}
                     r="0.9"
                     fill="none"
-                    stroke="#D4AF37"
+                    stroke="#FF2E2E"
                     strokeWidth="0.25"
                     className={prefersReducedMotion ? undefined : "origin-center animate-pulse-slow"}
                   />
-                  <circle cx={hub.x} cy={hub.y} r="0.55" fill="#F7F8FA" />
+                  <circle cx={hub.x} cy={hub.y} r="0.55" fill="#F5F5F5" />
                 </g>
               ))}
             </g>

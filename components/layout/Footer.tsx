@@ -2,6 +2,7 @@
 
 import { useId, useState, type FormEvent } from "react";
 import { NAV_LINKS, SERVICES } from "@/lib/data";
+import Wordmark from "@/components/ui/Wordmark";
 
 const SOCIALS = [
   { label: "LinkedIn", href: "https://linkedin.com" },
@@ -22,13 +23,11 @@ export default function Footer() {
   };
 
   return (
-    <footer className="bg-navy-950 pt-24 text-white">
+    <footer id="contact" className="bg-navy-950 pt-24 text-white">
       <div className="mx-auto max-w-container px-6 lg:px-12">
         <div className="grid grid-cols-2 gap-12 pb-16 sm:grid-cols-4 lg:grid-cols-5">
           <div className="col-span-2 sm:col-span-4 lg:col-span-2">
-            <p className="font-extrabold tracking-tight text-white">
-              MERIDIAN <span className="text-gold">FREIGHT</span>
-            </p>
+            <Wordmark />
             <p className="mt-5 max-w-xs text-sm leading-relaxed text-white/55">
               Global shipping and logistics, engineered for reliability — ocean, air, and
               ground freight across 180+ countries.
@@ -46,12 +45,12 @@ export default function Footer() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="you@company.com"
-                  className="w-full rounded-full border border-white/15 bg-white/5 px-5 py-3 text-sm text-white outline-none transition-colors focus:border-gold"
+                  className="w-full rounded-full border border-white/15 bg-white/5 px-5 py-3 text-sm text-white outline-none transition-colors focus:border-accent"
                 />
                 <button
                   type="submit"
                   data-cursor-hover="Join"
-                  className="shrink-0 rounded-full bg-gold px-5 py-3 text-sm font-semibold text-navy-950 transition-colors hover:bg-gold-light"
+                  className="shrink-0 rounded-full bg-accent px-5 py-3 text-sm font-semibold text-navy-950 transition-colors hover:bg-accent-dark hover:text-white"
                 >
                   Join
                 </button>
@@ -67,7 +66,7 @@ export default function Footer() {
             <ul className="mt-5 space-y-3">
               {NAV_LINKS.map((link) => (
                 <li key={link.href}>
-                  <a href={link.href} className="text-sm text-white/70 transition-colors hover:text-gold">
+                  <a href={link.href} className="text-sm text-white/70 transition-colors hover:text-accent">
                     {link.label}
                   </a>
                 </li>
@@ -80,7 +79,7 @@ export default function Footer() {
             <ul className="mt-5 space-y-3">
               {SERVICES.slice(0, 5).map((service) => (
                 <li key={service.id}>
-                  <a href="#services" className="text-sm text-white/70 transition-colors hover:text-gold">
+                  <a href="#services" className="text-sm text-white/70 transition-colors hover:text-accent">
                     {service.title}
                   </a>
                 </li>
@@ -92,12 +91,12 @@ export default function Footer() {
             <h3 className="text-xs font-semibold uppercase tracking-widest text-white/50">Contact</h3>
             <ul className="mt-5 space-y-3 text-sm text-white/70">
               <li>
-                <a href="mailto:quotes@meridianfreight.com" className="transition-colors hover:text-gold">
-                  quotes@meridianfreight.com
+                <a href="mailto:quotes@deltralogistics.com" className="transition-colors hover:text-accent">
+                  quotes@deltralogistics.com
                 </a>
               </li>
               <li>
-                <a href="tel:+18005551234" className="transition-colors hover:text-gold">
+                <a href="tel:+18005551234" className="transition-colors hover:text-accent">
                   +1 (800) 555-1234
                 </a>
               </li>
@@ -111,7 +110,7 @@ export default function Footer() {
                   target="_blank"
                   rel="noreferrer"
                   data-cursor-hover={social.label}
-                  className="text-xs font-medium uppercase tracking-wide text-white/50 transition-colors hover:text-gold"
+                  className="text-xs font-medium uppercase tracking-wide text-white/50 transition-colors hover:text-accent"
                 >
                   {social.label}
                 </a>
@@ -121,7 +120,7 @@ export default function Footer() {
         </div>
 
         <div className="flex flex-col gap-4 border-t border-white/10 py-8 text-xs text-white/40 sm:flex-row sm:items-center sm:justify-between">
-          <p>&copy; {new Date().getFullYear()} Meridian Freight. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} Deltra Logistics. All rights reserved.</p>
           <p>Placeholder brand — swap name, logo, and legal copy before launch.</p>
         </div>
       </div>
@@ -129,7 +128,7 @@ export default function Footer() {
       {/* Oversized wordmark — purely decorative, clipped so it never scrolls the page horizontally */}
       <div aria-hidden className="overflow-hidden">
         <p className="translate-y-[0.12em] select-none whitespace-nowrap px-6 text-center text-[18vw] font-extrabold leading-none tracking-tighter text-white/[0.04] lg:text-[13vw]">
-          MERIDIAN
+          DELTRA
         </p>
       </div>
     </footer>

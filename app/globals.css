@@ -4,15 +4,17 @@
 
 :root {
   /* Brand palette — mirrors tailwind.config.ts so raw CSS (SVG, canvas, etc.)
-     can reference the same values without duplicating hex codes. */
-  --color-navy: #0b2545;
-  --color-navy-900: #071831;
-  --color-navy-950: #040e1d;
-  --color-accent: #1e4fd8;
-  --color-gold: #d4af37;
+     can reference the same values without duplicating hex codes. Despite the
+     variable name, --color-gold is now a red-orange secondary accent. */
+  --color-navy: #0a0a0a;
+  --color-navy-900: #1a1a1a;
+  --color-navy-950: #000000;
+  --color-accent: #ff2e2e;
+  --color-accent-dark: #c81e1e;
+  --color-gold: #ff6538;
   --color-white: #ffffff;
-  --color-offwhite: #f7f8fa;
-  --color-ink: #0a0e17;
+  --color-offwhite: #f5f5f5;
+  --color-ink: #0a0a0a;
 
   --cursor-size: 16px;
   --header-height: 88px;

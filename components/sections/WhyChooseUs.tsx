@@ -53,7 +53,7 @@ export default function WhyChooseUs() {
                           <svg
                             aria-hidden
                             viewBox="0 0 20 20"
-                            className="h-5 w-5 shrink-0 text-gold"
+                            className="h-5 w-5 shrink-0 text-accent"
                             fill="none"
                             stroke="currentColor"
                             strokeWidth={2}

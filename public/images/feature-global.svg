@@ -1,24 +1,24 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" width="800" height="600">
   <defs>
     <radialGradient id="g1" cx="35%" cy="30%" r="75%">
-      <stop offset="0%" stop-color="#1E4FD8"/>
-      <stop offset="55%" stop-color="#0B2545"/>
-      <stop offset="100%" stop-color="#040E1D"/>
+      <stop offset="0%" stop-color="#FF2E2E"/>
+      <stop offset="55%" stop-color="#0A0A0A"/>
+      <stop offset="100%" stop-color="#000000"/>
     </radialGradient>
   </defs>
   <rect width="800" height="600" fill="url(#g1)"/>
-  <g fill="none" stroke="#D4AF37" stroke-width="1" opacity="0.55">
+  <g fill="none" stroke="#FF6538" stroke-width="1" opacity="0.55">
     <circle cx="400" cy="300" r="150"/>
     <ellipse cx="400" cy="300" rx="150" ry="55"/>
     <ellipse cx="400" cy="300" rx="150" ry="110"/>
     <line x1="250" y1="300" x2="550" y2="300"/>
     <line x1="400" y1="150" x2="400" y2="450"/>
   </g>
-  <g fill="#D4AF37">
+  <g fill="#FF6538">
     <circle cx="330" cy="235" r="4"/>
     <circle cx="470" cy="260" r="4"/>
     <circle cx="410" cy="380" r="4"/>
     <circle cx="300" cy="340" r="4"/>
   </g>
-  <text x="32" y="562" font-family="monospace" font-size="16" fill="#F7F8FA" opacity="0.55">TODO: replace with real operations photography</text>
+  <text x="32" y="562" font-family="monospace" font-size="16" fill="#F5F5F5" opacity="0.55">TODO: replace with real operations photography</text>
 </svg>

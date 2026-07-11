@@ -1,4 +1,4 @@
-// Centralized placeholder content for Meridian Freight (placeholder brand name).
+// Centralized placeholder content for Deltra Logistics (placeholder brand name).
 // Swap copy, numbers, and TODO-marked assets with real brand data before launch.
 
 export const NAV_LINKS = [
@@ -177,7 +177,7 @@ export const PROCESS_STEPS = [
 export const TESTIMONIALS = [
   {
     quote:
-      "Meridian Freight replatformed our entire supply chain visibility. We went from guessing ETAs to knowing them down to the hour.",
+      "Deltra Logistics replatformed our entire supply chain visibility. We went from guessing ETAs to knowing them down to the hour.",
     name: "Elena Marsh",
     title: "VP Supply Chain, Nordholt Retail",
   },
@@ -189,7 +189,7 @@ export const TESTIMONIALS = [
   },
   {
     quote:
-      "We scaled from 3 markets to 40 without ever outgrowing Meridian's network. That kind of reliability is rare at this scale.",
+      "We scaled from 3 markets to 40 without ever outgrowing Deltra's network. That kind of reliability is rare at this scale.",
     name: "Priya Nandan",
     title: "COO, Fernbridge Goods",
   },

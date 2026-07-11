@@ -7,7 +7,6 @@ import GlobalNetwork from "@/components/sections/GlobalNetwork";
 import TrackShipment from "@/components/sections/TrackShipment";
 import Process from "@/components/sections/Process";
 import Testimonials from "@/components/sections/Testimonials";
-import CtaBand from "@/components/sections/CtaBand";
 
 export default function Home() {
   return (
@@ -21,7 +20,6 @@ export default function Home() {
       <TrackShipment />
       <Process />
       <Testimonials />
-      <CtaBand />
     </>
   );
 }

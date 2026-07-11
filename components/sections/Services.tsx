@@ -19,7 +19,7 @@ export default function Services() {
               <article className="group relative h-full overflow-hidden rounded-2xl border border-navy-950/8 bg-white p-8 transition-all duration-500 hover:-translate-y-2 hover:shadow-card">
                 <div
                   aria-hidden
-                  className="absolute -right-8 -top-8 h-28 w-28 rounded-full bg-gold/0 blur-2xl transition-colors duration-500 group-hover:bg-gold/25"
+                  className="absolute -right-8 -top-8 h-28 w-28 rounded-full bg-accent/0 blur-2xl transition-colors duration-500 group-hover:bg-accent/25"
                 />
                 <ServiceIcon
                   icon={service.icon}

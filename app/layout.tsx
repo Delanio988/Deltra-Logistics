@@ -4,8 +4,7 @@ import "./globals.css";
 import SmoothScrollProvider from "@/components/layout/SmoothScrollProvider";
 import CustomCursor from "@/components/ui/CustomCursor";
 import Noise from "@/components/ui/Noise";
-import Header from "@/components/layout/Header";
-import Footer from "@/components/layout/Footer";
+import { AuthProvider } from "@/lib/auth-context";
 
 const poppins = Poppins({
   variable: "--font-poppins",
@@ -15,9 +14,9 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: "Meridian Freight | Global Shipping & Logistics",
+  title: "Deltra Logistics | Global Shipping & Logistics",
   description:
-    "Meridian Freight moves the world's cargo by ocean, air, and road — 180+ countries, 2M+ shipments delivered, 99.8% on-time performance.",
+    "Deltra Logistics moves the world's cargo by ocean, air, and road — 180+ countries, 2M+ shipments delivered, 99.8% on-time performance.",
 };
 
 export default function RootLayout({
@@ -28,13 +27,13 @@ export default function RootLayout({
   return (
     <html lang="en" className={poppins.variable}>
       <body className="antialiased bg-offwhite text-ink font-sans">
-        <SmoothScrollProvider>
-          <CustomCursor />
-          <Noise />
-          <Header />
-          <main>{children}</main>
-          <Footer />
-        </SmoothScrollProvider>
+        <AuthProvider>
+          <SmoothScrollProvider>
+            <CustomCursor />
+            <Noise />
+            {children}
+          </SmoothScrollProvider>
+        </AuthProvider>
       </body>
     </html>
   );

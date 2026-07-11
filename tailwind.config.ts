@@ -1,8 +1,14 @@
 import type { Config } from "tailwindcss";
 
-// Brand design tokens for Meridian Freight (placeholder brand name — swap freely).
+// Brand design tokens for Deltra Logistics (placeholder brand name — swap freely).
 // Colors are also mirrored as CSS variables in app/globals.css so they can be
 // consumed outside of Tailwind (e.g. inline SVG gradients, canvas drawing).
+//
+// Red/black identity (v2): token NAMES are kept as-is on purpose (navy, gold,
+// accent, offwhite) so every existing className in the app keeps working —
+// only the hex VALUES changed, which is what makes a source-of-truth token
+// swap actually cascade. Despite the name, `gold` is now a red-orange
+// secondary accent, not gold — see the role comments below.
 const config: Config = {
   content: [
     "./app/**/*.{ts,tsx,mdx}",
@@ -14,27 +20,33 @@ const config: Config = {
     extend: {
       colors: {
         navy: {
-          DEFAULT: "#0B2545",
-          50: "#EAF0FB",
-          100: "#CBD9F0",
-          300: "#5D7FBE",
-          500: "#1B3B70",
-          700: "#0B2545",
-          900: "#071831",
-          950: "#040E1D",
+          // Neutral dark/black ramp. -950 is the dominant shade (solid dark
+          // section backgrounds, and — via opacity modifiers — body text/
+          // borders on light surfaces). -900/700/500/300 fill in the new
+          // "surface / border / muted text" roles the red-black system needs.
+          DEFAULT: "#0A0A0A", // near-black — primary deep background
+          50: "#CCCCCC",
+          100: "#999999",
+          300: "#646464", // muted text (gray)
+          500: "#333333", // borders / dividers / muted UI (mid gray)
+          700: "#0A0A0A", // near-black — primary deep background
+          900: "#1A1A1A", // surfaces / cards (dark gray)
+          950: "#000000", // true black — sections/footer
         },
         accent: {
-          DEFAULT: "#1E4FD8",
-          light: "#4E74E6",
-          dark: "#15379E",
+          // Primary accent: buttons, links, key highlights, active states.
+          DEFAULT: "#FF2E2E", // vibrant red
+          light: "#FF5C5C",
+          dark: "#C81E1E", // hover / pressed
         },
         gold: {
-          DEFAULT: "#D4AF37",
-          light: "#E6C866",
-          dark: "#A9862A",
+          // Secondary accent: gradients, small highlights, decorative accents.
+          DEFAULT: "#FF6538", // red-orange
+          light: "#FF8F6B",
+          dark: "#D14A1F",
         },
-        offwhite: "#F7F8FA",
-        ink: "#0A0E17",
+        offwhite: "#F5F5F5",
+        ink: "#0A0A0A",
       },
       fontFamily: {
         sans: ["var(--font-poppins)", "system-ui", "sans-serif"],
@@ -54,12 +66,14 @@ const config: Config = {
         container: "1440px",
       },
       boxShadow: {
-        gold: "0 0 0 1px rgba(212,175,55,0.35), 0 8px 30px -8px rgba(212,175,55,0.35)",
-        card: "0 20px 60px -20px rgba(11,37,69,0.35)",
+        accent: "0 0 0 1px rgba(255,46,46,0.35), 0 8px 30px -8px rgba(255,46,46,0.45)",
+        gold: "0 0 0 1px rgba(255,101,56,0.35), 0 8px 30px -8px rgba(255,101,56,0.35)",
+        card: "0 20px 60px -20px rgba(0,0,0,0.45)",
       },
       backgroundImage: {
-        "navy-radial": "radial-gradient(circle at 50% 0%, #163564 0%, #0B2545 45%, #040E1D 100%)",
-        "gold-line": "linear-gradient(90deg, transparent, #D4AF37, transparent)",
+        "navy-radial": "radial-gradient(circle at 50% 0%, #1A1A1A 0%, #0A0A0A 45%, #000000 100%)",
+        "gold-line": "linear-gradient(90deg, transparent, #FF6538, transparent)",
+        "brand-gradient": "linear-gradient(135deg, #FF2E2E 0%, #FF6538 100%)",
       },
       animation: {
         marquee: "marquee 32s linear infinite",

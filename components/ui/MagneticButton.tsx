@@ -16,6 +16,7 @@ type MagneticButtonProps = {
   strength?: number;
   /** Only used when rendering as a <button> (no href), e.g. "submit". */
   type?: "button" | "submit";
+  disabled?: boolean;
 };
 
 /**
@@ -31,6 +32,7 @@ export default function MagneticButton({
   cursorLabel = "View",
   strength = 0.35,
   type = "button",
+  disabled = false,
 }: MagneticButtonProps) {
   const ref = useRef<HTMLAnchorElement | HTMLButtonElement>(null);
   const prefersReducedMotion = useReducedMotion();
@@ -42,7 +44,7 @@ export default function MagneticButton({
   const springY = useSpring(y, { damping: 18, stiffness: 220, mass: 0.6 });
 
   const handleMouseMove = (e: MouseEvent<HTMLAnchorElement | HTMLButtonElement>) => {
-    if (prefersReducedMotion || !ref.current) return;
+    if (prefersReducedMotion || disabled || !ref.current) return;
     const rect = ref.current.getBoundingClientRect();
     const relX = e.clientX - (rect.left + rect.width / 2);
     const relY = e.clientY - (rect.top + rect.height / 2);
@@ -58,6 +60,10 @@ export default function MagneticButton({
   // Anchor links (#services, #contact, ...) route through Lenis so they get
   // the same smooth-scroll easing as the header nav, instead of a hard jump.
   const handleClick = (e: MouseEvent<HTMLAnchorElement | HTMLButtonElement>) => {
+    if (disabled) {
+      e.preventDefault();
+      return;
+    }
     onClick?.();
     if (href?.startsWith("#")) {
       e.preventDefault();
@@ -78,13 +84,15 @@ export default function MagneticButton({
       ref={ref as never}
       href={href}
       type={href ? undefined : type}
+      disabled={href ? undefined : disabled}
+      aria-disabled={disabled || undefined}
       onClick={handleClick}
       data-cursor-hover={cursorLabel}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
       style={{ x: springX, y: springY }}
       className={cn(
-        "relative inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full px-8 py-4 text-sm font-semibold tracking-wide transition-colors duration-300",
+        "relative inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full px-8 py-4 text-sm font-semibold tracking-wide transition-colors duration-300 disabled:cursor-not-allowed",
         className
       )}
     >

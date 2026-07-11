@@ -26,7 +26,7 @@ export default function Testimonials() {
             <svg
               aria-hidden
               viewBox="0 0 60 48"
-              className="mx-auto h-10 w-12 text-gold/50"
+              className="mx-auto h-10 w-12 text-accent/50"
               fill="currentColor"
             >
               <path d="M0 48V28.8C0 12.8 8.8 2.4 24 0l3.2 6.4C18.4 9.6 13.6 15.2 12.8 22.4H24V48H0zm32 0V28.8C32 12.8 40.8 2.4 56 0l3.2 6.4c-8.8 3.2-13.6 8.8-14.4 16H56V48H32z" />
@@ -60,7 +60,7 @@ export default function Testimonials() {
               onClick={() => goTo(index - 1)}
               data-cursor-hover="Prev"
               aria-label="Previous testimonial"
-              className="flex h-11 w-11 items-center justify-center rounded-full border border-white/20 transition-colors hover:border-gold hover:text-gold"
+              className="flex h-11 w-11 items-center justify-center rounded-full border border-white/20 transition-colors hover:border-accent hover:text-accent"
             >
               <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2}>
                 <path d="M15 6l-6 6 6 6" strokeLinecap="round" strokeLinejoin="round" />
@@ -77,7 +77,7 @@ export default function Testimonials() {
                   aria-label={`Testimonial from ${t.name}`}
                   onClick={() => goTo(i)}
                   className={`h-1.5 rounded-full transition-all duration-300 ${
-                    i === index ? "w-8 bg-gold" : "w-1.5 bg-white/25"
+                    i === index ? "w-8 bg-accent" : "w-1.5 bg-white/25"
                   }`}
                 />
               ))}
@@ -88,7 +88,7 @@ export default function Testimonials() {
               onClick={() => goTo(index + 1)}
               data-cursor-hover="Next"
               aria-label="Next testimonial"
-              className="flex h-11 w-11 items-center justify-center rounded-full border border-white/20 transition-colors hover:border-gold hover:text-gold"
+              className="flex h-11 w-11 items-center justify-center rounded-full border border-white/20 transition-colors hover:border-accent hover:text-accent"
             >
               <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2}>
                 <path d="M9 6l6 6-6 6" strokeLinecap="round" strokeLinejoin="round" />

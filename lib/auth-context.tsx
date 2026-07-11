@@ -8,12 +8,17 @@ import {
   type ReactNode,
 } from "react";
 
+export type UserRole = "customer" | "admin";
+
 export type AuthUser = {
   name: string;
   email: string;
+  role: UserRole;
+  /** Customers only — keys their packages, messages, and shipping address. */
+  accountCode?: string;
 };
 
-type LoginResult = { success: true } | { success: false; error: string };
+type LoginResult = { success: true; user: AuthUser } | { success: false; error: string };
 
 type AuthContextValue = {
   user: AuthUser | null;
@@ -29,13 +34,21 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 
 const STORAGE_KEY = "deltra_auth_session";
 
-// Demo-only credential. Swap the whole `login()` body below for a real API
-// call and this constant goes away entirely.
-const DEMO_CREDENTIALS = {
-  email: "demo@deltra.com",
-  password: "demo123",
-  name: "Alex Morgan",
-};
+// Demo-only credentials. Swap the whole `login()` body below for a real API
+// call (which would also return the role/accountCode from the backend) and
+// this array goes away entirely.
+const DEMO_CREDENTIALS: Array<{ email: string; password: string; user: AuthUser }> = [
+  {
+    email: "demo@deltra.com",
+    password: "demo123",
+    user: { name: "Alex Morgan", email: "demo@deltra.com", role: "customer", accountCode: "DLT1789-A" },
+  },
+  {
+    email: "admin@deltra.com",
+    password: "admin123",
+    user: { name: "Deltra Admin", email: "admin@deltra.com", role: "admin" },
+  },
+];
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
@@ -45,7 +58,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const stored = window.localStorage.getItem(STORAGE_KEY);
     if (stored) {
       try {
-        setUser(JSON.parse(stored) as AuthUser);
+        const parsed = JSON.parse(stored) as Partial<AuthUser>;
+        // Guard against a session shape from an older version of this app
+        // (e.g. before `role` existed) — without this, a stale session
+        // missing `role` would make RequireAuth's role check permanently
+        // fail, redirecting in a loop instead of ever rendering the page.
+        if (parsed.role === "customer" || parsed.role === "admin") {
+          setUser(parsed as AuthUser);
+        } else {
+          window.localStorage.removeItem(STORAGE_KEY);
+        }
       } catch {
         window.localStorage.removeItem(STORAGE_KEY);
       }
@@ -55,20 +77,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = async (email: string, password: string): Promise<LoginResult> => {
     // ---- MOCK AUTH: replace this block with a real API / NextAuth call. ----
-    // The rest of the app only depends on the `LoginResult` shape returned
-    // here and on `user`/`logout`, so swapping this block for e.g.
-    // `signIn("credentials", { email, password })` doesn't require touching
-    // any consuming component.
+    // A real implementation would also return `role`/`accountCode` from the
+    // backend rather than a hardcoded list. The rest of the app only depends
+    // on the `LoginResult` shape returned here and on `user`/`logout`, so
+    // swapping this block out doesn't require touching any consuming component.
     await new Promise((resolve) => setTimeout(resolve, 500));
 
-    if (
-      email.trim().toLowerCase() === DEMO_CREDENTIALS.email &&
-      password === DEMO_CREDENTIALS.password
-    ) {
-      const authedUser: AuthUser = { name: DEMO_CREDENTIALS.name, email: DEMO_CREDENTIALS.email };
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(authedUser));
-      setUser(authedUser);
-      return { success: true };
+    const match = DEMO_CREDENTIALS.find(
+      (c) => c.email === email.trim().toLowerCase() && c.password === password
+    );
+
+    if (match) {
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(match.user));
+      setUser(match.user);
+      return { success: true, user: match.user };
     }
 
     return { success: false, error: "Invalid email or password." };

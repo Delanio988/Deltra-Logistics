@@ -9,7 +9,7 @@ import { useReducedMotion } from "@/lib/useReducedMotion";
 import MagneticButton from "@/components/ui/MagneticButton";
 import Wordmark from "@/components/ui/Wordmark";
 
-export default function LoginPage() {
+export default function AdminLoginPage() {
   const { user, isLoading, login } = useAuth();
   const router = useRouter();
   const prefersReducedMotion = useReducedMotion();
@@ -20,14 +20,15 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [showForgotNote, setShowForgotNote] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Already signed in? Skip the form entirely.
+  // Only auto-skip the form for an already-signed-in admin — a signed-in
+  // customer should still see this form (and get a clear error if they try
+  // it), rather than being silently redirected to their own dashboard.
   useEffect(() => {
-    if (!isLoading && user) {
-      router.replace(user.role === "admin" ? "/admin" : "/dashboard");
+    if (!isLoading && user?.role === "admin") {
+      router.replace("/admin");
     }
   }, [isLoading, user, router]);
 
@@ -37,16 +38,19 @@ export default function LoginPage() {
     setIsSubmitting(true);
     const result = await login(email, password);
     setIsSubmitting(false);
-    if (result.success) {
-      router.replace(result.user.role === "admin" ? "/admin" : "/dashboard");
-    } else {
+
+    if (!result.success) {
       setError(result.error);
+      return;
     }
+    if (result.user.role !== "admin") {
+      setError("This account doesn't have admin access.");
+      return;
+    }
+    router.replace("/admin");
   };
 
-  // Fade the form in only once we know there's no existing session — avoids a
-  // flash of the login form for users who are about to be redirected away.
-  if (isLoading || user) {
+  if (isLoading || user?.role === "admin") {
     return <div className="min-h-screen bg-navy-950" />;
   }
 
@@ -58,7 +62,7 @@ export default function LoginPage() {
 
   return (
     <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-navy-radial px-6 py-16 text-white">
-      <div aria-hidden className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(255,46,46,0.3),transparent_45%)]" />
+      <div aria-hidden className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(255,101,56,0.3),transparent_45%)]" />
 
       <motion.div className="relative z-10 mb-10" {...fadeUp(0)}>
         <Link href="/" data-cursor-hover="Home">
@@ -70,9 +74,10 @@ export default function LoginPage() {
         {...fadeUp(0.1)}
         className="relative z-10 w-full max-w-md rounded-3xl bg-white p-10 text-navy-950 shadow-card"
       >
-        <h1 className="text-display-sm font-extrabold text-navy-950">Welcome back</h1>
+        <span className="gold-label">Admin Access</span>
+        <h1 className="mt-4 text-display-sm font-extrabold text-navy-950">Warehouse sign in</h1>
         <p className="mt-3 text-sm text-navy-950/60">
-          Sign in to track shipments and manage your account.
+          Restricted to Deltra Logistics staff. Customers should use the regular login.
         </p>
 
         <form onSubmit={handleSubmit} noValidate className="mt-8 space-y-5">
@@ -87,24 +92,15 @@ export default function LoginPage() {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="you@company.com"
+              placeholder="admin@deltra.com"
               className="mt-2 w-full rounded-full border border-navy-950/15 bg-white px-5 py-3 text-sm text-navy-950 outline-none transition-colors focus:border-accent"
             />
           </div>
 
           <div>
-            <div className="flex items-center justify-between">
-              <label htmlFor={passwordId} className="text-xs font-semibold uppercase tracking-widest text-navy-950/50">
-                Password
-              </label>
-              <button
-                type="button"
-                onClick={() => setShowForgotNote((v) => !v)}
-                className="text-xs font-medium text-accent transition-colors hover:text-accent-dark"
-              >
-                Forgot password?
-              </button>
-            </div>
+            <label htmlFor={passwordId} className="text-xs font-semibold uppercase tracking-widest text-navy-950/50">
+              Password
+            </label>
             <div className="relative mt-2">
               <input
                 id={passwordId}
@@ -134,12 +130,6 @@ export default function LoginPage() {
                 )}
               </button>
             </div>
-            {showForgotNote && (
-              <p className="mt-2 text-xs text-navy-950/50">
-                Demo mode — sign in with <span className="font-semibold">demo@deltra.com</span> /{" "}
-                <span className="font-semibold">demo123</span>.
-              </p>
-            )}
           </div>
 
           {error && (
@@ -158,15 +148,15 @@ export default function LoginPage() {
           </MagneticButton>
 
           <p className="rounded-xl border-l-2 border-gold/60 bg-navy-950/[0.03] px-4 py-3 text-xs text-navy-950/50">
-            Demo access: <span className="font-semibold text-navy-950/70">demo@deltra.com</span> /{" "}
-            <span className="font-semibold text-navy-950/70">demo123</span>
+            Demo access: <span className="font-semibold text-navy-950/70">admin@deltra.com</span> /{" "}
+            <span className="font-semibold text-navy-950/70">admin123</span>
           </p>
         </form>
 
         <p className="mt-8 text-center text-sm text-navy-950/60">
-          Don&rsquo;t have an account?{" "}
-          <Link href="/#contact" className="font-semibold text-accent hover:text-accent-dark">
-            Sign up
+          Not staff?{" "}
+          <Link href="/login" className="font-semibold text-accent hover:text-accent-dark">
+            Customer login
           </Link>
         </p>
       </motion.div>

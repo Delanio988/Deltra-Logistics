@@ -3,7 +3,7 @@
 
 export const NAV_LINKS = [
   { label: "Services", href: "#services" },
-  { label: "Network", href: "#network" },
+  { label: "Get a Quote", href: "/quote" },
   { label: "Tracking", href: "#tracking" },
   { label: "About", href: "#about" },
   { label: "Contact", href: "#contact" },
@@ -94,44 +94,6 @@ export const FEATURES = [
     image: "/images/feature-scale.svg",
   },
 ] as const;
-
-export type Hub = {
-  id: string;
-  name: string;
-  // Coordinates as percentages of the map viewBox (0-100), hand-placed for the
-  // stylized world map in components/sections/GlobalNetwork.tsx
-  x: number;
-  y: number;
-};
-
-export const HUBS: Hub[] = [
-  { id: "la", name: "Los Angeles", x: 14, y: 40 },
-  { id: "nyc", name: "New York", x: 26, y: 36 },
-  { id: "sao", name: "São Paulo", x: 33, y: 68 },
-  { id: "london", name: "London", x: 48, y: 28 },
-  { id: "rotterdam", name: "Rotterdam", x: 50, y: 27 },
-  { id: "dubai", name: "Dubai", x: 62, y: 45 },
-  { id: "mumbai", name: "Mumbai", x: 66, y: 48 },
-  { id: "singapore", name: "Singapore", x: 76, y: 58 },
-  { id: "shanghai", name: "Shanghai", x: 82, y: 38 },
-  { id: "tokyo", name: "Tokyo", x: 88, y: 37 },
-  { id: "sydney", name: "Sydney", x: 87, y: 75 },
-];
-
-export const ROUTES: [string, string][] = [
-  ["la", "nyc"],
-  ["la", "tokyo"],
-  ["nyc", "london"],
-  ["london", "rotterdam"],
-  ["rotterdam", "dubai"],
-  ["dubai", "mumbai"],
-  ["mumbai", "singapore"],
-  ["singapore", "shanghai"],
-  ["shanghai", "tokyo"],
-  ["singapore", "sydney"],
-  ["sao", "nyc"],
-  ["sao", "london"],
-];
 
 export type TrackingStatus = {
   label: string;

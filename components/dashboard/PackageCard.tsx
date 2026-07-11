@@ -2,18 +2,20 @@
 
 import { AnimatePresence, motion } from "framer-motion";
 import type { Package } from "@/lib/dashboard-data";
-import { STATUS_STEP_INDEX } from "@/lib/dashboard-data";
+import { STATUS_STEP_INDEX, PACKAGE_STATUSES, buildPackageTimeline } from "@/lib/dashboard-data";
+import { calculateShippingCost, formatCurrency } from "@/lib/quote-config";
 import StatusTimeline from "@/components/ui/StatusTimeline";
 import { cn } from "@/lib/utils";
 
-// Active/in-progress statuses use red/red-orange per the brand system;
-// Delivered is the one deliberate exception (a clear, accessible green for
-// terminal/success state, distinct from the decorative red-black palette).
+// Escalating urgency toward "Ready for Pickup" (solid, most actionable),
+// then Delivered breaks out to green — the one deliberate exception to the
+// red/red-orange active-state system, for a clear, accessible terminal state.
 const STATUS_BADGE_STYLES: Record<Package["status"], string> = {
-  Processing: "border border-white/15 bg-white/5 text-white/60",
+  "Pre-Alerted": "border border-white/15 bg-white/5 text-white/60",
+  "Received at Warehouse": "border border-gold/40 bg-gold/10 text-gold",
   "In Transit": "border border-accent/30 bg-accent/10 text-accent",
-  "At Customs": "border border-gold/40 bg-gold/10 text-gold",
-  "Out for Delivery": "bg-accent text-navy-950",
+  "Arrived at Local Branch": "border border-accent/40 bg-accent/20 text-accent",
+  "Ready for Pickup": "bg-accent text-navy-950",
   Delivered: "border border-green-500/40 bg-green-500/10 text-green-400",
 };
 
@@ -25,7 +27,8 @@ type PackageCardProps = {
 
 export default function PackageCard({ pkg, isExpanded, onToggle }: PackageCardProps) {
   const stepIndex = STATUS_STEP_INDEX[pkg.status];
-  const progressPercent = ((stepIndex + 1) / 5) * 100;
+  const progressPercent = ((stepIndex + 1) / PACKAGE_STATUSES.length) * 100;
+  const shippingCost = calculateShippingCost(pkg.weightLb);
   const panelId = `package-panel-${pkg.id}`;
 
   return (
@@ -44,9 +47,11 @@ export default function PackageCard({ pkg, isExpanded, onToggle }: PackageCardPr
               {pkg.status}
             </span>
           </div>
-          <p className="mt-2 text-sm text-white/70">{pkg.description}</p>
+          <p className="mt-2 text-sm text-white/70">
+            {pkg.merchant} — {pkg.description}
+          </p>
           <p className="mt-1 text-sm text-white/50">
-            {pkg.origin} <span aria-hidden>→</span> {pkg.destination}
+            {pkg.weightLb} lb · {formatCurrency(shippingCost)} · Received {pkg.dateReceived}
           </p>
 
           <div className="mt-4 max-w-xs">
@@ -61,22 +66,16 @@ export default function PackageCard({ pkg, isExpanded, onToggle }: PackageCardPr
           </div>
         </div>
 
-        <div className="flex shrink-0 items-center gap-4 sm:flex-col sm:items-end sm:gap-2">
-          <div className="text-left sm:text-right">
-            <p className="text-xs font-semibold uppercase tracking-widest text-white/40">Est. delivery</p>
-            <p className="text-sm font-medium text-white">{pkg.estimatedDelivery}</p>
-          </div>
-          <svg
-            aria-hidden
-            viewBox="0 0 24 24"
-            className={cn("h-5 w-5 shrink-0 text-white/40 transition-transform duration-300", isExpanded && "rotate-180")}
-            fill="none"
-            stroke="currentColor"
-            strokeWidth={2}
-          >
-            <path d="M6 9l6 6 6-6" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        </div>
+        <svg
+          aria-hidden
+          viewBox="0 0 24 24"
+          className={cn("h-5 w-5 shrink-0 text-white/40 transition-transform duration-300", isExpanded && "rotate-180")}
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={2}
+        >
+          <path d="M6 9l6 6 6-6" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
       </button>
 
       <AnimatePresence initial={false}>
@@ -90,7 +89,7 @@ export default function PackageCard({ pkg, isExpanded, onToggle }: PackageCardPr
             className="overflow-hidden border-t border-white/8"
           >
             <div className="p-6">
-              <StatusTimeline steps={pkg.timeline} currentStepIndex={stepIndex} variant="dark" />
+              <StatusTimeline steps={buildPackageTimeline(pkg.status)} currentStepIndex={stepIndex} variant="dark" />
             </div>
           </motion.div>
         )}

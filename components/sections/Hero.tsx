@@ -74,15 +74,15 @@ export default function Hero() {
           transition={{ duration: 0.8, delay: 1.3 }}
           className="mt-12 flex flex-wrap items-center gap-5"
         >
-          <MagneticButton href="#contact" cursorLabel="Quote" className="bg-accent text-navy-950 shadow-accent hover:bg-accent-dark hover:text-white">
+          <MagneticButton href="/quote" cursorLabel="Quote" className="bg-accent text-navy-950 shadow-accent hover:bg-accent-dark hover:text-white">
             Get a Quote
           </MagneticButton>
           <MagneticButton
-            href="#network"
-            cursorLabel="Explore"
+            href="#tracking"
+            cursorLabel="Track"
             className="border border-white/25 text-white hover:border-accent hover:text-accent"
           >
-            Explore Our Network
+            Track a Shipment
           </MagneticButton>
         </motion.div>
       </motion.div>

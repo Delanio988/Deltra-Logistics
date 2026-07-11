@@ -1,136 +1,180 @@
-// Mock customer-portal data. Structured so it's a drop-in swap for a real API
-// later — replace the arrays/objects below with fetched data and every
-// consuming component (PackageCard, DropOffPanel, dashboard page) keeps working.
+// Mock freight-forwarding portal data. Structured so it's a drop-in swap for
+// a real API later — replace the arrays below with fetched data and every
+// consuming component keeps working. Live/mutable package + message state
+// lives in lib/data-store.tsx (seeded from INITIAL_PACKAGES below); this file
+// only holds static shape/types/seed content.
 
 import type { TrackingStatus } from "@/lib/data";
 
-export type PackageStatus = "Processing" | "In Transit" | "At Customs" | "Out for Delivery" | "Delivered";
+export type PackageStatus =
+  | "Pre-Alerted"
+  | "Received at Warehouse"
+  | "In Transit"
+  | "Arrived at Local Branch"
+  | "Ready for Pickup"
+  | "Delivered";
 
-export type Package = {
-  id: string;
-  trackingNumber: string;
-  description: string;
-  origin: string;
-  destination: string;
-  status: PackageStatus;
-  estimatedDelivery: string;
-  /** Same shape as the public tracking widget's timeline, so both share <StatusTimeline>. */
-  timeline: TrackingStatus[];
+// Order matters — it's also the timeline step order for <StatusTimeline>.
+export const PACKAGE_STATUSES: PackageStatus[] = [
+  "Pre-Alerted",
+  "Received at Warehouse",
+  "In Transit",
+  "Arrived at Local Branch",
+  "Ready for Pickup",
+  "Delivered",
+];
+
+export const STATUS_STEP_INDEX = Object.fromEntries(
+  PACKAGE_STATUSES.map((status, i) => [status, i])
+) as Record<PackageStatus, number>;
+
+const STEP_DESCRIPTIONS: Record<PackageStatus, string> = {
+  "Pre-Alerted": "Customer submitted a pre-alert for this shipment",
+  "Received at Warehouse": "Package received and logged at our US warehouse",
+  "In Transit": "Departed the warehouse en route to Jamaica",
+  "Arrived at Local Branch": "Cleared customs and arrived at your local branch",
+  "Ready for Pickup": "Ready for collection at your local branch",
+  Delivered: "Collected by / delivered to the customer",
 };
 
-// How many of the 5 timeline steps are complete for a given badge status.
-// "Processing" sits before step 0 (nothing picked up yet), everything else
-// lines up with its matching step index.
-export const STATUS_STEP_INDEX: Record<PackageStatus, number> = {
-  Processing: -1,
-  "In Transit": 1,
-  "At Customs": 2,
-  "Out for Delivery": 3,
-  Delivered: 4,
-};
-
-function buildTimeline(status: PackageStatus): TrackingStatus[] {
-  const steps: [string, string][] = [
-    ["Picked up", "Shipment collected from origin facility"],
-    ["In transit", "Departed regional hub en route to port"],
-    ["Customs", "Cleared customs at destination country"],
-    ["Out for delivery", "Loaded on final-mile vehicle"],
-    ["Delivered", "Signed for at destination address"],
-  ];
+export function buildPackageTimeline(status: PackageStatus): TrackingStatus[] {
   const currentIndex = STATUS_STEP_INDEX[status];
-  return steps.map(([label, description], i) => ({
+  return PACKAGE_STATUSES.map((label, i) => ({
     label,
-    description,
+    description: STEP_DESCRIPTIONS[label],
     timestamp: i <= currentIndex ? "Completed" : "Pending",
   }));
 }
 
-export const PACKAGES: Package[] = [
+export type Package = {
+  id: string;
+  /** Which customer this belongs to — matches Customer.accountCode. */
+  accountCode: string;
+  trackingNumber: string;
+  merchant: string;
+  description: string;
+  weightLb: number;
+  dateReceived: string;
+  status: PackageStatus;
+};
+
+// Seed data for lib/data-store.tsx. TODO: replace with a real API fetch.
+export const INITIAL_PACKAGES: Package[] = [
   {
     id: "pkg-1",
+    accountCode: "DLT1789-A",
     trackingNumber: "DL48213097",
+    merchant: "Amazon",
     description: "Electronics — 2 boxes",
-    origin: "Shanghai, CN",
-    destination: "Los Angeles, US",
+    weightLb: 6,
+    dateReceived: "Jul 5, 2026",
     status: "In Transit",
-    estimatedDelivery: "Jul 16, 2026",
-    timeline: buildTimeline("In Transit"),
   },
   {
     id: "pkg-2",
+    accountCode: "DLT1789-A",
     trackingNumber: "DL29104456",
-    description: "Machine parts — 1 pallet",
-    origin: "Rotterdam, NL",
-    destination: "New York, US",
-    status: "At Customs",
-    estimatedDelivery: "Jul 14, 2026",
-    timeline: buildTimeline("At Customs"),
+    merchant: "Best Buy",
+    description: "Kitchen appliance — 1 box",
+    weightLb: 14,
+    dateReceived: "Jul 3, 2026",
+    status: "Arrived at Local Branch",
   },
   {
     id: "pkg-3",
+    accountCode: "DLT1789-A",
     trackingNumber: "DL77350281",
-    description: "Textiles — 6 cartons",
-    origin: "Mumbai, IN",
-    destination: "Rotterdam, NL",
-    status: "Processing",
-    estimatedDelivery: "Jul 22, 2026",
-    timeline: buildTimeline("Processing"),
+    merchant: "Shein",
+    description: "Clothing — 1 poly bag",
+    weightLb: 3,
+    dateReceived: "Jun 29, 2026",
+    status: "Ready for Pickup",
   },
   {
     id: "pkg-4",
+    accountCode: "DLT1789-A",
     trackingNumber: "DL10293847",
-    description: "Furniture — 3 crates",
-    origin: "Ho Chi Minh City, VN",
-    destination: "Sydney, AU",
-    status: "Out for Delivery",
-    estimatedDelivery: "Jul 10, 2026",
-    timeline: buildTimeline("Out for Delivery"),
+    merchant: "Walmart",
+    description: "Home goods — 1 crate",
+    weightLb: 22,
+    dateReceived: "Jun 20, 2026",
+    status: "Delivered",
   },
   {
     id: "pkg-5",
+    accountCode: "DLT1789-A",
     trackingNumber: "DL63581920",
-    description: "Auto parts — 1 pallet",
-    origin: "Tokyo, JP",
-    destination: "Los Angeles, US",
-    status: "Delivered",
-    estimatedDelivery: "Jul 5, 2026",
-    timeline: buildTimeline("Delivered"),
+    merchant: "Wayfair",
+    description: "Furniture part — 1 box",
+    weightLb: 9,
+    dateReceived: "Jul 8, 2026",
+    status: "Pre-Alerted",
   },
   {
     id: "pkg-6",
+    accountCode: "DLT2044-B",
     trackingNumber: "DL39472105",
-    description: "Pharma samples — 1 box",
-    origin: "Singapore, SG",
-    destination: "Dubai, AE",
-    status: "In Transit",
-    estimatedDelivery: "Jul 13, 2026",
-    timeline: buildTimeline("In Transit"),
+    merchant: "Target",
+    description: "Toys — 1 box",
+    weightLb: 5,
+    dateReceived: "Jul 6, 2026",
+    status: "Received at Warehouse",
   },
 ];
 
-export type DropOffLocation = {
-  facilityName: string;
+export type Customer = {
+  name: string;
+  accountCode: string;
+  email: string;
+};
+
+// Mock customer directory used by the admin's "add package" picker.
+export const CUSTOMERS: Customer[] = [
+  { name: "Alex Morgan", accountCode: "DLT1789-A", email: "demo@deltra.com" },
+  { name: "Jordan Reid", accountCode: "DLT2044-B", email: "jordan.reid@example.com" },
+  { name: "Simone Clarke", accountCode: "DLT3310-C", email: "simone.clarke@example.com" },
+];
+
+export type Branch = {
+  name: string;
+  phone: string;
+};
+
+// TODO: mock branches — replace with the customer's real assigned branch from the API.
+export const BRANCHES: Branch[] = [
+  { name: "Montego Bay — Fairview", phone: "+1 (876) 555-0110" },
+  { name: "Montego Bay — Half Moon", phone: "+1 (876) 555-0142" },
+];
+
+export type OverseasAddress = {
+  name: string;
   addressLine1: string;
+  addressLine2: string;
   city: string;
   region: string;
   postalCode: string;
   country: string;
-  hours: string;
-  phone: string;
-  lat: number;
-  lng: number;
+  service: string;
 };
 
-// TODO: mock hub — replace with the customer's real assigned facility from the API.
-export const DROP_OFF_LOCATION: DropOffLocation = {
-  facilityName: "Deltra Logistics — Port Newark Hub",
+// TODO: mock warehouse — replace with the customer's real assigned facility from the API.
+const WAREHOUSE = {
   addressLine1: "1400 Corbin St",
   city: "Elizabeth",
   region: "NJ",
   postalCode: "07201",
-  country: "United States",
-  hours: "Mon–Fri, 7:00 AM – 7:00 PM · Sat, 8:00 AM – 2:00 PM",
-  phone: "+1 (800) 555-0148",
-  lat: 40.6895,
-  lng: -74.1745,
+  country: "USA",
 };
+
+export function getOverseasAddress(customerName: string, accountCode: string): OverseasAddress {
+  return {
+    name: `${customerName} ${accountCode}`,
+    addressLine1: WAREHOUSE.addressLine1,
+    addressLine2: `Suite ${accountCode}`,
+    city: WAREHOUSE.city,
+    region: WAREHOUSE.region,
+    postalCode: WAREHOUSE.postalCode,
+    country: WAREHOUSE.country,
+    service: "Standard Air",
+  };
+}

@@ -13,6 +13,12 @@ export default function CustomCursor() {
   const [isTouch, setIsTouch] = useState(true);
   const [isHovering, setIsHovering] = useState(false);
   const [hoverLabel, setHoverLabel] = useState<string | null>(null);
+  // Hidden until the first real pointer position arrives, and again whenever
+  // the pointer leaves the top-level document (e.g. over an iframe, or out
+  // of the window) — pointermove never fires in that gap, so without this
+  // the dot would otherwise freeze at its last known position instead of
+  // honestly tracking where the real cursor is.
+  const [isVisible, setIsVisible] = useState(false);
   const prefersReducedMotion = useReducedMotion();
 
   const cursorX = useMotionValue(-100);
@@ -34,6 +40,7 @@ export default function CustomCursor() {
       rafPos.current = { x: e.clientX, y: e.clientY };
       cursorX.set(e.clientX);
       cursorY.set(e.clientY);
+      setIsVisible(true);
     };
 
     const handleOver = (e: Event) => {
@@ -44,11 +51,16 @@ export default function CustomCursor() {
       }
     };
 
-    const handleOut = (e: Event) => {
+    const handleOut = (e: PointerEvent) => {
       const target = (e.target as HTMLElement).closest<HTMLElement>("[data-cursor-hover]");
       if (target) {
         setIsHovering(false);
         setHoverLabel(null);
+      }
+      // relatedTarget is null exactly when the pointer left the document
+      // entirely, rather than just moving to a different element within it.
+      if (!e.relatedTarget) {
+        setIsVisible(false);
       }
     };
 
@@ -69,6 +81,8 @@ export default function CustomCursor() {
   return (
     <motion.div
       aria-hidden
+      animate={{ opacity: isVisible ? 1 : 0 }}
+      transition={{ duration: 0.15 }}
       className="pointer-events-none fixed left-0 top-0 z-[70] mix-blend-difference"
       style={{ x, y, translateX: "-50%", translateY: "-50%" }}
     >

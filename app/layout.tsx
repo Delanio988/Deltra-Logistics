@@ -5,6 +5,7 @@ import SmoothScrollProvider from "@/components/layout/SmoothScrollProvider";
 import CustomCursor from "@/components/ui/CustomCursor";
 import Noise from "@/components/ui/Noise";
 import { AuthProvider } from "@/lib/auth-context";
+import { DataStoreProvider } from "@/lib/data-store";
 
 const poppins = Poppins({
   variable: "--font-poppins",
@@ -28,11 +29,13 @@ export default function RootLayout({
     <html lang="en" className={poppins.variable}>
       <body className="antialiased bg-offwhite text-ink font-sans">
         <AuthProvider>
-          <SmoothScrollProvider>
-            <CustomCursor />
-            <Noise />
-            {children}
-          </SmoothScrollProvider>
+          <DataStoreProvider>
+            <SmoothScrollProvider>
+              <CustomCursor />
+              <Noise />
+              {children}
+            </SmoothScrollProvider>
+          </DataStoreProvider>
         </AuthProvider>
       </body>
     </html>

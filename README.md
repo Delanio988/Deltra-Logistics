@@ -1,12 +1,16 @@
-# Deltra Logistics — Marketing Site + Customer Portal
+# Deltra Logistics — Marketing Site + Freight-Forwarding Portal
 
 A premium, "Awwwards"-style marketing site for **Deltra Logistics** — a placeholder
-brand name for a global shipping & logistics company. Swap the name, logo, copy,
-and imagery for your real brand whenever you're ready (see [Placeholder content](#placeholder-content--todos) below).
+brand name for a global shipping & logistics / freight-forwarding company. Swap
+the name, logo, copy, and imagery for your real brand whenever you're ready
+(see [Placeholder content](#placeholder-content--todos) below).
 
-Includes a mock-authenticated customer portal (`/login` → `/dashboard`) for
-tracking packages and finding drop-off locations — see
-[Customer portal (demo)](#customer-portal-demo) below.
+Includes a mock-authenticated **customer portal** (`/login` → `/dashboard`) —
+account summary, package tracking, a shipping-rate calculator, and an overseas
+"ship to" address — plus a separate **admin area** (`/admin/login` → `/admin`)
+where staff add packages and notify customers. See
+[Customer portal (demo)](#customer-portal-demo) and
+[Admin area (demo)](#admin-area-demo) below.
 
 Built with Next.js 15 (App Router), TypeScript, Tailwind CSS, Framer Motion,
 GSAP/ScrollTrigger, and Lenis smooth scrolling.
@@ -49,10 +53,21 @@ npm run lint    # ESLint
 
 - **`/login`** — email/password form. Demo credentials:
   `demo@deltra.com` / `demo123` (also shown on the login screen itself).
-- **`/dashboard`** — protected route: "My Packages" (mock shipments with
-  status badges, a progress bar, and an expandable step timeline) and a
-  "Shipping Drop-Off Location" panel (mock warehouse address, hours, phone,
-  an embedded map, copy-address, and get-directions).
+- **`/dashboard`** — protected (customers only), a card-based freight-forwarding
+  portal:
+  - **Account summary** — greeting, wallet balance, local branch contacts.
+  - **Account actions** — Submit Required Invoice, Authorised Users, and
+    Messages (this is where admin notifications land — badge count is unread
+    messages).
+  - **Package summary** — Pre-Alert, Packages (not yet picked up), Bills/
+    Transactions.
+  - **Overseas shipping address** — the US "ship your purchases here" address,
+    including the customer's unique account code and a copy-address button.
+  - **Get a Quote** — the same rate calculator as the public `/quote` page.
+  - **My Packages** — the full list with a 6-stage status
+    (`Pre-Alerted → Received at Warehouse → In Transit → Arrived at Local
+    Branch → Ready for Pickup → Delivered`), an animated progress bar, and an
+    expandable step timeline per package.
 
 Auth is intentionally mock/client-side for now — see
 [`lib/auth-context.tsx`](lib/auth-context.tsx). The whole `login()` call is
@@ -63,50 +78,108 @@ nothing else needs to change, since every consumer only depends on
 JSON blob in `localStorage` (key `deltra_auth_session`) — there's no real
 token/cookie, so treat this as a UI scaffold, not a security boundary.
 
-`components/auth/RequireAuth.tsx` is a reusable guard for protected routes:
-it shows a small loading state while the initial session check runs, then
-redirects to `/login` if there's no user. `/dashboard` is currently the only
-route wrapped in it.
+`components/auth/RequireAuth.tsx` is a reusable guard for protected routes.
+It takes an optional `role` prop: with no session it redirects to
+`redirectTo` (default `/login`); with the wrong role, it sends the visitor to
+the area they *do* have access to (`/dashboard` or `/admin`) instead of
+bouncing between login screens. `/dashboard` uses `role="customer"`, `/admin`
+uses `role="admin" redirectTo="/admin/login"`.
+
+## Admin area (demo)
+
+- **`/admin/login`** — separate, visually-distinguished admin sign-in. Demo
+  credentials: `admin@deltra.com` / `admin123`.
+- **`/admin`** — protected (admin role only):
+  - **Add a package** — pick a customer (by name/account code), tracking
+    number, merchant, description, weight (auto-calculates the shipping cost
+    live from the same rate config the customer-facing calculator uses),
+    date received, and initial status.
+  - **All packages table** — every package across every customer, with an
+    inline status dropdown per row.
+
+Adding a package or changing its status **automatically** pushes a
+notification into that customer's Messages (see `lib/data-store.tsx`) and
+shows a success toast — the admin never has to remember to notify separately.
+A `// TODO: real email/SMS notification would be sent here` comment marks
+where that would plug into a real provider.
+
+**Important limitation (by design, for this demo):** packages and messages
+live in `lib/data-store.tsx`, a React Context backed by `localStorage`. That
+means admin changes show up in the customer dashboard *within the same
+browser*, but there's no real backend — a real admin and a real customer on
+different devices won't see each other's changes until this is swapped for
+an actual database. Every mutation point is marked
+`// TODO: replace with a real backend + database call`.
+
+## Shipping rate calculator / Get a Quote
+
+`components/dashboard/RateCalculator.tsx` is a single shared component
+rendered both on the public **`/quote`** page (linked from the nav) and inside
+`/dashboard`. All the math is centralized in
+[`lib/quote-config.ts`](lib/quote-config.ts):
+
+- `CURRENCY` / `RATE_PER_LB` — currently `J$600` per pound.
+- `ROUND_UP_WEIGHT` — toggle for "round up to the next whole pound" (on by
+  default, standard courier behavior).
+- `SHIPPING_METHOD_MULTIPLIERS` — Standard Air (×1, default), Express (×1.5),
+  Sea (×0.6).
+
+Every displayed shipping cost (the calculator, admin's add-package form, each
+package card) calls `calculateShippingCost()` from this one file, so changing
+the rate anywhere changes it everywhere.
 
 ## Folder structure
 
 ```
 app/
-  layout.tsx              Root layout: Poppins font, AuthProvider, SmoothScrollProvider,
-                          CustomCursor, Noise — everything global across all routes
+  layout.tsx              Root layout: Poppins font, AuthProvider, DataStoreProvider,
+                          SmoothScrollProvider, CustomCursor, Noise — global across all routes
   (marketing)/
-    layout.tsx             Header + <main> + Footer — marketing chrome, home page only
+    layout.tsx             Header + <main> + Footer — marketing chrome
     page.tsx               Assembles all home page sections in order
-  login/page.tsx           Standalone login screen (no marketing chrome)
-  dashboard/page.tsx        Protected customer dashboard (no marketing chrome)
+    quote/page.tsx          Public "Get a Quote" page (RateCalculator)
+  login/page.tsx           Customer login (no marketing chrome)
+  dashboard/page.tsx        Protected customer portal (no marketing chrome)
+  admin/
+    login/page.tsx          Admin login (no marketing chrome)
+    page.tsx                Protected admin dashboard (no marketing chrome)
   globals.css             Tailwind directives, CSS variables, global utilities
 components/
   layout/
-    Header.tsx            Sticky nav, transparent→solid on scroll, mobile menu
+    Header.tsx            Sticky nav (mixes #anchor scroll-links and real /routes),
+                          transparent→solid on scroll, mobile menu
     Footer.tsx             Multi-column footer, newsletter form, oversized wordmark
     SmoothScrollProvider.tsx  Lenis + GSAP ScrollTrigger wiring (see comments)
   auth/
-    RequireAuth.tsx        Client guard: redirects to /login if not authenticated
+    RequireAuth.tsx        Client guard: optional `role`, redirects appropriately
   dashboard/
-    DashboardHeader.tsx    Simplified header: logo, name/avatar, logout
+    DashboardHeader.tsx    Simplified customer header: logo, name/avatar, logout
+    AccountSummaryCard.tsx, AccountActionsCard.tsx, PackageSummaryCard.tsx,
+    OverseasAddressCard.tsx, ActionRow.tsx    The 4 portal summary cards
     PackageCard.tsx        Shipment row: badge, progress bar, expandable timeline
-    DropOffPanel.tsx       Warehouse address + embedded map + copy/directions
+    RateCalculator.tsx     Shared rate calculator (dashboard + /quote)
+  admin/
+    AdminHeader.tsx, AddPackageForm.tsx, PackagesTable.tsx
   ui/                   Small reusable interaction primitives
     Wordmark.tsx        Single source of truth for the brand name/logo text
-    CustomCursor.tsx    Grows + labels on [data-cursor-hover] elements
+    CustomCursor.tsx    Grows + labels on [data-cursor-hover]; see Cursor behavior below
     MagneticButton.tsx  Cursor-following button, handles anchor smooth-scroll + /routes
     ScrollReveal.tsx    Generic fade/slide-in-on-scroll wrapper (supports stagger)
     SplitText.tsx       Word-by-word masked reveal for the hero headline
     Counter.tsx         Count-up-on-scroll-into-view number
     Marquee.tsx         Infinite horizontal marquee (client logos / terms)
     ServiceIcon.tsx     Inline line-art icon set for the Services grid
-    StatusTimeline.tsx  Shared step timeline (public tracking widget + dashboard)
+    StatusTimeline.tsx  Shared step timeline (light variant for TrackShipment,
+                        dark variant for the dashboard's dark cards)
+    Toast.tsx           Auto-dismissing confirmation banner (dashboard stubs + admin)
     Noise.tsx           Tasteful fixed film-grain overlay
   sections/             One component per home-page section (Hero, Services, ...)
 lib/
   data.ts               Marketing page placeholder copy/content
-  dashboard-data.ts      Mock packages + drop-off location, typed for an easy API swap
-  auth-context.tsx      Mock AuthProvider / useAuth (see Customer portal above)
+  dashboard-data.ts      Package/status/branch/customer/address types + mock seed data
+  data-store.tsx         Shared mock "database" (packages + messages) — see Admin area above
+  quote-config.ts        Single-source rate/currency/method config — see Rate calculator above
+  auth-context.tsx      Mock AuthProvider / useAuth, role-aware (see Customer portal above)
   utils.ts              cn() className helper
   useReducedMotion.ts   Reactive prefers-reduced-motion hook
 public/images/          Placeholder SVG artwork (see TODOs below)
@@ -121,19 +194,28 @@ Brand colors are defined in **two** places kept in sync intentionally:
 - `app/globals.css` → `:root` CSS variables (`--color-navy`, `--color-gold`, …)
   for anywhere outside Tailwind's reach (inline SVG gradients, etc).
 
+The palette is a **red/black identity**: `navy-950` is true black
+(`#000000`), `navy-900` is the dark-gray card surface (`#1A1A1A`), `accent` is
+the vibrant red primary (`#FF2E2E`, used for buttons/links/key highlights),
+and `gold` — despite the name, kept for minimal call-site churn — is now a
+red-orange secondary accent (`#FF6538`) used for smaller/decorative accents.
+See the comments at the top of `tailwind.config.ts` for the full role
+breakdown. Two deliberate exceptions to the red/black system: a small
+semantic red for the login form's error state, and green for the "Delivered"
+package status badge — both chosen for accessible, unambiguous meaning rather
+than brand decoration.
+
 Fluid display type scale (`text-display-xl` down to `text-display-sm`) is
 defined in `tailwind.config.ts` using `clamp()` so headings scale smoothly
 between mobile and desktop without breakpoint-specific overrides.
-
-The one deliberate departure from the brand palette is a small semantic red
-used only for the login form's inline error state — gold is reserved for
-positive/highlight accents elsewhere, so it's not reused for error messaging.
 
 ## Signature interactions — where to find them
 
 - **Custom cursor** — `components/ui/CustomCursor.tsx`. Mark any element with
   `data-cursor-hover="Label"` to grow the cursor and show a label on hover.
-  Disabled on touch devices and when `prefers-reduced-motion` is set.
+  Disabled on touch devices and when `prefers-reduced-motion` is set. See
+  [Cursor behavior](#cursor-behavior) below for the details that make it
+  reliable rather than just decorative.
 - **Magnetic buttons** — `components/ui/MagneticButton.tsx`. Used for every
   primary CTA; handles smooth-scrolling to `#anchor` targets via Lenis, plain
   navigation for internal `/routes`, and an optional `disabled` state.
@@ -147,20 +229,40 @@ positive/highlight accents elsewhere, so it's not reused for error messaging.
 - **Pinned horizontal timeline** — `components/sections/Process.tsx`. Desktop
   only (GSAP ScrollTrigger `pin` + `scrub`); collapses to a static grid on
   mobile and under reduced motion.
-- **Animated network map** — `components/sections/GlobalNetwork.tsx`. Routes
-  draw themselves in via ScrollTrigger; small dots continuously travel the
-  routes via native SVG `<animateMotion>`.
 - **Shared status timeline** — `components/ui/StatusTimeline.tsx`. Used by
-  both the public `TrackShipment` widget and the dashboard's package detail
-  view so they stay visually identical.
+  the public `TrackShipment` widget (`variant="light"`, the default) and the
+  dashboard's package cards (`variant="dark"`) so both stay visually
+  consistent with the card they sit on.
 - **Smooth scrolling** — `components/layout/SmoothScrollProvider.tsx` wires
   Lenis to GSAP's ticker and keeps ScrollTrigger in sync. In development only,
   the active instance is exposed at `window.__lenis` for debugging.
 
+## Cursor behavior
+
+Three things make the custom cursor (`components/ui/CustomCursor.tsx`)
+reliable rather than just decorative:
+
+1. **Never blocks a click** — the cursor element is `pointer-events-none`, so
+   it's purely visual regardless of what's under the pointer.
+2. **Form fields keep a real text caret** — `app/globals.css` scopes the
+   `cursor: none` override so it excludes `input`/`textarea`/
+   `[contenteditable]` (which get `cursor: text`) and `select`/checkboxes/
+   radios (which get `cursor: pointer`). Only links/buttons/generic content
+   hand cursor duties fully to the custom dot.
+3. **No stuck/frozen position** — the dot fades out on `pointerleave` from the
+   document (e.g. moving over a cross-origin `<iframe>`, or out of the browser
+   window) and back in on the next real pointer position, since
+   `pointermove` never fires while the pointer is outside the top-level
+   document — without this it would otherwise freeze at its last known spot.
+
+Disabled entirely on touch devices (`(hover: none), (pointer: coarse)`) and
+when `prefers-reduced-motion` is set, falling back to the normal system
+cursor in both cases.
+
 ## Accessibility & motion
 
 - All signature motion (cursor, magnetic pull, parallax, pinned scroll,
-  Lenis itself, the login screen's entrance) is gated behind a
+  Lenis itself, the login screens' entrance) is gated behind a
   `useReducedMotion()` check and falls back to plain, static layouts.
 - `app/globals.css` also sets a blanket `@media (prefers-reduced-motion: reduce)`
   rule that collapses any remaining CSS transitions/animations.
@@ -168,9 +270,9 @@ positive/highlight accents elsewhere, so it's not reused for error messaging.
   headings are hierarchical, and interactive controls have `aria-label`s where
   their visible text isn't sufficient (icon-only buttons, carousel controls,
   the password show/hide toggle).
-- Package cards use a real `<button>` for the expand/collapse control (not a
-  `div` with an `onClick`), so they're keyboard-operable and get a focus ring
-  for free.
+- Package cards, action rows, and the admin table's status control all use
+  real `<button>`/`<select>` elements (not `div`s with `onClick`), so
+  everything is keyboard-operable with a visible focus state.
 - All images go through `next/image` with descriptive `alt` text.
 
 ## Placeholder content & TODOs
@@ -178,23 +280,23 @@ positive/highlight accents elsewhere, so it's not reused for error messaging.
 Everything here is realistic placeholder copy for a fictional brand — swap it
 out before shipping:
 
-- **Brand name/logo** — centralized in `components/ui/Wordmark.tsx`. Replace
-  with a real logo asset there and it updates everywhere (nav, footer, login,
-  dashboard header).
+- **Brand name/logo** — centralized in `components/ui/Wordmark.tsx`.
 - **All marketing copy, stats, service descriptions, testimonials, process
   steps** — centralized in `lib/data.ts`.
 - **`public/images/feature-*.svg`** — abstract placeholder art standing in for
   real photography; each has a visible "TODO: replace…" label baked into the
-  image itself so it's obvious in the running site. Referenced from
-  `lib/data.ts` → `FEATURES`.
+  image itself. Referenced from `lib/data.ts` → `FEATURES`.
 - **Tracking widget** — `components/sections/TrackShipment.tsx` uses mock
   client-side data (`lib/data.ts` → `TRACKING_DATA`); wire up to a real
   tracking API when available.
-- **Dashboard packages & drop-off hub** — `lib/dashboard-data.ts`; swap
-  `PACKAGES` and `DROP_OFF_LOCATION` for real API responses (types are already
-  in place). The drop-off hub uses a real address/coordinates for the map demo
-  but is entirely fictional as a Deltra Logistics facility.
-- **Auth** — `lib/auth-context.tsx`; see [Customer portal (demo)](#customer-portal-demo).
+- **Dashboard packages, branches, customers, overseas address** —
+  `lib/dashboard-data.ts` (static seed/shape) and `lib/data-store.tsx` (live
+  mutable state); swap for real API responses — types are already in place.
+- **Shipping rate** — `lib/quote-config.ts`; update `RATE_PER_LB`, `CURRENCY`,
+  or the method multipliers in this one file.
+- **Auth & roles** — `lib/auth-context.tsx`; see
+  [Customer portal (demo)](#customer-portal-demo) and
+  [Admin area (demo)](#admin-area-demo).
 - **Newsletter form** — submit handler currently just updates local state
   (`Footer.tsx`); no data is sent anywhere. Wire up a real email provider/CRM
   before launch.

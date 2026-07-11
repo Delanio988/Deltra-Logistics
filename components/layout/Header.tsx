@@ -53,17 +53,28 @@ export default function Header() {
         </a>
 
         <nav className="hidden items-center gap-10 lg:flex" aria-label="Primary">
-          {NAV_LINKS.map((link) => (
-            <a
-              key={link.href}
-              href={link.href}
-              onClick={(e) => handleNavClick(e, link.href)}
-              data-cursor-hover={link.label}
-              className="text-sm font-medium tracking-wide text-white/80 transition-colors hover:text-accent"
-            >
-              {link.label}
-            </a>
-          ))}
+          {NAV_LINKS.map((link) =>
+            link.href.startsWith("#") ? (
+              <a
+                key={link.href}
+                href={link.href}
+                onClick={(e) => handleNavClick(e, link.href)}
+                data-cursor-hover={link.label}
+                className="text-sm font-medium tracking-wide text-white/80 transition-colors hover:text-accent"
+              >
+                {link.label}
+              </a>
+            ) : (
+              <Link
+                key={link.href}
+                href={link.href}
+                data-cursor-hover={link.label}
+                className="text-sm font-medium tracking-wide text-white/80 transition-colors hover:text-accent"
+              >
+                {link.label}
+              </Link>
+            )
+          )}
         </nav>
 
         <div className="hidden lg:block">
@@ -115,16 +126,27 @@ export default function Header() {
             aria-label="Mobile"
           >
             <div className="flex flex-col gap-1 px-6 pb-8 pt-2">
-              {NAV_LINKS.map((link) => (
-                <a
-                  key={link.href}
-                  href={link.href}
-                  onClick={(e) => handleNavClick(e, link.href)}
-                  className="border-b border-white/10 py-4 text-lg font-medium text-white/90"
-                >
-                  {link.label}
-                </a>
-              ))}
+              {NAV_LINKS.map((link) =>
+                link.href.startsWith("#") ? (
+                  <a
+                    key={link.href}
+                    href={link.href}
+                    onClick={(e) => handleNavClick(e, link.href)}
+                    className="border-b border-white/10 py-4 text-lg font-medium text-white/90"
+                  >
+                    {link.label}
+                  </a>
+                ) : (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    onClick={() => setIsMobileOpen(false)}
+                    className="border-b border-white/10 py-4 text-lg font-medium text-white/90"
+                  >
+                    {link.label}
+                  </Link>
+                )
+              )}
               <Link
                 href="/login"
                 onClick={() => setIsMobileOpen(false)}

@@ -23,18 +23,18 @@ export default function Footer() {
   };
 
   return (
-    <footer id="contact" className="bg-navy-950 pt-24 text-white">
+    <footer id="contact" className="bg-bg pt-24 text-fg">
       <div className="mx-auto max-w-container px-6 lg:px-12">
         <div className="grid grid-cols-2 gap-12 pb-16 sm:grid-cols-4 lg:grid-cols-5">
           <div className="col-span-2 sm:col-span-4 lg:col-span-2">
-            <Wordmark />
-            <p className="mt-5 max-w-xs text-sm leading-relaxed text-white/55">
+            <Wordmark className="h-10" />
+            <p className="mt-5 max-w-xs text-sm leading-relaxed text-fg/55">
               Global shipping and logistics, engineered for reliability — ocean, air, and
               ground freight across 180+ countries.
             </p>
 
             <form onSubmit={handleSubmit} className="mt-8 max-w-sm">
-              <label htmlFor={inputId} className="text-xs font-semibold uppercase tracking-widest text-white/50">
+              <label htmlFor={inputId} className="text-xs font-semibold uppercase tracking-widest text-fg/50">
                 Get logistics insights
               </label>
               <div className="mt-3 flex gap-2">
@@ -45,7 +45,7 @@ export default function Footer() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="you@company.com"
-                  className="w-full rounded-full border border-white/15 bg-white/5 px-5 py-3 text-sm text-white outline-none transition-colors focus:border-accent"
+                  className="w-full rounded-full border border-fg/15 bg-fg/5 px-5 py-3 text-sm text-fg outline-none transition-colors focus:border-accent"
                 />
                 <button
                   type="submit"
@@ -62,11 +62,11 @@ export default function Footer() {
           </div>
 
           <div>
-            <h3 className="text-xs font-semibold uppercase tracking-widest text-white/50">Company</h3>
+            <h3 className="text-xs font-semibold uppercase tracking-widest text-fg/50">Company</h3>
             <ul className="mt-5 space-y-3">
               {NAV_LINKS.map((link) => (
                 <li key={link.href}>
-                  <a href={link.href} className="text-sm text-white/70 transition-colors hover:text-accent">
+                  <a href={link.href} className="text-sm text-fg/70 transition-colors hover:text-accent">
                     {link.label}
                   </a>
                 </li>
@@ -75,11 +75,11 @@ export default function Footer() {
           </div>
 
           <div>
-            <h3 className="text-xs font-semibold uppercase tracking-widest text-white/50">Services</h3>
+            <h3 className="text-xs font-semibold uppercase tracking-widest text-fg/50">Services</h3>
             <ul className="mt-5 space-y-3">
               {SERVICES.slice(0, 5).map((service) => (
                 <li key={service.id}>
-                  <a href="#services" className="text-sm text-white/70 transition-colors hover:text-accent">
+                  <a href="#services" className="text-sm text-fg/70 transition-colors hover:text-accent">
                     {service.title}
                   </a>
                 </li>
@@ -88,8 +88,8 @@ export default function Footer() {
           </div>
 
           <div>
-            <h3 className="text-xs font-semibold uppercase tracking-widest text-white/50">Contact</h3>
-            <ul className="mt-5 space-y-3 text-sm text-white/70">
+            <h3 className="text-xs font-semibold uppercase tracking-widest text-fg/50">Contact</h3>
+            <ul className="mt-5 space-y-3 text-sm text-fg/70">
               <li>
                 <a href="mailto:quotes@deltralogistics.com" className="transition-colors hover:text-accent">
                   quotes@deltralogistics.com
@@ -100,7 +100,7 @@ export default function Footer() {
                   +1 (800) 555-1234
                 </a>
               </li>
-              <li className="text-white/50">TODO: HQ address</li>
+              <li className="text-fg/50">TODO: HQ address</li>
             </ul>
             <div className="mt-6 flex gap-4">
               {SOCIALS.map((social) => (
@@ -110,7 +110,7 @@ export default function Footer() {
                   target="_blank"
                   rel="noreferrer"
                   data-cursor-hover={social.label}
-                  className="text-xs font-medium uppercase tracking-wide text-white/50 transition-colors hover:text-accent"
+                  className="text-xs font-medium uppercase tracking-wide text-fg/50 transition-colors hover:text-accent"
                 >
                   {social.label}
                 </a>
@@ -119,7 +119,7 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="flex flex-col gap-4 border-t border-white/10 py-8 text-xs text-white/40 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-4 border-t border-fg/10 py-8 text-xs text-fg/40 sm:flex-row sm:items-center sm:justify-between">
           <p>&copy; {new Date().getFullYear()} Deltra Logistics. All rights reserved.</p>
           <p>Placeholder brand — swap name, logo, and legal copy before launch.</p>
         </div>
@@ -127,7 +127,7 @@ export default function Footer() {
 
       {/* Oversized wordmark — purely decorative, clipped so it never scrolls the page horizontally */}
       <div aria-hidden className="overflow-hidden">
-        <p className="translate-y-[0.12em] select-none whitespace-nowrap px-6 text-center text-[18vw] font-extrabold leading-none tracking-tighter text-white/[0.04] lg:text-[13vw]">
+        <p className="translate-y-[0.12em] select-none whitespace-nowrap px-6 text-center text-[18vw] font-extrabold leading-none tracking-tighter text-fg/[0.04] lg:text-[13vw]">
           DELTRA
         </p>
       </div>

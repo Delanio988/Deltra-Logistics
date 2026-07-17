@@ -3,14 +3,21 @@
 import { useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 
+type ToastAction = {
+  label: string;
+  onClick: () => void;
+};
+
 type ToastProps = {
   message: string | null;
   onDismiss: () => void;
+  /** Optional inline action button, e.g. "Undo" — clicking it dismisses the toast too. */
+  action?: ToastAction;
 };
 
 /** Simple auto-dismissing confirmation banner, reused across the dashboard's
  *  stub actions and the admin area's add/update-package confirmations. */
-export default function Toast({ message, onDismiss }: ToastProps) {
+export default function Toast({ message, onDismiss, action }: ToastProps) {
   useEffect(() => {
     if (!message) return;
     const timer = setTimeout(onDismiss, 3000);
@@ -28,9 +35,22 @@ export default function Toast({ message, onDismiss }: ToastProps) {
             transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
             role="status"
             aria-live="polite"
-            className="pointer-events-auto rounded-full border border-accent/30 bg-navy-900 px-6 py-3 text-sm font-semibold text-white shadow-card"
+            className="pointer-events-auto flex items-center gap-4 rounded-full border border-accent/30 bg-surface px-6 py-3 text-sm font-semibold text-fg shadow-card"
           >
-            {message}
+            <span>{message}</span>
+            {action && (
+              <button
+                type="button"
+                onClick={() => {
+                  action.onClick();
+                  onDismiss();
+                }}
+                data-cursor-hover={action.label}
+                className="shrink-0 text-accent underline transition-colors hover:text-accent-dark"
+              >
+                {action.label}
+              </button>
+            )}
           </motion.div>
         )}
       </AnimatePresence>

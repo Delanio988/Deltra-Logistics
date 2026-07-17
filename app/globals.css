@@ -3,74 +3,77 @@
 @tailwind utilities;
 
 :root {
-  /* Brand palette — mirrors tailwind.config.ts so raw CSS (SVG, canvas, etc.)
-     can reference the same values without duplicating hex codes. Despite the
-     variable name, --color-gold is now a red-orange secondary accent. */
-  --color-navy: #0a0a0a;
-  --color-navy-900: #1a1a1a;
-  --color-navy-950: #000000;
-  --color-accent: #ff2e2e;
-  --color-accent-dark: #c81e1e;
-  --color-gold: #ff6538;
-  --color-white: #ffffff;
-  --color-offwhite: #f5f5f5;
-  --color-ink: #0a0a0a;
+  /* Light theme (default CSS scope — next-themes adds .dark for dark mode).
+     Values are "R G B" (space-separated, no commas) so Tailwind's
+     rgb(var(--x) / <alpha-value>) pattern can still apply opacity modifiers
+     like bg-surface/50. These 5 tokens are the ONLY colors that flip with
+     the theme toggle — see tailwind.config.ts for which components use them
+     vs. the fixed, always-the-same navy/offwhite/ink/accent/gold tokens. */
+  --color-bg: 245 245 245;        /* F5F5F5 */
+  --color-surface: 255 255 255;   /* FFFFFF */
+  --color-border: 229 229 229;    /* E5E5E5 */
+  --color-muted: 107 107 107;     /* 6B6B6B */
+  --color-fg: 10 10 10;           /* 0A0A0A */
+
+  /* Text-safe accent shades: the vivid accent/gold stay vivid for buttons,
+     borders, and focus rings in both themes, but small text/links need a
+     deeper shade in light mode to hit WCAG AA against a white background. */
+  --color-accent-text: 224 27 27; /* E01B1B */
+  --color-gold-text: 209 74 31;   /* same hex as the existing gold-dark shade */
+
+  /* bg-navy-radial's 3 gradient stops (see tailwind.config.ts) */
+  --gradient-1: 255 255 255;
+  --gradient-2: 245 245 245;
+  --gradient-3: 245 245 245;
+
+  /* Fixed brand colors — identical in both themes, defined once here so raw
+     CSS (SVG, canvas, etc.) can reference them without duplicating hex codes. */
+  --color-accent: 255 46 46;      /* FF2E2E */
+  --color-accent-dark: 200 30 30; /* C81E1E */
+  --color-gold: 255 101 56;       /* FF6538 */
+  --color-gold-dark: 209 74 31;   /* D14A1F */
 
   --cursor-size: 16px;
   --header-height: 88px;
 }
 
+.dark {
+  --color-bg: 0 0 0;              /* 000000 — unchanged from today */
+  --color-surface: 26 26 26;      /* 1A1A1A — unchanged from today */
+  --color-border: 51 51 51;       /* 333333 — unchanged from today */
+  --color-muted: 100 100 100;     /* 646464 — unchanged from today */
+  --color-fg: 255 255 255;        /* FFFFFF — unchanged from today */
+
+  --color-accent-text: 255 46 46; /* same as --color-accent — unchanged from today */
+  --color-gold-text: 255 101 56;  /* same as --color-gold — unchanged from today */
+
+  --gradient-1: 26 26 26;
+  --gradient-2: 10 10 10;
+  --gradient-3: 0 0 0;
+}
+
 * {
-  scrollbar-color: var(--color-gold) var(--color-navy-950);
+  scrollbar-color: rgb(var(--color-gold)) rgb(var(--color-bg));
 }
 
 html {
   scroll-behavior: auto; /* Lenis takes over smooth scrolling; avoid double-smoothing */
-  background: var(--color-offwhite);
 }
 
 body {
-  background: var(--color-offwhite);
-  color: var(--color-ink);
   font-family: var(--font-poppins), system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
 
-/* Hide the native cursor only once the custom cursor is confirmed active
-   (see components/ui/CustomCursor.tsx), and never on touch devices. */
-html.has-custom-cursor,
-html.has-custom-cursor * {
-  cursor: none !important;
-}
-
-/* ...except form fields, which keep a real text/I-beam cursor — the custom
-   dot is for links/buttons, not for indicating a text-input caret. */
-html.has-custom-cursor input,
-html.has-custom-cursor textarea,
-html.has-custom-cursor [contenteditable="true"] {
-  cursor: text !important;
-}
-
-html.has-custom-cursor select,
-html.has-custom-cursor input[type="checkbox"],
-html.has-custom-cursor input[type="radio"] {
-  cursor: pointer !important;
-}
-
-@media (hover: none) and (pointer: coarse) {
-  html.has-custom-cursor,
-  html.has-custom-cursor * {
-    cursor: auto !important;
-  }
-}
-
 ::selection {
-  background: var(--color-gold);
-  color: var(--color-navy-950);
+  background: rgb(var(--color-gold-text) / 0.9);
+  color: rgb(var(--color-fg));
 }
 
-/* Reusable gold underline / label accent used sparingly across sections */
+/* Reusable overline/label accent used sparingly across sections. Despite the
+   name, it's colored with --color-gold-text (a red-orange, deeper in light
+   mode for AA contrast), not literal gold. */
 .gold-label {
   display: inline-flex;
   align-items: center;
@@ -79,7 +82,7 @@ html.has-custom-cursor input[type="radio"] {
   font-weight: 600;
   letter-spacing: 0.28em;
   text-transform: uppercase;
-  color: var(--color-gold);
+  color: rgb(var(--color-gold-text));
 }
 
 .gold-label::before {
@@ -87,10 +90,12 @@ html.has-custom-cursor input[type="radio"] {
   display: block;
   width: 2.25rem;
   height: 1px;
-  background: var(--color-gold);
+  background: rgb(var(--color-gold-text));
 }
 
-/* Tasteful film-grain overlay for cinematic depth (components/ui/Noise.tsx) */
+/* Tasteful film-grain overlay for cinematic depth (components/ui/Noise.tsx).
+   mix-blend-mode: overlay reads correctly against both light and dark
+   backgrounds, so this needs no theme-specific handling. */
 .noise-overlay {
   position: fixed;
   inset: 0;
@@ -102,7 +107,8 @@ html.has-custom-cursor input[type="radio"] {
 }
 
 /* Respect reduced-motion preference globally: collapse scroll/parallax-driven
-   transforms and let content appear in place instead of animating in. */
+   transforms and let content appear in place instead of animating in. This
+   also covers the theme-change color transition added in app/layout.tsx. */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

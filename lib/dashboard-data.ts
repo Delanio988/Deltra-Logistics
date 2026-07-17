@@ -56,6 +56,10 @@ export type Package = {
   weightLb: number;
   dateReceived: string;
   status: PackageStatus;
+  /** Admin-set flag — customs requires a purchase invoice before this
+   *  package can be cleared. Review state (submitted/pending/approved/
+   *  rejected) lives in the separate Invoice record — see lib/invoices.ts. */
+  invoiceRequired?: boolean;
 };
 
 // Seed data for lib/data-store.tsx. TODO: replace with a real API fetch.
@@ -69,6 +73,7 @@ export const INITIAL_PACKAGES: Package[] = [
     weightLb: 6,
     dateReceived: "Jul 5, 2026",
     status: "In Transit",
+    invoiceRequired: true,
   },
   {
     id: "pkg-2",
@@ -79,6 +84,7 @@ export const INITIAL_PACKAGES: Package[] = [
     weightLb: 14,
     dateReceived: "Jul 3, 2026",
     status: "Arrived at Local Branch",
+    invoiceRequired: true,
   },
   {
     id: "pkg-3",
@@ -89,6 +95,7 @@ export const INITIAL_PACKAGES: Package[] = [
     weightLb: 3,
     dateReceived: "Jun 29, 2026",
     status: "Ready for Pickup",
+    invoiceRequired: true,
   },
   {
     id: "pkg-4",
@@ -109,6 +116,7 @@ export const INITIAL_PACKAGES: Package[] = [
     weightLb: 9,
     dateReceived: "Jul 8, 2026",
     status: "Pre-Alerted",
+    invoiceRequired: true,
   },
   {
     id: "pkg-6",

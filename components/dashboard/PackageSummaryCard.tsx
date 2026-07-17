@@ -1,8 +1,10 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { useDataStore } from "@/lib/data-store";
+import { getOutstandingBills } from "@/lib/billing";
 import { useLenis } from "@/components/layout/SmoothScrollProvider";
 import ActionRow from "@/components/dashboard/ActionRow";
 import Toast from "@/components/ui/Toast";
@@ -32,14 +34,16 @@ const billsIcon = (
 
 export default function PackageSummaryCard() {
   const { user } = useAuth();
-  const { getPackagesForAccount } = useDataStore();
+  const { getPackagesForAccount, bills } = useDataStore();
   const lenis = useLenis();
+  const router = useRouter();
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const accountCode = user?.accountCode ?? "";
   const packages = getPackagesForAccount(accountCode);
   const preAlertCount = packages.filter((p) => p.status === "Pre-Alerted").length;
   const notPickedUpCount = packages.filter((p) => p.status !== "Delivered").length;
+  const outstandingBillCount = getOutstandingBills(bills, accountCode).length;
 
   const handleStub = (label: string) => setToastMessage(`${label} is coming soon in a future update.`);
 
@@ -54,10 +58,10 @@ export default function PackageSummaryCard() {
   };
 
   return (
-    <div className="rounded-2xl border border-white/8 bg-navy-900 p-8 shadow-card">
-      <h3 className="text-xs font-semibold uppercase tracking-widest text-white/50">Package Summary</h3>
+    <div className="rounded-2xl border border-fg/8 bg-surface p-8 shadow-card">
+      <h3 className="text-xs font-semibold uppercase tracking-widest text-fg/50">Package Summary</h3>
 
-      <div className="mt-4 -mx-3 divide-y divide-white/8">
+      <div className="mt-4 -mx-3 divide-y divide-fg/8">
         <ActionRow
           icon={preAlertIcon}
           label="Pre-Alert"
@@ -75,8 +79,9 @@ export default function PackageSummaryCard() {
         <ActionRow
           icon={billsIcon}
           label="Bills/Transactions"
-          sublabel="Schedule deliveries"
-          onClick={() => handleStub("Bills/Transactions")}
+          sublabel="Pay outstanding bills"
+          badge={outstandingBillCount}
+          onClick={() => router.push("/dashboard/billing")}
         />
       </div>
 

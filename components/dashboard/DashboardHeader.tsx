@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import Wordmark from "@/components/ui/Wordmark";
 import MagneticButton from "@/components/ui/MagneticButton";
+import ThemeToggle from "@/components/ui/ThemeToggle";
+import SeasonalGreetingBanner from "@/components/ui/SeasonalGreetingBanner";
 
 function getInitials(name: string) {
   return name
@@ -33,31 +35,35 @@ export default function DashboardHeader() {
   };
 
   return (
-    <header className="border-b border-white/8 bg-navy-900">
-      <div className="mx-auto flex h-20 max-w-container items-center justify-between px-6 lg:px-12">
-        <Link href="/dashboard" data-cursor-hover="Dashboard">
-          <Wordmark className="text-lg text-white" />
-        </Link>
+    <>
+      <SeasonalGreetingBanner scope="portal" />
+      <header className="border-b border-fg/8 bg-surface">
+        <div className="mx-auto flex h-20 max-w-container items-center justify-between px-6 lg:px-12">
+          <Link href="/dashboard" data-cursor-hover="Dashboard">
+            <Wordmark className="h-8" />
+          </Link>
 
-        <div className="flex items-center gap-4">
-          {user && (
-            <div className="hidden items-center gap-3 sm:flex">
-              <span className="flex h-9 w-9 items-center justify-center rounded-full bg-accent text-xs font-bold text-navy-950">
-                {getInitials(user.name)}
-              </span>
-              <span className="text-sm font-medium text-white">{user.name}</span>
-            </div>
-          )}
-          <MagneticButton
-            onClick={handleLogout}
-            cursorLabel="Logout"
-            strength={0.2}
-            className="border border-white/15 text-white hover:border-accent hover:text-accent"
-          >
-            Logout
-          </MagneticButton>
+          <div className="flex items-center gap-4">
+            {user && (
+              <div className="hidden items-center gap-3 sm:flex">
+                <span className="flex h-9 w-9 items-center justify-center rounded-full bg-accent text-xs font-bold text-navy-950">
+                  {getInitials(user.name)}
+                </span>
+                <span className="text-sm font-medium text-fg">{user.name}</span>
+              </div>
+            )}
+            <ThemeToggle />
+            <MagneticButton
+              onClick={handleLogout}
+              cursorLabel="Logout"
+              strength={0.2}
+              className="border border-fg/15 text-fg hover:border-accent hover:text-accent"
+            >
+              Logout
+            </MagneticButton>
+          </div>
         </div>
-      </div>
-    </header>
+      </header>
+    </>
   );
 }

@@ -283,9 +283,6 @@ out before shipping:
 - **Brand name/logo** — centralized in `components/ui/Wordmark.tsx`.
 - **All marketing copy, stats, service descriptions, testimonials, process
   steps** — centralized in `lib/data.ts`.
-- **`public/images/feature-*.svg`** — abstract placeholder art standing in for
-  real photography; each has a visible "TODO: replace…" label baked into the
-  image itself. Referenced from `lib/data.ts` → `FEATURES`.
 - **Tracking widget** — `components/sections/TrackShipment.tsx` uses mock
   client-side data (`lib/data.ts` → `TRACKING_DATA`); wire up to a real
   tracking API when available.

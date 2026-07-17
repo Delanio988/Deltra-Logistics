@@ -7,6 +7,8 @@ import { NAV_LINKS } from "@/lib/data";
 import { useLenis } from "@/components/layout/SmoothScrollProvider";
 import MagneticButton from "@/components/ui/MagneticButton";
 import Wordmark from "@/components/ui/Wordmark";
+import ThemeToggle from "@/components/ui/ThemeToggle";
+import SeasonalGreetingBanner from "@/components/ui/SeasonalGreetingBanner";
 import { cn } from "@/lib/utils";
 
 export default function Header() {
@@ -38,18 +40,19 @@ export default function Header() {
       className={cn(
         "fixed inset-x-0 top-0 z-50 transition-colors duration-500",
         isScrolled || isMobileOpen
-          ? "bg-navy-950/90 backdrop-blur-md shadow-[0_1px_0_0_rgba(255,101,56,0.15)]"
+          ? "bg-bg/90 backdrop-blur-md shadow-[0_1px_0_0_rgba(255,101,56,0.15)]"
           : "bg-transparent"
       )}
     >
+      <SeasonalGreetingBanner scope="public" />
       <div className="mx-auto flex h-[--header-height] max-w-container items-center justify-between px-6 lg:px-12">
         <a
           href="#top"
           onClick={(e) => handleNavClick(e, "#top")}
           data-cursor-hover="Home"
-          className="text-white"
+          className="text-fg"
         >
-          <Wordmark className="text-lg lg:text-xl" />
+          <Wordmark responsive animated className="h-8 lg:h-9" />
         </a>
 
         <nav className="hidden items-center gap-10 lg:flex" aria-label="Primary">
@@ -60,7 +63,7 @@ export default function Header() {
                 href={link.href}
                 onClick={(e) => handleNavClick(e, link.href)}
                 data-cursor-hover={link.label}
-                className="text-sm font-medium tracking-wide text-white/80 transition-colors hover:text-accent"
+                className="text-sm font-medium tracking-wide text-fg/80 transition-colors hover:text-accent"
               >
                 {link.label}
               </a>
@@ -69,7 +72,7 @@ export default function Header() {
                 key={link.href}
                 href={link.href}
                 data-cursor-hover={link.label}
-                className="text-sm font-medium tracking-wide text-white/80 transition-colors hover:text-accent"
+                className="text-sm font-medium tracking-wide text-fg/80 transition-colors hover:text-accent"
               >
                 {link.label}
               </Link>
@@ -77,7 +80,8 @@ export default function Header() {
           )}
         </nav>
 
-        <div className="hidden lg:block">
+        <div className="hidden items-center gap-4 lg:flex">
+          <ThemeToggle />
           <MagneticButton
             href="/login"
             cursorLabel="Login"
@@ -87,32 +91,35 @@ export default function Header() {
           </MagneticButton>
         </div>
 
-        <button
-          type="button"
-          onClick={() => setIsMobileOpen((v) => !v)}
-          aria-expanded={isMobileOpen}
-          aria-label="Toggle navigation menu"
-          className="flex h-10 w-10 flex-col items-center justify-center gap-1.5 lg:hidden"
-        >
-          <span
-            className={cn(
-              "h-[2px] w-6 bg-white transition-transform duration-300",
-              isMobileOpen && "translate-y-[7px] rotate-45"
-            )}
-          />
-          <span
-            className={cn(
-              "h-[2px] w-6 bg-white transition-opacity duration-300",
-              isMobileOpen && "opacity-0"
-            )}
-          />
-          <span
-            className={cn(
-              "h-[2px] w-6 bg-white transition-transform duration-300",
-              isMobileOpen && "-translate-y-[7px] -rotate-45"
-            )}
-          />
-        </button>
+        <div className="flex items-center gap-1 lg:hidden">
+          <ThemeToggle />
+          <button
+            type="button"
+            onClick={() => setIsMobileOpen((v) => !v)}
+            aria-expanded={isMobileOpen}
+            aria-label="Toggle navigation menu"
+            className="flex h-10 w-10 flex-col items-center justify-center gap-1.5"
+          >
+            <span
+              className={cn(
+                "h-[2px] w-6 bg-fg transition-transform duration-300",
+                isMobileOpen && "translate-y-[7px] rotate-45"
+              )}
+            />
+            <span
+              className={cn(
+                "h-[2px] w-6 bg-fg transition-opacity duration-300",
+                isMobileOpen && "opacity-0"
+              )}
+            />
+            <span
+              className={cn(
+                "h-[2px] w-6 bg-fg transition-transform duration-300",
+                isMobileOpen && "-translate-y-[7px] -rotate-45"
+              )}
+            />
+          </button>
+        </div>
       </div>
 
       <AnimatePresence>
@@ -122,7 +129,7 @@ export default function Header() {
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-            className="overflow-hidden bg-navy-950 lg:hidden"
+            className="overflow-hidden bg-bg lg:hidden"
             aria-label="Mobile"
           >
             <div className="flex flex-col gap-1 px-6 pb-8 pt-2">
@@ -132,7 +139,7 @@ export default function Header() {
                     key={link.href}
                     href={link.href}
                     onClick={(e) => handleNavClick(e, link.href)}
-                    className="border-b border-white/10 py-4 text-lg font-medium text-white/90"
+                    className="border-b border-fg/10 py-4 text-lg font-medium text-fg/90"
                   >
                     {link.label}
                   </a>
@@ -141,7 +148,7 @@ export default function Header() {
                     key={link.href}
                     href={link.href}
                     onClick={() => setIsMobileOpen(false)}
-                    className="border-b border-white/10 py-4 text-lg font-medium text-white/90"
+                    className="border-b border-fg/10 py-4 text-lg font-medium text-fg/90"
                   >
                     {link.label}
                   </Link>

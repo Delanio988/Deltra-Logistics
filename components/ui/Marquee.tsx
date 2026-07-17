@@ -1,10 +1,12 @@
 import { Fragment, type ReactNode } from "react";
 
-type MarqueeProps = {
-  items: readonly string[] | string[];
+type MarqueeProps<T> = {
+  items: readonly T[] | T[];
+  renderItem: (item: T, index: number) => ReactNode;
   className?: string;
-  itemClassName?: string;
-  separator?: ReactNode;
+  /** Rendered between items. Pass `null` to disable and rely on `gapClassName` spacing instead. */
+  separator?: ReactNode | null;
+  gapClassName?: string;
   /** Animation duration in seconds — lower is faster. */
   duration?: number;
   reverse?: boolean;
@@ -14,20 +16,23 @@ type MarqueeProps = {
  * Infinite horizontal marquee. Renders the item list twice back-to-back and
  * animates a translateX(-50%) loop (see `animate-marquee` in tailwind.config.ts),
  * so the seam is invisible as long as both copies are identical widths.
+ * Rendering is entirely up to the caller via `renderItem` — this component
+ * only owns the looping/pause-on-hover mechanics.
  */
-export default function Marquee({
+export default function Marquee<T>({
   items,
+  renderItem,
   className,
-  itemClassName,
   separator = <span className="mx-8 text-gold/50">&#47;</span>,
+  gapClassName = "",
   duration = 32,
   reverse = false,
-}: MarqueeProps) {
+}: MarqueeProps<T>) {
   const track = (
-    <div className="flex shrink-0 items-center">
+    <div className={`flex shrink-0 items-center ${gapClassName}`}>
       {items.map((item, i) => (
         <Fragment key={i}>
-          <span className={itemClassName}>{item}</span>
+          {renderItem(item, i)}
           {separator}
         </Fragment>
       ))}

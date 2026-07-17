@@ -20,6 +20,14 @@ export type AuthUser = {
 
 type LoginResult = { success: true; user: AuthUser } | { success: false; error: string };
 
+export type RegisterInput = {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  password: string;
+};
+
 type AuthContextValue = {
   user: AuthUser | null;
   /** True until the initial localStorage check on mount resolves — consumers
@@ -27,8 +35,15 @@ type AuthContextValue = {
    *  user to /login on first render. */
   isLoading: boolean;
   login: (email: string, password: string) => Promise<LoginResult>;
+  register: (input: RegisterInput) => Promise<LoginResult>;
   logout: () => void;
 };
+
+function generateAccountCode(): string {
+  const digits = Math.floor(1000 + Math.random() * 9000);
+  const letter = String.fromCharCode(65 + Math.floor(Math.random() * 26));
+  return `DLT${digits}-${letter}`;
+}
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
@@ -97,13 +112,40 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // ---- END MOCK AUTH ----
   };
 
+  const register = async (input: RegisterInput): Promise<LoginResult> => {
+    // ---- MOCK REGISTRATION: replace this block with a real registration API call. ----
+    // A real backend would check the full user table for an existing email;
+    // this demo only has the two hardcoded demo accounts to collide with.
+    // It would also send the phone number for WhatsApp/SMS verification and
+    // verify the Turnstile token (see app/signup/page.tsx) before creating
+    // the account — both are no-ops here since there's no backend yet.
+    await new Promise((resolve) => setTimeout(resolve, 600));
+
+    const email = input.email.trim().toLowerCase();
+    if (DEMO_CREDENTIALS.some((c) => c.email === email)) {
+      return { success: false, error: "An account with this email already exists." };
+    }
+
+    const newUser: AuthUser = {
+      name: `${input.firstName.trim()} ${input.lastName.trim()}`,
+      email,
+      role: "customer",
+      accountCode: generateAccountCode(),
+    };
+
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(newUser));
+    setUser(newUser);
+    return { success: true, user: newUser };
+    // ---- END MOCK REGISTRATION ----
+  };
+
   const logout = () => {
     window.localStorage.removeItem(STORAGE_KEY);
     setUser(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, login, logout }}>
+    <AuthContext.Provider value={{ user, isLoading, login, register, logout }}>
       {children}
     </AuthContext.Provider>
   );

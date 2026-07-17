@@ -47,7 +47,7 @@ export default function LoginPage() {
   // Fade the form in only once we know there's no existing session — avoids a
   // flash of the login form for users who are about to be redirected away.
   if (isLoading || user) {
-    return <div className="min-h-screen bg-navy-950" />;
+    return <div className="min-h-screen bg-bg" />;
   }
 
   const fadeUp = (delay: number) => ({
@@ -57,12 +57,12 @@ export default function LoginPage() {
   });
 
   return (
-    <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-navy-radial px-6 py-16 text-white">
+    <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-navy-radial px-6 py-16 text-fg">
       <div aria-hidden className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(255,46,46,0.3),transparent_45%)]" />
 
       <motion.div className="relative z-10 mb-10" {...fadeUp(0)}>
         <Link href="/" data-cursor-hover="Home">
-          <Wordmark className="text-lg" />
+          <Wordmark className="h-9" />
         </Link>
       </motion.div>
 
@@ -165,7 +165,7 @@ export default function LoginPage() {
 
         <p className="mt-8 text-center text-sm text-navy-950/60">
           Don&rsquo;t have an account?{" "}
-          <Link href="/#contact" className="font-semibold text-accent hover:text-accent-dark">
+          <Link href="/signup" className="font-semibold text-accent hover:text-accent-dark">
             Sign up
           </Link>
         </p>

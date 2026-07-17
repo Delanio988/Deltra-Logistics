@@ -68,33 +68,6 @@ export const SERVICES: Service[] = [
   },
 ];
 
-export const FEATURES = [
-  {
-    number: "01",
-    title: "Global reach, local expertise",
-    description:
-      "Operating in 180+ countries with on-the-ground teams who understand regional regulations, ports, and partners better than anyone.",
-    // TODO: replace with real operations photography
-    image: "/images/feature-global.svg",
-  },
-  {
-    number: "02",
-    title: "Technology-first visibility",
-    description:
-      "Live shipment tracking, predictive ETAs, and API integrations give you full control of your supply chain from pickup to delivery.",
-    // TODO: replace with real dashboard/product screenshot
-    image: "/images/feature-tech.svg",
-  },
-  {
-    number: "03",
-    title: "Built for scale",
-    description:
-      "From single pallets to multi-modal enterprise programs, our infrastructure flexes with demand without sacrificing service quality.",
-    // TODO: replace with real warehouse/fleet photography
-    image: "/images/feature-scale.svg",
-  },
-] as const;
-
 export type TrackingStatus = {
   label: string;
   description: string;
@@ -116,23 +89,70 @@ export const TRACKING_DATA: Record<string, TrackingStatus[]> = {
 export const PROCESS_STEPS = [
   {
     number: "01",
-    title: "Request a quote",
-    description: "Tell us what you're shipping, where, and when. Get a transparent, competitive quote within hours.",
+    title: "Shop online in the US",
+    description: "Buy from any US retailer — Amazon, Walmart, Shein, Best Buy, and thousands more ship there.",
   },
   {
     number: "02",
-    title: "We plan the route",
-    description: "Our logistics team builds the optimal multi-modal route across our global carrier network.",
+    title: "Ship to your Deltra address",
+    description: "Use your personal Deltra US address at checkout. We receive and log every package the moment it arrives.",
   },
   {
     number: "03",
-    title: "Cargo moves, you track it",
-    description: "Real-time visibility from pickup through customs to final delivery — no guessing, no gaps.",
+    title: "We fly it to Jamaica",
+    description: "Your packages are consolidated and flown in on our next scheduled air freight run — fast and fully tracked.",
   },
   {
     number: "04",
-    title: "Delivered, on time",
-    description: "Signed, confirmed, and backed by our 99.8% on-time guarantee.",
+    title: "Collect at your branch",
+    description: "Get notified the moment it lands, then pick up at your nearest Deltra branch — or have it delivered.",
+  },
+] as const;
+
+export type BentoFeature = {
+  id: string;
+  title: string;
+  description: string;
+  icon: "globe" | "bolt" | "tag" | "radar" | "branch";
+  size: "lg" | "md" | "sm";
+};
+
+export const BENTO_FEATURES: BentoFeature[] = [
+  {
+    id: "air-freight",
+    title: "Fast air freight",
+    description:
+      "Scheduled flights out of our US warehouses mean your packages are airborne within days, not weeks — every run tracked door to branch.",
+    icon: "bolt",
+    size: "lg",
+  },
+  {
+    id: "pricing",
+    title: "Transparent pricing",
+    description: "One flat rate per pound, shown up front. No surprise fees at pickup.",
+    icon: "tag",
+    size: "sm",
+  },
+  {
+    id: "tracking",
+    title: "Package tracking",
+    description: "Every package logged the moment it hits our US warehouse, visible in your dashboard from arrival to branch.",
+    icon: "radar",
+    size: "sm",
+  },
+  {
+    id: "branches",
+    title: "Local branches",
+    description: "Multiple Jamaican pickup locations, with real people ready to help — not just a tracking number.",
+    icon: "branch",
+    size: "md",
+  },
+  {
+    id: "reach",
+    title: "Global reach, local roots",
+    description: "Shop from any US retailer. Collect in Jamaica.",
+    icon: "globe",
+    size: "md",
   },
 ] as const;
 

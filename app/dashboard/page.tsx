@@ -24,15 +24,15 @@ function DashboardContent() {
   const overseasAddress = getOverseasAddress(user?.name ?? "Customer", accountCode);
 
   return (
-    <div className="min-h-screen bg-navy-950">
+    <div className="min-h-screen bg-bg">
       <DashboardHeader />
 
       <main className="mx-auto max-w-container px-6 py-12 lg:px-12 lg:py-16">
         <ScrollReveal direction="none">
-          <h1 className="text-display-sm font-extrabold text-white">
+          <h1 className="text-display-sm font-extrabold text-fg">
             Welcome back{user ? `, ${user.name.split(" ")[0]}` : ""}
           </h1>
-          <p className="mt-2 text-white/60">Here&rsquo;s what&rsquo;s moving right now.</p>
+          <p className="mt-2 text-fg/60">Here&rsquo;s what&rsquo;s moving right now.</p>
         </ScrollReveal>
 
         <div className="mt-10 grid grid-cols-1 gap-6 lg:grid-cols-2">
@@ -51,17 +51,17 @@ function DashboardContent() {
         </div>
 
         <section className="mt-12">
-          <h2 className="text-xs font-semibold uppercase tracking-widest text-white/50">Get a Quote</h2>
+          <h2 className="text-xs font-semibold uppercase tracking-widest text-fg/50">Get a Quote</h2>
           <div className="mt-4">
             <RateCalculator title="Estimate a new shipment" />
           </div>
         </section>
 
         <section id="packages" className="mt-12 scroll-mt-24">
-          <h2 className="text-xs font-semibold uppercase tracking-widest text-white/50">My Packages</h2>
+          <h2 className="text-xs font-semibold uppercase tracking-widest text-fg/50">My Packages</h2>
           <div className="mt-4 grid grid-cols-1 gap-4">
             {packages.length === 0 ? (
-              <p className="rounded-2xl border border-white/8 bg-navy-900 p-8 text-sm text-white/50 shadow-card">
+              <p className="rounded-2xl border border-fg/8 bg-surface p-8 text-sm text-fg/50 shadow-card">
                 No packages yet — once you pre-alert or ship a package, it&rsquo;ll show up here.
               </p>
             ) : (

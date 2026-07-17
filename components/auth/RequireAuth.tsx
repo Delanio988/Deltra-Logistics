@@ -3,6 +3,7 @@
 import { useEffect, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth, type UserRole } from "@/lib/auth-context";
+import Skeleton from "@/components/ui/Skeleton";
 
 type RequireAuthProps = {
   children: ReactNode;
@@ -37,8 +38,21 @@ export default function RequireAuth({ children, role, redirectTo = "/login" }: R
 
   if (isLoading || !user || wrongRole) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-navy-950">
-        <span className="h-2.5 w-2.5 animate-pulse-slow rounded-full bg-accent" aria-hidden />
+      <div className="min-h-screen bg-bg">
+        <div className="border-b border-fg/8 bg-surface">
+          <div className="mx-auto flex h-20 max-w-container items-center justify-between px-6 lg:px-12">
+            <Skeleton className="h-8 w-32" />
+            <Skeleton className="h-9 w-24 rounded-full" />
+          </div>
+        </div>
+        <div className="mx-auto max-w-container px-6 py-12 lg:px-12 lg:py-16">
+          <Skeleton className="h-8 w-64 max-w-full" />
+          <Skeleton className="mt-4 h-4 w-96 max-w-full" />
+          <div className="mt-10 grid grid-cols-1 gap-6 lg:grid-cols-2">
+            <Skeleton className="h-40 rounded-2xl" />
+            <Skeleton className="h-40 rounded-2xl" />
+          </div>
+        </div>
         <span className="sr-only">Checking your session…</span>
       </div>
     );

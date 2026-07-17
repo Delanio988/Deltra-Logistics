@@ -51,7 +51,7 @@ export default function AdminLoginPage() {
   };
 
   if (isLoading || user?.role === "admin") {
-    return <div className="min-h-screen bg-navy-950" />;
+    return <div className="min-h-screen bg-bg" />;
   }
 
   const fadeUp = (delay: number) => ({
@@ -61,12 +61,12 @@ export default function AdminLoginPage() {
   });
 
   return (
-    <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-navy-radial px-6 py-16 text-white">
+    <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-navy-radial px-6 py-16 text-fg">
       <div aria-hidden className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(255,101,56,0.3),transparent_45%)]" />
 
       <motion.div className="relative z-10 mb-10" {...fadeUp(0)}>
         <Link href="/" data-cursor-hover="Home">
-          <Wordmark className="text-lg" />
+          <Wordmark className="h-9" />
         </Link>
       </motion.div>
 

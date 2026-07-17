@@ -35,17 +35,17 @@ export default function RateCalculator({ className, title = "Shipping rate calcu
   const cost = hasValidWeight ? calculateShippingCost(parsedWeight, method) : 0;
 
   return (
-    <div className={cn("rounded-2xl border border-white/8 bg-navy-900 p-8 shadow-card", className)}>
+    <div className={cn("rounded-2xl border border-fg/8 bg-surface p-8 shadow-card", className)}>
       <span className="gold-label">Get a Quote</span>
-      <h3 className="mt-4 text-xl font-bold text-white">{title}</h3>
-      <p className="mt-2 text-sm text-white/60">
+      <h3 className="mt-4 text-xl font-bold text-fg">{title}</h3>
+      <p className="mt-2 text-sm text-fg/60">
         {CURRENCY}
         {RATE_PER_LB} per pound, Standard Air. Enter your package weight for an instant estimate.
       </p>
 
       <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
-          <label htmlFor={weightId} className="text-xs font-semibold uppercase tracking-widest text-white/50">
+          <label htmlFor={weightId} className="text-xs font-semibold uppercase tracking-widest text-fg/50">
             Weight (lb)
           </label>
           <input
@@ -57,21 +57,21 @@ export default function RateCalculator({ className, title = "Shipping rate calcu
             value={weight}
             onChange={(e) => setWeight(e.target.value)}
             placeholder="e.g. 5"
-            className="mt-2 w-full rounded-full border border-white/15 bg-white/5 px-5 py-3 text-sm text-white outline-none transition-colors focus:border-accent"
+            className="mt-2 w-full rounded-full border border-fg/15 bg-fg/5 px-5 py-3 text-sm text-fg outline-none transition-colors focus:border-accent"
           />
         </div>
         <div>
-          <label htmlFor={methodId} className="text-xs font-semibold uppercase tracking-widest text-white/50">
+          <label htmlFor={methodId} className="text-xs font-semibold uppercase tracking-widest text-fg/50">
             Shipping method
           </label>
           <select
             id={methodId}
             value={method}
             onChange={(e) => setMethod(e.target.value as ShippingMethod)}
-            className="mt-2 w-full rounded-full border border-white/15 bg-white/5 px-5 py-3 text-sm text-white outline-none transition-colors focus:border-accent"
+            className="mt-2 w-full rounded-full border border-fg/15 bg-fg/5 px-5 py-3 text-sm text-fg outline-none transition-colors focus:border-accent"
           >
             {SHIPPING_METHODS.map((m) => (
-              <option key={m} value={m} className="bg-navy-900 text-white">
+              <option key={m} value={m} className="bg-surface text-fg">
                 {m} (×{SHIPPING_METHOD_MULTIPLIERS[m]})
               </option>
             ))}
@@ -79,8 +79,8 @@ export default function RateCalculator({ className, title = "Shipping rate calcu
         </div>
       </div>
 
-      <div className="mt-6 rounded-xl border border-white/10 bg-white/5 p-6">
-        <p className="text-xs font-semibold uppercase tracking-widest text-white/50">Estimated cost</p>
+      <div className="mt-6 rounded-xl border border-fg/10 bg-fg/5 p-6">
+        <p className="text-xs font-semibold uppercase tracking-widest text-fg/50">Estimated cost</p>
         <AnimatePresence mode="wait">
           {hasValidWeight ? (
             <motion.p
@@ -107,7 +107,7 @@ export default function RateCalculator({ className, title = "Shipping rate calcu
           )}
         </AnimatePresence>
         {hasValidWeight && (
-          <p className="mt-2 text-xs text-white/40">
+          <p className="mt-2 text-xs text-fg/40">
             {chargeableWeight(parsedWeight)} lb chargeable × {CURRENCY}
             {RATE_PER_LB} × {SHIPPING_METHOD_MULTIPLIERS[method]}
           </p>

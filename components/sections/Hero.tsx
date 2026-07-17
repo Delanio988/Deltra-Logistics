@@ -5,10 +5,16 @@ import { motion, useScroll, useTransform } from "framer-motion";
 import SplitText from "@/components/ui/SplitText";
 import MagneticButton from "@/components/ui/MagneticButton";
 import { useReducedMotion } from "@/lib/useReducedMotion";
+import { useDataStore } from "@/lib/data-store";
+import { cn } from "@/lib/utils";
 
 export default function Hero() {
   const sectionRef = useRef<HTMLElement>(null);
   const prefersReducedMotion = useReducedMotion();
+  const { isSeasonalBannerVisible } = useDataStore();
+  // Header grows to fit the seasonal banner (see Header.tsx) — this extra
+  // clearance keeps the heading from rendering underneath the taller header.
+  const bannerVisible = isSeasonalBannerVisible("public");
 
   // Parallax: background drifts slower than scroll, content fades out faster,
   // so the hero feels like it recedes as you scroll past it.
@@ -24,7 +30,7 @@ export default function Hero() {
     <section
       ref={sectionRef}
       id="top"
-      className="relative flex min-h-[100svh] flex-col overflow-hidden bg-navy-950 text-white"
+      className="relative flex min-h-[100svh] flex-col overflow-hidden bg-bg text-fg"
     >
       {/* Background layer: animated gradient + parallax drift. TODO: swap for a
           slow-panning container-ship / globe video or image plate. */}
@@ -35,12 +41,15 @@ export default function Hero() {
       >
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(255,46,46,0.35),transparent_45%)]" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_75%,rgba(255,101,56,0.15),transparent_40%)]" />
-        <div className="absolute inset-0 opacity-40 [background:repeating-linear-gradient(115deg,transparent,transparent_2px,rgba(255,255,255,0.02)_2px,rgba(255,255,255,0.02)_3px)]" />
+        <div className="absolute inset-0 opacity-40 [background:repeating-linear-gradient(115deg,transparent,transparent_2px,rgb(var(--color-fg)/0.02)_2px,rgb(var(--color-fg)/0.02)_3px)]" />
       </motion.div>
 
       <motion.div
         style={{ y: contentY, opacity: contentOpacity }}
-        className="relative z-10 mx-auto flex w-full max-w-container flex-1 flex-col justify-center px-6 pt-[--header-height] lg:px-12"
+        className={cn(
+          "relative z-10 mx-auto flex w-full max-w-container flex-1 flex-col justify-center px-6 lg:px-12",
+          bannerVisible ? "pt-[calc(var(--header-height)+2.75rem)]" : "pt-[--header-height]"
+        )}
       >
         <motion.span
           initial={{ opacity: 0, y: 16 }}
@@ -55,14 +64,14 @@ export default function Hero() {
           as="h1"
           text="Moving the world, one shipment at a time"
           startDelay={0.25}
-          className="max-w-5xl text-display-xl font-extrabold text-white"
+          className="max-w-5xl text-display-xl font-extrabold text-fg"
         />
 
         <motion.p
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 1.1 }}
-          className="mt-8 max-w-xl text-lg text-white/70 lg:text-xl"
+          className="mt-8 max-w-xl text-lg text-fg/70 lg:text-xl"
         >
           Ocean, air, and ground freight engineered for reliability at scale.
           Deltra Logistics connects 180+ countries with one accountable partner.
@@ -80,7 +89,7 @@ export default function Hero() {
           <MagneticButton
             href="#tracking"
             cursorLabel="Track"
-            className="border border-white/25 text-white hover:border-accent hover:text-accent"
+            className="border border-fg/25 text-fg hover:border-accent hover:text-accent"
           >
             Track a Shipment
           </MagneticButton>
@@ -97,10 +106,10 @@ export default function Hero() {
           href="#stats"
           data-cursor-hover="Scroll"
           aria-label="Scroll to next section"
-          className="flex flex-col items-center gap-3 text-white/60 transition-colors hover:text-accent"
+          className="flex flex-col items-center gap-3 text-fg/60 transition-colors hover:text-accent"
         >
           <span className="text-[11px] font-medium uppercase tracking-widest2">Scroll</span>
-          <span className="relative h-12 w-[1px] overflow-hidden bg-white/20">
+          <span className="relative h-12 w-[1px] overflow-hidden bg-fg/20">
             <motion.span
               className="absolute inset-x-0 top-0 h-full bg-gold"
               animate={prefersReducedMotion ? undefined : { y: ["-100%", "100%"] }}

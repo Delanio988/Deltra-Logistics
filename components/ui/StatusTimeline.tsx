@@ -32,7 +32,7 @@ export default function StatusTimeline({ steps, currentStepIndex, className, var
             {!isLast && (
               <span
                 aria-hidden
-                className={cn("absolute left-[11px] top-6 h-full w-px", isDark ? "bg-white/10" : "bg-navy-950/10")}
+                className={cn("absolute left-[11px] top-6 h-full w-px", isDark ? "bg-fg/10" : "bg-navy-950/10")}
               >
                 <motion.span
                   className="block w-full bg-accent"
@@ -48,7 +48,7 @@ export default function StatusTimeline({ steps, currentStepIndex, className, var
               transition={{ duration: 0.4, delay: i * 0.15 }}
               className={cn(
                 "relative z-10 mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2",
-                isComplete ? "border-accent bg-accent" : isDark ? "border-white/15 bg-navy-900" : "border-navy-950/15 bg-white"
+                isComplete ? "border-accent bg-accent" : isDark ? "border-fg/15 bg-surface" : "border-navy-950/15 bg-white"
               )}
             >
               {isComplete && (
@@ -61,13 +61,13 @@ export default function StatusTimeline({ steps, currentStepIndex, className, var
               <p
                 className={cn(
                   "font-semibold",
-                  isComplete ? (isDark ? "text-white" : "text-navy-950") : isDark ? "text-white/40" : "text-navy-950/40"
+                  isComplete ? (isDark ? "text-fg" : "text-navy-950") : isDark ? "text-fg/40" : "text-navy-950/40"
                 )}
               >
                 {step.label}
               </p>
-              <p className={cn("mt-1 text-sm", isDark ? "text-white/50" : "text-navy-950/50")}>{step.description}</p>
-              <p className={cn("mt-1 text-xs", isDark ? "text-white/35" : "text-navy-950/35")}>{step.timestamp}</p>
+              <p className={cn("mt-1 text-sm", isDark ? "text-fg/50" : "text-navy-950/50")}>{step.description}</p>
+              <p className={cn("mt-1 text-xs", isDark ? "text-fg/35" : "text-navy-950/35")}>{step.timestamp}</p>
             </div>
           </li>
         );

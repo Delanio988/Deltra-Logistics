@@ -17,7 +17,7 @@ export default function Testimonials() {
   const testimonial = TESTIMONIALS[index];
 
   return (
-    <section className="bg-navy-950 py-28 text-white lg:py-36">
+    <section className="bg-bg py-28 text-fg lg:py-36">
       <div className="mx-auto max-w-container px-6 lg:px-12">
         <ScrollReveal className="mx-auto max-w-3xl text-center">
           <span className="gold-label justify-center">Client Voices</span>
@@ -42,11 +42,11 @@ export default function Testimonials() {
                 transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
                 className="mt-6"
               >
-                <p className="text-display-sm font-medium leading-snug text-white">
+                <p className="text-display-sm font-medium leading-snug text-fg">
                   &ldquo;{testimonial.quote}&rdquo;
                 </p>
-                <footer className="mt-8 text-sm text-white/60">
-                  <span className="font-semibold text-white">{testimonial.name}</span>
+                <footer className="mt-8 text-sm text-fg/60">
+                  <span className="font-semibold text-fg">{testimonial.name}</span>
                   {" — "}
                   {testimonial.title}
                 </footer>
@@ -60,7 +60,7 @@ export default function Testimonials() {
               onClick={() => goTo(index - 1)}
               data-cursor-hover="Prev"
               aria-label="Previous testimonial"
-              className="flex h-11 w-11 items-center justify-center rounded-full border border-white/20 transition-colors hover:border-accent hover:text-accent"
+              className="flex h-11 w-11 items-center justify-center rounded-full border border-fg/20 transition-colors hover:border-accent hover:text-accent"
             >
               <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2}>
                 <path d="M15 6l-6 6 6 6" strokeLinecap="round" strokeLinejoin="round" />
@@ -77,7 +77,7 @@ export default function Testimonials() {
                   aria-label={`Testimonial from ${t.name}`}
                   onClick={() => goTo(i)}
                   className={`h-1.5 rounded-full transition-all duration-300 ${
-                    i === index ? "w-8 bg-accent" : "w-1.5 bg-white/25"
+                    i === index ? "w-8 bg-accent" : "w-1.5 bg-fg/25"
                   }`}
                 />
               ))}
@@ -88,7 +88,7 @@ export default function Testimonials() {
               onClick={() => goTo(index + 1)}
               data-cursor-hover="Next"
               aria-label="Next testimonial"
-              className="flex h-11 w-11 items-center justify-center rounded-full border border-white/20 transition-colors hover:border-accent hover:text-accent"
+              className="flex h-11 w-11 items-center justify-center rounded-full border border-fg/20 transition-colors hover:border-accent hover:text-accent"
             >
               <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2}>
                 <path d="M9 6l6 6-6 6" strokeLinecap="round" strokeLinejoin="round" />

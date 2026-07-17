@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils";
 // then Delivered breaks out to green — the one deliberate exception to the
 // red/red-orange active-state system, for a clear, accessible terminal state.
 const STATUS_BADGE_STYLES: Record<Package["status"], string> = {
-  "Pre-Alerted": "border border-white/15 bg-white/5 text-white/60",
+  "Pre-Alerted": "border border-fg/15 bg-fg/5 text-fg/60",
   "Received at Warehouse": "border border-gold/40 bg-gold/10 text-gold",
   "In Transit": "border border-accent/30 bg-accent/10 text-accent",
   "Arrived at Local Branch": "border border-accent/40 bg-accent/20 text-accent",
@@ -32,30 +32,30 @@ export default function PackageCard({ pkg, isExpanded, onToggle }: PackageCardPr
   const panelId = `package-panel-${pkg.id}`;
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-white/8 bg-navy-900 shadow-card">
+    <div className="overflow-hidden rounded-2xl border border-fg/8 bg-surface shadow-card">
       <button
         type="button"
         onClick={onToggle}
         aria-expanded={isExpanded}
         aria-controls={panelId}
-        className="flex w-full flex-col gap-4 p-6 text-left transition-colors hover:bg-white/[0.03] sm:flex-row sm:items-center sm:justify-between"
+        className="flex w-full flex-col gap-4 p-6 text-left transition-colors hover:bg-fg/[0.03] sm:flex-row sm:items-center sm:justify-between"
       >
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-3">
-            <span className="font-mono text-sm font-semibold text-white">{pkg.trackingNumber}</span>
+            <span className="font-mono text-sm font-semibold text-fg">{pkg.trackingNumber}</span>
             <span className={cn("rounded-full px-3 py-1 text-xs font-semibold", STATUS_BADGE_STYLES[pkg.status])}>
               {pkg.status}
             </span>
           </div>
-          <p className="mt-2 text-sm text-white/70">
+          <p className="mt-2 text-sm text-fg/70">
             {pkg.merchant} — {pkg.description}
           </p>
-          <p className="mt-1 text-sm text-white/50">
+          <p className="mt-1 text-sm text-fg/50">
             {pkg.weightLb} lb · {formatCurrency(shippingCost)} · Received {pkg.dateReceived}
           </p>
 
           <div className="mt-4 max-w-xs">
-            <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/10">
+            <div className="h-1.5 w-full overflow-hidden rounded-full bg-fg/10">
               <motion.div
                 className="h-full rounded-full bg-accent"
                 initial={{ width: 0 }}
@@ -69,7 +69,7 @@ export default function PackageCard({ pkg, isExpanded, onToggle }: PackageCardPr
         <svg
           aria-hidden
           viewBox="0 0 24 24"
-          className={cn("h-5 w-5 shrink-0 text-white/40 transition-transform duration-300", isExpanded && "rotate-180")}
+          className={cn("h-5 w-5 shrink-0 text-fg/40 transition-transform duration-300", isExpanded && "rotate-180")}
           fill="none"
           stroke="currentColor"
           strokeWidth={2}
@@ -86,7 +86,7 @@ export default function PackageCard({ pkg, isExpanded, onToggle }: PackageCardPr
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-            className="overflow-hidden border-t border-white/8"
+            className="overflow-hidden border-t border-fg/8"
           >
             <div className="p-6">
               <StatusTimeline steps={buildPackageTimeline(pkg.status)} currentStepIndex={stepIndex} variant="dark" />

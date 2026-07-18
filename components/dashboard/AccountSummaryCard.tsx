@@ -3,6 +3,7 @@
 import { useAuth } from "@/lib/auth-context";
 import { BRANCHES } from "@/lib/dashboard-data";
 import { formatCurrency } from "@/lib/quote-config";
+import { CONTACT_PHONE_HREF } from "@/lib/siteConfig";
 
 export default function AccountSummaryCard({ walletBalance }: { walletBalance: number }) {
   const { user } = useAuth();
@@ -32,7 +33,7 @@ export default function AccountSummaryCard({ walletBalance }: { walletBalance: n
             <li key={branch.name} className="flex items-center justify-between gap-3 text-sm">
               <span className="text-fg/80">{branch.name}</span>
               <a
-                href={`tel:${branch.phone.replace(/[^\d+]/g, "")}`}
+                href={CONTACT_PHONE_HREF}
                 data-cursor-hover="Call"
                 className="shrink-0 text-fg/50 transition-colors hover:text-accent"
               >

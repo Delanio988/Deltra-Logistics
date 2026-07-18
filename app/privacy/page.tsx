@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Wordmark from "@/components/ui/Wordmark";
+import { CONTACT_EMAIL, CONTACT_EMAIL_HREF } from "@/lib/siteConfig";
 
 export const metadata: Metadata = {
   title: "Privacy Policy | Deltra Logistics",
@@ -119,8 +120,8 @@ export default function PrivacyPage() {
             <h2 className="text-base font-bold text-fg">10. Contact</h2>
             <p className="mt-2">
               Questions or requests regarding this Policy can be sent to{" "}
-              <a href="mailto:quotes@deltralogistics.com" className="text-accent hover:text-accent-dark">
-                quotes@deltralogistics.com
+              <a href={CONTACT_EMAIL_HREF} className="text-accent hover:text-accent-dark">
+                {CONTACT_EMAIL}
               </a>
               .
             </p>

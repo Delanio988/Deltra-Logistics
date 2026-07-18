@@ -1,4 +1,5 @@
 import type { TrackingStatus } from "@/lib/data";
+import { CONTACT_PHONE } from "@/lib/siteConfig";
 
 export type PackageStatus =
   | "Pre-Alerted"
@@ -67,10 +68,11 @@ export type Branch = {
   phone: string;
 };
 
-// TODO: mock branches — replace with the customer's real assigned branch from the API.
+// Same contact number for both branches for now — update lib/siteConfig.ts if
+// each branch gets its own direct line.
 export const BRANCHES: Branch[] = [
-  { name: "Montego Bay — Fairview", phone: "+1 (876) 555-0110" },
-  { name: "Montego Bay — Half Moon", phone: "+1 (876) 555-0142" },
+  { name: "Montego Bay — Fairview", phone: CONTACT_PHONE },
+  { name: "Montego Bay — Half Moon", phone: CONTACT_PHONE },
 ];
 
 export type OverseasAddress = {

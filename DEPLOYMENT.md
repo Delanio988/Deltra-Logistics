@@ -121,9 +121,9 @@ Once DNS is live, walk through this on the real domain (not localhost):
 - [ ] Confirmed there's no way to reach `/admin` without an admin-role account (already enforced by middleware + RLS, but worth a manual check on the live domain)
 
 **Data & business details**
-- [ ] `lib/dashboard-data.ts`'s `BRANCHES` (branch names/phone numbers) updated with real values — currently placeholder Jamaican numbers
+- [ ] `lib/dashboard-data.ts`'s `BRANCHES` names updated if each branch has its own direct line (both currently share the one number in `lib/siteConfig.ts`)
 - [ ] `lib/dashboard-data.ts`'s `WAREHOUSE` address updated to your real US receiving address
-- [ ] Footer contact email (`quotes@deltralogistics.com`) confirmed as a real, monitored inbox
+- [ ] `lib/siteConfig.ts`'s `CONTACT_EMAIL`/`CONTACT_PHONE` confirmed as real, monitored contact points
 - [ ] `app/terms/page.tsx` and `app/privacy/page.tsx` — the bracketed placeholders
       (`[Company legal name]`, `[Governing law jurisdiction]`, `[retention period]`,
       `[liability cap]`) filled in, and both pages reviewed by a lawyer before relying

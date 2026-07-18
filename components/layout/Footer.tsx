@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { NAV_LINKS, SERVICES } from "@/lib/data";
+import { CONTACT_EMAIL, CONTACT_EMAIL_HREF, CONTACT_PHONE, CONTACT_PHONE_HREF, WHATSAPP_URL } from "@/lib/siteConfig";
 import Wordmark from "@/components/ui/Wordmark";
 
 export default function Footer() {
@@ -45,8 +46,24 @@ export default function Footer() {
             <h3 className="text-xs font-semibold uppercase tracking-widest text-fg/50">Contact</h3>
             <ul className="mt-5 space-y-3 text-sm text-fg/70">
               <li>
-                <a href="mailto:quotes@deltralogistics.com" className="transition-colors hover:text-accent">
-                  quotes@deltralogistics.com
+                <a href={CONTACT_EMAIL_HREF} className="transition-colors hover:text-accent">
+                  {CONTACT_EMAIL}
+                </a>
+              </li>
+              <li>
+                <a href={CONTACT_PHONE_HREF} data-cursor-hover="Call" className="transition-colors hover:text-accent">
+                  {CONTACT_PHONE}
+                </a>
+              </li>
+              <li>
+                <a
+                  href={WHATSAPP_URL}
+                  target="_blank"
+                  rel="noreferrer"
+                  data-cursor-hover="WhatsApp"
+                  className="transition-colors hover:text-accent"
+                >
+                  WhatsApp us
                 </a>
               </li>
             </ul>

@@ -295,7 +295,7 @@ export default function SignupPage() {
                   value={phoneNumber}
                   onChange={(e) => setPhoneNumber(e.target.value)}
                   onBlur={() => markTouched("phone")}
-                  placeholder="876 555 0110"
+                  placeholder="Enter your phone number"
                   className={`${inputBase} flex-1 px-5`}
                 />
               </div>

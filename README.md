@@ -327,9 +327,9 @@ Everything customer/data-facing now runs on the real Supabase backend — see
 [Backend](#backend). What's left is business-specific detail that only you
 can fill in (no fake data has been left in its place):
 
-- **Branches & warehouse address** — `lib/dashboard-data.ts`'s `BRANCHES`
-  (names/phone numbers) and `WAREHOUSE` (US receiving address) are still
-  placeholder values shown to real customers — update with your real ones.
+- **Warehouse address** — `lib/dashboard-data.ts`'s `WAREHOUSE` (US receiving
+  address) is still a placeholder value shown to real customers — update
+  with your real one. Real contact email/phone live in `lib/siteConfig.ts`.
 - **Legal pages** — `app/terms/page.tsx` and `app/privacy/page.tsx` are
   drafted, substantive policies (not stubs), but contain bracketed
   placeholders (`[Company legal name]`, `[Governing law jurisdiction]`, etc.)

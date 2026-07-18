@@ -1,29 +1,36 @@
-# Deltra Logistics — Marketing Site + Freight-Forwarding Portal
+# Deltra Logistics — Freight-Forwarding Portal
 
-A premium, "Awwwards"-style marketing site for **Deltra Logistics** — a placeholder
-brand name for a global shipping & logistics / freight-forwarding company. Swap
-the name, logo, copy, and imagery for your real brand whenever you're ready
-(see [Placeholder content](#placeholder-content--todos) below).
+A US→Jamaica package-forwarding platform: customers shop at US retailers,
+ship to their personal Deltra address, and track packages through to pickup
+at a Jamaican branch. Includes a marketing site, a customer portal
+(`/login` → `/dashboard`), and a staff admin area (`/admin/login` → `/admin`).
 
-Includes a mock-authenticated **customer portal** (`/login` → `/dashboard`) —
-account summary, package tracking, a shipping-rate calculator, and an overseas
-"ship to" address — plus a separate **admin area** (`/admin/login` → `/admin`)
-where staff add packages and notify customers. See
-[Customer portal (demo)](#customer-portal-demo) and
-[Admin area (demo)](#admin-area-demo) below.
-
-Built with Next.js 15 (App Router), TypeScript, Tailwind CSS, Framer Motion,
-GSAP/ScrollTrigger, and Lenis smooth scrolling.
+Backed by **Supabase** (Postgres + Auth + Storage, RLS-enforced), with real
+payments (Fygaro hosted checkout) and notifications (Resend email, Twilio
+SMS) — see [Backend](#backend) below. Built with Next.js 15 (App Router),
+TypeScript, Tailwind CSS, Framer Motion, GSAP/ScrollTrigger, and Lenis smooth
+scrolling.
 
 ## Getting started
 
-```bash
-npm install
-npm run dev
-```
+1. Copy `.env.example` to `.env.local` and fill in at least the Supabase
+   variables (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`,
+   `SUPABASE_SERVICE_ROLE_KEY`) — the app needs a real Supabase project to
+   run against, even locally. Everything else in `.env.example` is optional
+   and no-ops safely when left blank (see [Backend](#backend)).
+2. Run the migrations under `supabase/migrations` (or via the Supabase MCP/
+   CLI) against your project if you haven't already.
+3. Seed your first admin account:
+   ```bash
+   node --env-file=.env.local scripts/seed-admin.mjs
+   ```
+   (requires `INITIAL_ADMIN_EMAIL`/`INITIAL_ADMIN_PASSWORD` set in `.env.local`)
+4. ```bash
+   npm install
+   npm run dev
+   ```
 
-Open [http://localhost:3000](http://localhost:3000). That's it — no environment
-variables or external services are required to run the site locally.
+Open [http://localhost:3000](http://localhost:3000).
 
 Other scripts:
 
@@ -33,11 +40,19 @@ npm run start   # serve the production build
 npm run lint    # ESLint
 ```
 
+See [DEPLOYMENT.md](DEPLOYMENT.md) for deploying to Vercel + pointing a
+Hostinger (or any registrar's) domain at it, plus a full pre-launch checklist.
+
 ## Tech stack
 
 | Concern | Library |
 | --- | --- |
 | Framework | Next.js 15 (App Router) + TypeScript |
+| Backend | Supabase (Postgres, Auth, Storage), RLS-enforced |
+| Payments | Fygaro hosted checkout (webhook-confirmed) |
+| Notifications | Resend (email), Twilio (SMS) |
+| Rate limiting | Upstash Redis |
+| Bot protection | Cloudflare Turnstile |
 | Styling | Tailwind CSS 3 (custom theme, no default palette) |
 | Component/page animation | Framer Motion |
 | Scroll-driven reveals & pinned sections | GSAP + ScrollTrigger |
@@ -101,18 +116,11 @@ uses `role="admin" redirectTo="/admin/login"`.
     inline status dropdown per row.
 
 Adding a package or changing its status **automatically** pushes a
-notification into that customer's Messages (see `lib/data-store.tsx`) and
-shows a success toast — the admin never has to remember to notify separately.
-A `// TODO: real email/SMS notification would be sent here` comment marks
-where that would plug into a real provider.
-
-**Important limitation (by design, for this demo):** packages and messages
-live in `lib/data-store.tsx`, a React Context backed by `localStorage`. That
-means admin changes show up in the customer dashboard *within the same
-browser*, but there's no real backend — a real admin and a real customer on
-different devices won't see each other's changes until this is swapped for
-an actual database. Every mutation point is marked
-`// TODO: replace with a real backend + database call`.
+notification into that customer's Messages, and shows a success toast — the
+admin never has to remember to notify separately. See
+[Backend](#backend) below for how this is wired end-to-end: every mutation
+goes through a Server Action, is enforced by RLS, and (when Resend/Twilio are
+configured) also sends a real email/SMS via `lib/notify.ts`.
 
 ## Shipping rate calculator / Get a Quote
 
@@ -131,61 +139,96 @@ Every displayed shipping cost (the calculator, admin's add-package form, each
 package card) calls `calculateShippingCost()` from this one file, so changing
 the rate anywhere changes it everywhere.
 
+## Backend
+
+- **Auth** — `lib/auth-context.tsx` wraps real Supabase Auth (email/password,
+  verification, password reset). Session lives in an httpOnly cookie via
+  `@supabase/ssr`, refreshed by `middleware.ts` on every request, which also
+  enforces `/dashboard` (customer) and `/admin` (admin) route protection
+  server-side before a protected page ever renders.
+- **Data** — Server Components read directly from Supabase (`lib/packages.ts`,
+  `lib/invoices-data.ts`, `lib/billing-data.ts`, `lib/messages-data.ts`);
+  mutations go through Server Actions in `lib/actions/*.ts`, each zod-validated
+  and rate-limited (`lib/rate-limit.ts`, via Upstash Redis). RLS is the actual
+  enforcement boundary — every policy is defined in the migrations under
+  `supabase/migrations/`, which is the source of truth for the schema.
+- **Money-touching writes** (wallet payments, admin cash confirmation, wallet
+  top-ups/refunds, Fygaro webhook confirmation) go through `SECURITY DEFINER`
+  Postgres RPCs rather than direct table writes, so locking/idempotency lives
+  in the database next to the data it protects.
+- **File storage** — invoice uploads go straight from the browser to a private
+  Supabase Storage bucket (RLS-scoped by path), with signed URLs generated
+  server-side for previews.
+- **Payments** — `lib/payments/fygaro.ts` builds Fygaro hosted-checkout
+  redirect URLs and verifies webhook signatures;
+  `app/api/webhooks/fygaro/route.ts` receives payment confirmations. No-ops to
+  a "coming soon" UI state until `FYGARO_PAYMENT_BUTTON_URL`/
+  `FYGARO_WEBHOOK_SECRET` are configured.
+- **Notifications** — `lib/notify.ts` wraps every in-app message with a real
+  email (Resend, `lib/notifications/email.ts`) and SMS (Twilio,
+  `lib/notifications/sms.ts`) send, each no-op-ing safely when unconfigured.
+
+See [DEPLOYMENT.md](DEPLOYMENT.md) for environment variables and the full
+deployment/pre-launch checklist.
+
 ## Folder structure
 
 ```
 app/
-  layout.tsx              Root layout: Poppins font, AuthProvider, DataStoreProvider,
+  layout.tsx              Root layout: Poppins font, AuthProvider, SeasonalProvider,
                           SmoothScrollProvider, CustomCursor, Noise — global across all routes
   (marketing)/
     layout.tsx             Header + <main> + Footer — marketing chrome
     page.tsx               Assembles all home page sections in order
     quote/page.tsx          Public "Get a Quote" page (RateCalculator)
-  login/page.tsx           Customer login (no marketing chrome)
-  dashboard/page.tsx        Protected customer portal (no marketing chrome)
-  admin/
-    login/page.tsx          Admin login (no marketing chrome)
-    page.tsx                Protected admin dashboard (no marketing chrome)
+  login/, signup/, reset-password/, admin/login/   Auth pages (no marketing chrome)
+  dashboard/               Protected customer portal (page.tsx, invoices/, billing/)
+  admin/                   Protected admin area (page.tsx, invoices/, billing/, theme/)
+  auth/callback/route.ts   Supabase email-link callback (verification, password reset)
+  api/webhooks/fygaro/route.ts   Fygaro payment-confirmation webhook
   globals.css             Tailwind directives, CSS variables, global utilities
 components/
   layout/
     Header.tsx            Sticky nav (mixes #anchor scroll-links and real /routes),
                           transparent→solid on scroll, mobile menu
-    Footer.tsx             Multi-column footer, newsletter form, oversized wordmark
+    Footer.tsx             Multi-column footer, oversized wordmark
     SmoothScrollProvider.tsx  Lenis + GSAP ScrollTrigger wiring (see comments)
   auth/
     RequireAuth.tsx        Client guard: optional `role`, redirects appropriately
-  dashboard/
-    DashboardHeader.tsx    Simplified customer header: logo, name/avatar, logout
-    AccountSummaryCard.tsx, AccountActionsCard.tsx, PackageSummaryCard.tsx,
-    OverseasAddressCard.tsx, ActionRow.tsx    The 4 portal summary cards
-    PackageCard.tsx        Shipment row: badge, progress bar, expandable timeline
-    RateCalculator.tsx     Shared rate calculator (dashboard + /quote)
-  admin/
-    AdminHeader.tsx, AddPackageForm.tsx, PackagesTable.tsx
+  dashboard/, admin/        Portal cards/tables/forms + their *Content.tsx client
+                           wrappers (data comes in as props from a Server Component page)
   ui/                   Small reusable interaction primitives
     Wordmark.tsx        Single source of truth for the brand name/logo text
     CustomCursor.tsx    Grows + labels on [data-cursor-hover]; see Cursor behavior below
     MagneticButton.tsx  Cursor-following button, handles anchor smooth-scroll + /routes
     ScrollReveal.tsx    Generic fade/slide-in-on-scroll wrapper (supports stagger)
     SplitText.tsx       Word-by-word masked reveal for the hero headline
-    Counter.tsx         Count-up-on-scroll-into-view number
-    Marquee.tsx         Infinite horizontal marquee (client logos / terms)
+    Marquee.tsx         Infinite horizontal marquee (used by FloatingRetailers)
     ServiceIcon.tsx     Inline line-art icon set for the Services grid
     StatusTimeline.tsx  Shared step timeline (light variant for TrackShipment,
                         dark variant for the dashboard's dark cards)
-    Toast.tsx           Auto-dismissing confirmation banner (dashboard stubs + admin)
+    Toast.tsx           Auto-dismissing confirmation banner
     Noise.tsx           Tasteful fixed film-grain overlay
   sections/             One component per home-page section (Hero, Services, ...)
 lib/
-  data.ts               Marketing page placeholder copy/content
-  dashboard-data.ts      Package/status/branch/customer/address types + mock seed data
-  data-store.tsx         Shared mock "database" (packages + messages) — see Admin area above
+  supabase/             client.ts (browser), server.ts (Server Components/Actions),
+                        service-role.ts (webhooks only), middleware.ts (session refresh + route guard)
+  actions/              Server Actions — packages.ts, invoices.ts, billing.ts, settings.ts,
+                        messages.ts, auth-helpers.ts (shared requireAdmin())
+  payments/fygaro.ts     Hosted-checkout URL builder + webhook signature verification
+  notifications/         email.ts (Resend), sms.ts (Twilio)
+  notify.ts              Wraps an in-app message with a real email/SMS send
+  packages.ts, invoices-data.ts, billing-data.ts, messages-data.ts   Server Component data reads
+  database.types.ts      Generated Supabase types — regenerate after any schema change
+  data.ts               Marketing page copy/content
+  dashboard-data.ts      Package/status/branch/address types (+ Branch/Warehouse config)
   quote-config.ts        Single-source rate/currency/method config — see Rate calculator above
-  auth-context.tsx      Mock AuthProvider / useAuth, role-aware (see Customer portal above)
+  auth-context.tsx      Real Supabase AuthProvider / useAuth, role-aware
+  rate-limit.ts          Upstash-backed sliding-window rate limiter for Server Actions
   utils.ts              cn() className helper
   useReducedMotion.ts   Reactive prefers-reduced-motion hook
-public/images/          Placeholder SVG artwork (see TODOs below)
+supabase/migrations/    Applied schema history — see Backend above
+scripts/seed-admin.mjs  One-off first-admin creation (service-role key, run manually)
 ```
 
 ## Design tokens
@@ -225,8 +268,8 @@ between mobile and desktop without breakpoint-specific overrides.
 - **Scroll reveals** — `components/ui/ScrollReveal.tsx`. Pass an `index` prop
   on sibling items to get an automatic stagger.
 - **Split-text hero headline** — `components/ui/SplitText.tsx`.
-- **Count-up stats** — `components/ui/Counter.tsx`, used in `StatsBar.tsx`.
-- **Infinite marquee** — `components/ui/Marquee.tsx`, used in `ClientMarquee.tsx`.
+- **Infinite marquee** — `components/ui/Marquee.tsx`, used by `FloatingRetailers.tsx`
+  for the "shop these US retailers" logo strip.
 - **Parallax hero** — `components/sections/Hero.tsx` via Framer Motion's
   `useScroll`/`useTransform`.
 - **Pinned horizontal timeline** — `components/sections/Process.tsx`. Desktop
@@ -278,31 +321,24 @@ cursor in both cases.
   everything is keyboard-operable with a visible focus state.
 - All images go through `next/image` with descriptive `alt` text.
 
-## Placeholder content & TODOs
+## Remaining placeholder content
 
-Everything here is realistic placeholder copy for a fictional brand — swap it
-out before shipping:
+Everything customer/data-facing now runs on the real Supabase backend — see
+[Backend](#backend). What's left is business-specific detail that only you
+can fill in (no fake data has been left in its place):
 
-- **Brand name/logo** — centralized in `components/ui/Wordmark.tsx`.
-- **All marketing copy, stats, service descriptions, testimonials, process
-  steps** — centralized in `lib/data.ts`.
-- **Tracking widget** — `components/sections/TrackShipment.tsx` uses mock
-  client-side data (`lib/data.ts` → `TRACKING_DATA`); wire up to a real
-  tracking API when available.
-- **Dashboard packages, branches, customers, overseas address** —
-  `lib/dashboard-data.ts` (static seed/shape) and `lib/data-store.tsx` (live
-  mutable state); swap for real API responses — types are already in place.
+- **Branches & warehouse address** — `lib/dashboard-data.ts`'s `BRANCHES`
+  (names/phone numbers) and `WAREHOUSE` (US receiving address) are still
+  placeholder values shown to real customers — update with your real ones.
+- **Legal pages** — `app/terms/page.tsx` and `app/privacy/page.tsx` are
+  drafted, substantive policies (not stubs), but contain bracketed
+  placeholders (`[Company legal name]`, `[Governing law jurisdiction]`, etc.)
+  and should be reviewed by a lawyer before you rely on them.
 - **Shipping rate** — `lib/quote-config.ts`; update `RATE_PER_LB`, `CURRENCY`,
   or the method multipliers in this one file.
-- **Auth & roles** — `lib/auth-context.tsx`; see
-  [Customer portal (demo)](#customer-portal-demo) and
-  [Admin area (demo)](#admin-area-demo).
-- **Newsletter form** — submit handler currently just updates local state
-  (`Footer.tsx`); no data is sent anywhere. Wire up a real email provider/CRM
-  before launch.
-- **Contact details** — placeholder email/phone in `Footer.tsx`; HQ address is
-  left as an explicit `TODO`.
-- **Social links** — point to placeholder URLs in `Footer.tsx`.
+- **Fygaro/Resend/Twilio/Turnstile credentials** — see
+  [DEPLOYMENT.md](DEPLOYMENT.md); each feature no-ops safely until its real
+  keys are set.
 
 ## Notes on Tailwind version
 

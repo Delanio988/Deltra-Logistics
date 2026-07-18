@@ -1,26 +1,40 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
-import { useDataStore } from "@/lib/data-store";
-import { CUSTOMERS, PACKAGE_STATUSES, type PackageStatus } from "@/lib/dashboard-data";
+import { useRouter } from "next/navigation";
+import { PACKAGE_STATUSES, type PackageStatus } from "@/lib/dashboard-data";
 import { calculateShippingCost, formatCurrency } from "@/lib/quote-config";
-import { getInvoiceForPackage } from "@/lib/invoices";
+import { getInvoiceForPackage, type Invoice } from "@/lib/invoices";
+import { updatePackageStatus, setPackageInvoiceRequired } from "@/lib/actions/packages";
+import type { PackageWithCustomer } from "@/lib/packages";
 import InvoiceStatusBadge from "@/components/ui/InvoiceStatusBadge";
+import Toast from "@/components/ui/Toast";
 
 type PackagesTableProps = {
-  onStatusChange: (message: string) => void;
+  packages: PackageWithCustomer[];
+  invoices: Invoice[];
 };
 
 /** All packages across all customers, with an inline status control per row. */
-export default function PackagesTable({ onStatusChange }: PackagesTableProps) {
-  const { packages, invoices, updatePackageStatus, setPackageInvoiceRequired } = useDataStore();
+export default function PackagesTable({ packages, invoices }: PackagesTableProps) {
+  const router = useRouter();
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  const customerName = (accountCode: string) =>
-    CUSTOMERS.find((c) => c.accountCode === accountCode)?.name ?? accountCode;
+  const handleStatusChange = async (packageId: string, trackingNumber: string, status: PackageStatus) => {
+    const result = await updatePackageStatus({ packageId, status });
+    if (!result.success) {
+      setToastMessage(result.error);
+      return;
+    }
+    setToastMessage(`${trackingNumber} updated to "${status}".`);
+    router.refresh();
+  };
 
-  const handleStatusChange = (packageId: string, trackingNumber: string, status: PackageStatus) => {
-    updatePackageStatus(packageId, status);
-    onStatusChange(`${trackingNumber} updated to "${status}".`);
+  const handleInvoiceRequiredChange = async (packageId: string, required: boolean) => {
+    const result = await setPackageInvoiceRequired({ packageId, required });
+    if (!result.success) setToastMessage(result.error);
+    else router.refresh();
   };
 
   if (packages.length === 0) {
@@ -65,7 +79,7 @@ export default function PackagesTable({ onStatusChange }: PackagesTableProps) {
             return (
               <tr key={pkg.id} className="border-b border-fg/8 last:border-0">
                 <td className="px-6 py-4 font-mono text-fg">{pkg.trackingNumber}</td>
-                <td className="px-6 py-4 text-fg/70">{customerName(pkg.accountCode)}</td>
+                <td className="px-6 py-4 text-fg/70">{pkg.customerName}</td>
                 <td className="px-6 py-4 text-fg/70">{pkg.merchant}</td>
                 <td className="px-6 py-4 text-fg/70">{pkg.weightLb} lb</td>
                 <td className="px-6 py-4 text-fg/70">{formatCurrency(calculateShippingCost(pkg.weightLb))}</td>
@@ -102,7 +116,7 @@ export default function PackagesTable({ onStatusChange }: PackagesTableProps) {
                       </span>
                       <button
                         type="button"
-                        onClick={() => setPackageInvoiceRequired(pkg.id, false)}
+                        onClick={() => handleInvoiceRequiredChange(pkg.id, false)}
                         data-cursor-hover="Unflag"
                         className="text-xs font-medium text-fg/40 underline transition-colors hover:text-accent"
                       >
@@ -112,7 +126,7 @@ export default function PackagesTable({ onStatusChange }: PackagesTableProps) {
                   ) : (
                     <button
                       type="button"
-                      onClick={() => setPackageInvoiceRequired(pkg.id, true)}
+                      onClick={() => handleInvoiceRequiredChange(pkg.id, true)}
                       data-cursor-hover="Require"
                       className="text-xs font-medium text-fg/50 underline transition-colors hover:text-accent"
                     >
@@ -125,6 +139,8 @@ export default function PackagesTable({ onStatusChange }: PackagesTableProps) {
           })}
         </tbody>
       </table>
+
+      <Toast message={toastMessage} onDismiss={() => setToastMessage(null)} />
     </div>
   );
 }

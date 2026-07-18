@@ -1,7 +1,3 @@
-// Invoice types, seed data, and pure helpers. Live/mutable invoice state
-// lives in lib/data-store.tsx (seeded from INITIAL_INVOICES below) — this
-// file only holds shape/types/seed content, same split as lib/dashboard-data.ts.
-
 import type { Package } from "@/lib/dashboard-data";
 
 export type InvoiceStatus = "pending" | "approved" | "rejected";
@@ -11,9 +7,11 @@ export type InvoiceFile = {
   name: string;
   size: number;
   type: string;
-  /** Object URL for this browser session only. Missing after a reload (or
-   *  for the seed/demo entries below, which were never really uploaded) —
-   *  the UI shows a "preview unavailable" note rather than a broken image. */
+  /** Real Supabase Storage object path — absent only for pre-migration seed
+   *  rows that were never really uploaded anywhere. */
+  storagePath?: string;
+  /** A local blob preview (mid-upload) or a server-generated signed URL
+   *  (already-saved files). Absent means "preview unavailable" in the UI. */
   url?: string;
   uploadedAt?: string;
 };
@@ -51,63 +49,6 @@ export type Invoice = {
 
 export const INVOICE_CURRENCIES = ["USD", "JMD", "GBP", "CAD"] as const;
 export type InvoiceCurrency = (typeof INVOICE_CURRENCIES)[number];
-
-// Seed data for lib/data-store.tsx — demonstrates every review state without
-// requiring manual setup. See lib/dashboard-data.ts for the matching
-// invoiceRequired flags on pkg-1/pkg-2/pkg-3/pkg-5.
-export const INITIAL_INVOICES: Invoice[] = [
-  {
-    id: "inv-1",
-    packageId: "pkg-1",
-    accountCode: "DLT1789-A",
-    files: [
-      { id: "inv-1-file-1", name: "amazon-receipt.pdf", size: 214_000, type: "application/pdf", uploadedAt: "Jul 6, 2026" },
-    ],
-    merchant: "Amazon",
-    value: 142.5,
-    currency: "USD",
-    status: "pending",
-    submittedAt: "Jul 6, 2026",
-    statusHistory: [{ status: "pending", at: "Jul 6, 2026", note: "Submitted" }],
-  },
-  {
-    id: "inv-2",
-    packageId: "pkg-3",
-    accountCode: "DLT1789-A",
-    files: [
-      { id: "inv-2-file-1", name: "shein-order.jpg", size: 892_000, type: "image/jpeg", uploadedAt: "Jun 30, 2026" },
-    ],
-    merchant: "Shein",
-    value: 38.2,
-    currency: "USD",
-    status: "approved",
-    submittedAt: "Jun 30, 2026",
-    reviewedAt: "Jul 1, 2026",
-    statusHistory: [
-      { status: "pending", at: "Jun 30, 2026", note: "Submitted" },
-      { status: "approved", at: "Jul 1, 2026", note: "Approved" },
-    ],
-  },
-  {
-    id: "inv-3",
-    packageId: "pkg-5",
-    accountCode: "DLT1789-A",
-    files: [
-      { id: "inv-3-file-1", name: "wayfair-invoice.png", size: 1_240_000, type: "image/png", uploadedAt: "Jul 8, 2026" },
-    ],
-    merchant: "Wayfair",
-    value: 76,
-    currency: "USD",
-    status: "rejected",
-    rejectionReason: "Image is blurry — the total amount isn't legible. Please re-upload a clearer photo.",
-    submittedAt: "Jul 8, 2026",
-    reviewedAt: "Jul 9, 2026",
-    statusHistory: [
-      { status: "pending", at: "Jul 8, 2026", note: "Submitted" },
-      { status: "rejected", at: "Jul 9, 2026", note: "Image is blurry — the total amount isn't legible. Please re-upload a clearer photo." },
-    ],
-  },
-];
 
 export function getInvoiceForPackage(invoices: Invoice[], packageId: string): Invoice | undefined {
   return invoices.find((inv) => inv.packageId === packageId);

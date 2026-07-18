@@ -1,13 +1,15 @@
 "use client";
 
 import { useId, useState, type FormEvent } from "react";
-import { PACKAGE_STATUSES, type PackageStatus } from "@/lib/dashboard-data";
+import { useRouter } from "next/navigation";
+import { PACKAGE_STATUSES, type Customer, type PackageStatus } from "@/lib/dashboard-data";
 import { calculateShippingCost, formatCurrency } from "@/lib/quote-config";
-import { useDataStore } from "@/lib/data-store";
+import { addPackage } from "@/lib/actions/packages";
 import MagneticButton from "@/components/ui/MagneticButton";
+import Toast from "@/components/ui/Toast";
 
 type AddPackageFormProps = {
-  onSuccess: (message: string) => void;
+  customers: Customer[];
 };
 
 const DEFAULT_STATUS: PackageStatus = "Received at Warehouse";
@@ -21,8 +23,8 @@ function formatDate(isoDate: string): string {
   });
 }
 
-export default function AddPackageForm({ onSuccess }: AddPackageFormProps) {
-  const { customers, addPackage } = useDataStore();
+export default function AddPackageForm({ customers }: AddPackageFormProps) {
+  const router = useRouter();
   const accountId = useId();
   const trackingId = useId();
   const merchantId = useId();
@@ -30,8 +32,9 @@ export default function AddPackageForm({ onSuccess }: AddPackageFormProps) {
   const weightId = useId();
   const dateId = useId();
   const statusId = useId();
+  const invoiceRequiredId = useId();
 
-  const [accountCode, setAccountCode] = useState(customers[0].accountCode);
+  const [accountCode, setAccountCode] = useState(customers[0]?.accountCode ?? "");
   const [trackingNumber, setTrackingNumber] = useState("");
   const [merchant, setMerchant] = useState("");
   const [description, setDescription] = useState("");
@@ -39,29 +42,45 @@ export default function AddPackageForm({ onSuccess }: AddPackageFormProps) {
   const [dateReceived, setDateReceived] = useState("");
   const [status, setStatus] = useState<PackageStatus>(DEFAULT_STATUS);
   const [invoiceRequired, setInvoiceRequired] = useState(false);
-  const invoiceRequiredId = useId();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const parsedWeight = parseFloat(weight);
   const hasValidWeight = Number.isFinite(parsedWeight) && parsedWeight > 0;
   const estimatedCost = hasValidWeight ? calculateShippingCost(parsedWeight) : 0;
 
-  const handleSubmit = (e: FormEvent) => {
+  if (customers.length === 0) {
+    return (
+      <div className="rounded-2xl border border-fg/8 bg-surface p-8 text-center text-sm text-fg/50 shadow-card">
+        No customers yet — packages can be added once at least one customer has signed up.
+      </div>
+    );
+  }
+
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (!hasValidWeight || !trackingNumber.trim() || !merchant.trim() || !description.trim() || !dateReceived) return;
 
-    addPackage({
+    setIsSubmitting(true);
+    const result = await addPackage({
       accountCode,
       trackingNumber: trackingNumber.trim(),
       merchant: merchant.trim(),
       description: description.trim(),
       weightLb: parsedWeight,
-      dateReceived: formatDate(dateReceived),
+      dateReceived,
       status,
       invoiceRequired,
     });
+    setIsSubmitting(false);
+
+    if (!result.success) {
+      setToastMessage(result.error);
+      return;
+    }
 
     const customer = customers.find((c) => c.accountCode === accountCode);
-    onSuccess(`Package ${trackingNumber.trim()} added for ${customer?.name ?? accountCode}.`);
+    setToastMessage(`Package ${trackingNumber.trim()} added for ${customer?.name ?? accountCode}.`);
 
     setTrackingNumber("");
     setMerchant("");
@@ -70,6 +89,7 @@ export default function AddPackageForm({ onSuccess }: AddPackageFormProps) {
     setDateReceived("");
     setStatus(DEFAULT_STATUS);
     setInvoiceRequired(false);
+    router.refresh();
   };
 
   return (
@@ -169,6 +189,7 @@ export default function AddPackageForm({ onSuccess }: AddPackageFormProps) {
             onChange={(e) => setDateReceived(e.target.value)}
             className="mt-2 w-full rounded-full border border-fg/15 bg-fg/5 px-5 py-3 text-sm text-fg outline-none transition-colors focus:border-accent [color-scheme:light] dark:[color-scheme:dark]"
           />
+          {dateReceived && <p className="mt-1 text-xs text-fg/35">{formatDate(dateReceived)}</p>}
         </div>
 
         <div className="sm:col-span-2">
@@ -211,11 +232,14 @@ export default function AddPackageForm({ onSuccess }: AddPackageFormProps) {
 
       <MagneticButton
         type="submit"
+        disabled={isSubmitting}
         cursorLabel="Add"
-        className="mt-6 w-full justify-center bg-accent text-navy-950 shadow-accent hover:bg-accent-dark hover:text-white"
+        className="mt-6 w-full justify-center bg-accent text-navy-950 shadow-accent hover:bg-accent-dark hover:text-white disabled:opacity-60"
       >
-        Add package
+        {isSubmitting ? "Adding…" : "Add package"}
       </MagneticButton>
+
+      <Toast message={toastMessage} onDismiss={() => setToastMessage(null)} />
     </form>
   );
 }

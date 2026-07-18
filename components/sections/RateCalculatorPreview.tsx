@@ -4,7 +4,7 @@ import MagneticButton from "@/components/ui/MagneticButton";
 
 export default function RateCalculatorPreview() {
   return (
-    <section className="relative overflow-hidden bg-bg py-28 text-fg lg:py-36">
+    <section id="calculator" className="relative overflow-hidden bg-bg py-28 text-fg lg:py-36">
       <div
         aria-hidden
         className="absolute inset-0 bg-[radial-gradient(circle_at_15%_50%,rgba(255,46,46,0.14),transparent_50%)]"

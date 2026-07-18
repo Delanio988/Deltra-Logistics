@@ -1,7 +1,12 @@
-// Isolated file-upload service for invoice submissions. Every consumer goes
-// through uploadInvoiceFile() — swapping the mock body below for a real
-// upload (Supabase Storage / S3 / UploadThing, etc.) later means editing
-// only this file, not any component.
+// Client-side invoice file upload — uploads straight to Supabase Storage
+// (the `invoice-files` bucket) from the browser, authenticated via the
+// customer's own session. Storage RLS (see the Phase 1 migrations) enforces
+// that a customer can only write under their own `invoices/{their-uid}/...`
+// prefix, so this needs no server round-trip of the file bytes themselves —
+// only the resulting metadata (name/size/type/storage path) ever reaches a
+// Server Action, in lib/actions/invoices.ts.
+
+import { createClient } from "@/lib/supabase/client";
 
 export const MAX_FILE_SIZE_MB = 10;
 export const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
@@ -51,73 +56,72 @@ export function formatFileSize(bytes: number): string {
 }
 
 export type UploadedInvoiceFile = {
-  id: string;
   name: string;
   size: number;
   type: string;
-  /** Object URL for this browser session only — see lib/data-store.tsx for
-   *  why this doesn't survive a reload. */
-  url: string;
-  uploadedAt: string;
+  /** Real Supabase Storage object path — what actually gets persisted. */
+  storagePath: string;
+  /** Displayable URL: a local blob preview while mid-upload, or a
+   *  server-generated signed URL once the file belongs to a saved invoice.
+   *  Absent means "preview unavailable" — the existing UI already handles that. */
+  url?: string;
+  uploadedAt?: string;
 };
 
 function formatToday(): string {
   return new Date().toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
 }
 
-/**
- * Uploads a single file and reports progress, resolving with the stored
- * file's metadata + URL. `onProgress` mirrors the shape a real XHR/fetch
- * upload-progress event would have, so the UI doesn't need to change when
- * the mock body below is replaced with a real network call.
- *
- * TODO: replace this body with a real upload (Supabase Storage / S3 /
- * UploadThing) + a database record for the resulting file. Server-side
- * file-type/size validation and virus scanning belong at that boundary,
- * re-checked server-side even though the client already validates —
- * client-side checks are a UX nicety, not a security control.
- */
-export function uploadInvoiceFile(file: File, onProgress?: (percent: number) => void): Promise<UploadedInvoiceFile> {
-  return new Promise((resolve) => {
-    let percent = 0;
-    const tick = () => {
-      percent = Math.min(100, percent + 15 + Math.random() * 20);
-      onProgress?.(Math.round(percent));
-      if (percent >= 100) {
-        resolve({
-          id: crypto.randomUUID(),
-          name: file.name,
-          size: file.size,
-          type: file.type,
-          url: URL.createObjectURL(file),
-          uploadedAt: formatToday(),
-        });
-        return;
-      }
-      setTimeout(tick, 150 + Math.random() * 150);
-    };
-    setTimeout(tick, 150);
-  });
+function randomStorageFilename(originalName: string): string {
+  const dot = originalName.lastIndexOf(".");
+  const ext = dot >= 0 ? originalName.slice(dot) : "";
+  return `${crypto.randomUUID()}${ext}`;
 }
 
 /**
- * Deletes a single invoice file. Mock: just revokes its local object URL.
- * TODO: replace with a real delete call against your storage provider
- * (Supabase Storage / S3 / UploadThing) and remove the corresponding
- * database file record. Server-side authorization must live here too —
- * only the owning customer or an admin may delete a given file; right now
- * this check doesn't exist at all and is trivially bypassable client-side.
+ * Uploads a single file to Storage under invoices/{customer_id}/pending/... —
+ * "pending" because the invoice row this belongs to may not exist yet (a
+ * fresh submission creates it only when the form is actually submitted).
+ * `onProgress` is coarse (start/done) since the Supabase JS client doesn't
+ * expose granular upload progress — a real backend can't fake percentages
+ * the way the previous mock did.
  */
+export async function uploadInvoiceFile(file: File, onProgress?: (percent: number) => void): Promise<UploadedInvoiceFile> {
+  onProgress?.(10);
+
+  const supabase = createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) throw new Error("Not signed in.");
+
+  const storagePath = `invoices/${user.id}/pending/${randomStorageFilename(file.name)}`;
+  const { error } = await supabase.storage.from("invoice-files").upload(storagePath, file, {
+    contentType: file.type,
+    upsert: false,
+  });
+  if (error) throw new Error(error.message);
+
+  onProgress?.(100);
+
+  return {
+    name: file.name,
+    size: file.size,
+    type: file.type,
+    storagePath,
+    url: URL.createObjectURL(file),
+    uploadedAt: formatToday(),
+  };
+}
+
+/** Revokes the local preview URL only — deleting the real Storage object (and
+ *  its invoice_files row) is a server-side operation requiring an ownership
+ *  check, see lib/actions/invoices.ts's removeInvoiceFile. */
 export function deleteInvoiceFile(file: { url?: string }): void {
   if (file.url) URL.revokeObjectURL(file.url);
 }
 
-/**
- * Swaps one invoice file for another. Mock: deletes the old file's object
- * URL, then uploads the replacement through the normal upload path — a
- * real backend would ideally do this as one atomic operation server-side.
- */
-export function replaceInvoiceFile(
+export async function replaceInvoiceFile(
   oldFile: { url?: string },
   newFile: File,
   onProgress?: (percent: number) => void

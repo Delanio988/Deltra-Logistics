@@ -7,7 +7,6 @@ import Script from "next/script";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { useAuth } from "@/lib/auth-context";
-import { useDataStore } from "@/lib/data-store";
 import { useReducedMotion } from "@/lib/useReducedMotion";
 import { COUNTRIES } from "@/lib/countries";
 import MagneticButton from "@/components/ui/MagneticButton";
@@ -15,12 +14,14 @@ import Wordmark from "@/components/ui/Wordmark";
 import signupVisual from "@/public/images/signup-visual.svg";
 import logoMark from "@/public/deltra-mark-ondark.png";
 
-// Cloudflare's public, documented "always passes" Turnstile test key — safe
-// to ship in a demo. TODO: swap for a real site key, render this behind your
-// own domain allow-list, and verify the resulting token server-side before
-// creating the account. This mock form does not block submission on it,
-// since there's no backend yet to verify a token against.
+// Falls back to Cloudflare's public "always passes" test key only when
+// NEXT_PUBLIC_TURNSTILE_SITE_KEY isn't configured, so local dev keeps working
+// before a real site key is issued. The widget renders and collects a token,
+// but nothing currently verifies that token server-side against
+// TURNSTILE_SECRET_KEY before account creation — a real deployment should add
+// that check (Cloudflare's siteverify endpoint) to a signup Server Action.
 const TURNSTILE_TEST_SITE_KEY = "1x00000000000000000000AA";
+const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || TURNSTILE_TEST_SITE_KEY;
 
 const PersonIcon = (
   <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={1.8}>
@@ -52,7 +53,6 @@ const inputBase =
 
 export default function SignupPage() {
   const { user, isLoading, register } = useAuth();
-  const { addCustomer } = useDataStore();
   const router = useRouter();
   const prefersReducedMotion = useReducedMotion();
 
@@ -75,6 +75,7 @@ export default function SignupPage() {
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   const [formError, setFormError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [verifyEmailSent, setVerifyEmailSent] = useState<string | null>(null);
 
   const markTouched = (field: string) => setTouched((t) => ({ ...t, [field]: true }));
 
@@ -120,12 +121,15 @@ export default function SignupPage() {
     });
     setIsSubmitting(false);
 
-    if (result.success) {
-      addCustomer({ name: result.user.name, accountCode: result.user.accountCode!, email: result.user.email });
-      router.replace("/dashboard");
-    } else {
+    if (!result.success) {
       setFormError(result.error);
+      return;
     }
+    if (result.status === "verify-email") {
+      setVerifyEmailSent(result.email);
+      return;
+    }
+    router.replace("/dashboard");
   };
 
   if (isLoading || user) {
@@ -137,6 +141,41 @@ export default function SignupPage() {
     animate: { opacity: 1, y: 0 },
     transition: { duration: 0.6, delay },
   });
+
+  if (verifyEmailSent) {
+    return (
+      <div className="grid min-h-screen grid-cols-1 bg-bg lg:grid-cols-2">
+        <div className="flex flex-col justify-center px-6 py-16 sm:px-12 lg:px-16">
+          <motion.div {...fadeUp(0)} className="mx-auto w-full max-w-md">
+            <Link href="/" data-cursor-hover="Home">
+              <Wordmark className="h-8" />
+            </Link>
+            <span className="gold-label mt-10 inline-block">Almost there</span>
+            <h1 className="mt-5 text-display-sm font-extrabold text-fg">
+              Check your email<span className="text-accent">.</span>
+            </h1>
+            <p className="mt-3 text-sm text-fg/60">
+              We sent a verification link to <span className="font-semibold text-fg">{verifyEmailSent}</span>.
+              Click it to activate your account, then log in.
+            </p>
+            <Link
+              href="/login"
+              className="mt-8 inline-block font-semibold text-accent hover:text-accent-dark"
+              data-cursor-hover="Login"
+            >
+              Back to login
+            </Link>
+          </motion.div>
+        </div>
+        <div className="relative hidden overflow-hidden lg:block">
+          <Image src={signupVisual} alt="" fill priority sizes="50vw" className="object-cover" />
+          <div className="absolute bottom-8 left-8">
+            <Image src={logoMark} alt="Deltra Logistics" className="h-10 w-auto drop-shadow-[0_4px_12px_rgba(0,0,0,0.6)]" />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="grid min-h-screen grid-cols-1 bg-bg lg:grid-cols-2">
@@ -222,7 +261,7 @@ export default function SignupPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   onBlur={() => markTouched("email")}
-                  placeholder="you@company.com"
+                  placeholder="Enter your Email"
                   className={`${inputBase} pl-11 pr-4`}
                 />
               </div>
@@ -279,7 +318,7 @@ export default function SignupPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   onBlur={() => markTouched("password")}
-                  placeholder="••••••••"
+                  placeholder="Enter your password"
                   className={`${inputBase} pl-11 pr-12`}
                 />
                 <button
@@ -358,7 +397,7 @@ export default function SignupPage() {
             )}
 
             <motion.div {...fadeUp(0.35)}>
-              <div className="cf-turnstile" data-sitekey={TURNSTILE_TEST_SITE_KEY} data-theme="auto" />
+              <div className="cf-turnstile" data-sitekey={TURNSTILE_SITE_KEY} data-theme="auto" />
             </motion.div>
 
             <motion.div {...fadeUp(0.4)}>

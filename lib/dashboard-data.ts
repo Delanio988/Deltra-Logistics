@@ -1,9 +1,3 @@
-// Mock freight-forwarding portal data. Structured so it's a drop-in swap for
-// a real API later — replace the arrays below with fetched data and every
-// consuming component keeps working. Live/mutable package + message state
-// lives in lib/data-store.tsx (seeded from INITIAL_PACKAGES below); this file
-// only holds static shape/types/seed content.
-
 import type { TrackingStatus } from "@/lib/data";
 
 export type PackageStatus =
@@ -62,86 +56,11 @@ export type Package = {
   invoiceRequired?: boolean;
 };
 
-// Seed data for lib/data-store.tsx. TODO: replace with a real API fetch.
-export const INITIAL_PACKAGES: Package[] = [
-  {
-    id: "pkg-1",
-    accountCode: "DLT1789-A",
-    trackingNumber: "DL48213097",
-    merchant: "Amazon",
-    description: "Electronics — 2 boxes",
-    weightLb: 6,
-    dateReceived: "Jul 5, 2026",
-    status: "In Transit",
-    invoiceRequired: true,
-  },
-  {
-    id: "pkg-2",
-    accountCode: "DLT1789-A",
-    trackingNumber: "DL29104456",
-    merchant: "Best Buy",
-    description: "Kitchen appliance — 1 box",
-    weightLb: 14,
-    dateReceived: "Jul 3, 2026",
-    status: "Arrived at Local Branch",
-    invoiceRequired: true,
-  },
-  {
-    id: "pkg-3",
-    accountCode: "DLT1789-A",
-    trackingNumber: "DL77350281",
-    merchant: "Shein",
-    description: "Clothing — 1 poly bag",
-    weightLb: 3,
-    dateReceived: "Jun 29, 2026",
-    status: "Ready for Pickup",
-    invoiceRequired: true,
-  },
-  {
-    id: "pkg-4",
-    accountCode: "DLT1789-A",
-    trackingNumber: "DL10293847",
-    merchant: "Walmart",
-    description: "Home goods — 1 crate",
-    weightLb: 22,
-    dateReceived: "Jun 20, 2026",
-    status: "Delivered",
-  },
-  {
-    id: "pkg-5",
-    accountCode: "DLT1789-A",
-    trackingNumber: "DL63581920",
-    merchant: "Wayfair",
-    description: "Furniture part — 1 box",
-    weightLb: 9,
-    dateReceived: "Jul 8, 2026",
-    status: "Pre-Alerted",
-    invoiceRequired: true,
-  },
-  {
-    id: "pkg-6",
-    accountCode: "DLT2044-B",
-    trackingNumber: "DL39472105",
-    merchant: "Target",
-    description: "Toys — 1 box",
-    weightLb: 5,
-    dateReceived: "Jul 6, 2026",
-    status: "Received at Warehouse",
-  },
-];
-
 export type Customer = {
   name: string;
   accountCode: string;
   email: string;
 };
-
-// Mock customer directory used by the admin's "add package" picker.
-export const CUSTOMERS: Customer[] = [
-  { name: "Alex Morgan", accountCode: "DLT1789-A", email: "demo@deltra.com" },
-  { name: "Jordan Reid", accountCode: "DLT2044-B", email: "jordan.reid@example.com" },
-  { name: "Simone Clarke", accountCode: "DLT3310-C", email: "simone.clarke@example.com" },
-];
 
 export type Branch = {
   name: string;

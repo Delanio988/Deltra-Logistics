@@ -49,10 +49,10 @@ npm run lint    # ESLint
 > [`lenis`](https://www.npmjs.com/package/lenis) under the darkroom.engineering
 > org. This project uses the current package; the API is unchanged.
 
-## Customer portal (demo)
+## Customer portal
 
-- **`/login`** — email/password form. Demo credentials:
-  `demo@deltra.com` / `demo123` (also shown on the login screen itself).
+- **`/login`** — real Supabase Auth email/password sign-in, with a working
+  "Forgot password?" reset flow.
 - **`/dashboard`** — protected (customers only), a card-based freight-forwarding
   portal:
   - **Account summary** — greeting, wallet balance, local branch contacts.
@@ -69,14 +69,14 @@ npm run lint    # ESLint
     Branch → Ready for Pickup → Delivered`), an animated progress bar, and an
     expandable step timeline per package.
 
-Auth is intentionally mock/client-side for now — see
-[`lib/auth-context.tsx`](lib/auth-context.tsx). The whole `login()` call is
-fenced with `// ---- MOCK AUTH ----` / `// ---- END MOCK AUTH ----` comments;
-swap that block for a real API or [NextAuth](https://authjs.dev) call and
-nothing else needs to change, since every consumer only depends on
-`useAuth()`'s `{ user, isLoading, login, logout }` shape. Session state is a
-JSON blob in `localStorage` (key `deltra_auth_session`) — there's no real
-token/cookie, so treat this as a UI scaffold, not a security boundary.
+Auth is real Supabase Auth — see [`lib/auth-context.tsx`](lib/auth-context.tsx).
+Signup creates a real `auth.users` row; a Postgres trigger
+(`private.handle_new_user()`) provisions the matching `profiles` row, a
+generated `DLT####-A` account code, and a zero wallet balance in the same
+transaction. Session state lives in an httpOnly cookie managed by
+`@supabase/ssr`, refreshed on every request by `middleware.ts` — there's no
+`localStorage` session and no client-trusted role field; `role` is read from
+`profiles` on every login via a query that Postgres RLS enforces.
 
 `components/auth/RequireAuth.tsx` is a reusable guard for protected routes.
 It takes an optional `role` prop: with no session it redirects to
@@ -85,10 +85,13 @@ the area they *do* have access to (`/dashboard` or `/admin`) instead of
 bouncing between login screens. `/dashboard` uses `role="customer"`, `/admin`
 uses `role="admin" redirectTo="/admin/login"`.
 
-## Admin area (demo)
+## Admin area
 
-- **`/admin/login`** — separate, visually-distinguished admin sign-in. Demo
-  credentials: `admin@deltra.com` / `admin123`.
+- **`/admin/login`** — separate, visually-distinguished admin sign-in. There
+  is no public admin signup — the first admin is created with
+  `scripts/seed-admin.mjs` (service-role key, run manually), and further
+  admins are promoted via the `admin_set_role()` Postgres RPC. A successful
+  login whose `profiles.role` isn't `admin` is immediately signed back out.
 - **`/admin`** — protected (admin role only):
   - **Add a package** — pick a customer (by name/account code), tracking
     number, merchant, description, weight (auto-calculates the shipping cost

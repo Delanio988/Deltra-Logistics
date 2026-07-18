@@ -5,13 +5,13 @@ import { motion, useScroll, useTransform } from "framer-motion";
 import SplitText from "@/components/ui/SplitText";
 import MagneticButton from "@/components/ui/MagneticButton";
 import { useReducedMotion } from "@/lib/useReducedMotion";
-import { useDataStore } from "@/lib/data-store";
+import { useSeasonal } from "@/lib/seasonal-context";
 import { cn } from "@/lib/utils";
 
 export default function Hero() {
   const sectionRef = useRef<HTMLElement>(null);
   const prefersReducedMotion = useReducedMotion();
-  const { isSeasonalBannerVisible } = useDataStore();
+  const { isSeasonalBannerVisible } = useSeasonal();
   // Header grows to fit the seasonal banner (see Header.tsx) — this extra
   // clearance keeps the heading from rendering underneath the taller header.
   const bannerVisible = isSeasonalBannerVisible("public");
@@ -73,8 +73,8 @@ export default function Hero() {
           transition={{ duration: 0.8, delay: 1.1 }}
           className="mt-8 max-w-xl text-lg text-fg/70 lg:text-xl"
         >
-          Ocean, air, and ground freight engineered for reliability at scale.
-          Deltra Logistics connects 180+ countries with one accountable partner.
+          Shop from any US retailer and get it home fast — Deltra Logistics
+          consolidates and flies your packages from our US warehouse straight to your local branch in Jamaica.
         </motion.p>
 
         <motion.div
@@ -103,7 +103,7 @@ export default function Hero() {
         className="relative z-10 flex justify-center pb-10"
       >
         <a
-          href="#stats"
+          href="#calculator"
           data-cursor-hover="Scroll"
           aria-label="Scroll to next section"
           className="flex flex-col items-center gap-3 text-fg/60 transition-colors hover:text-accent"

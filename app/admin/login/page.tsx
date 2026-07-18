@@ -10,7 +10,7 @@ import MagneticButton from "@/components/ui/MagneticButton";
 import Wordmark from "@/components/ui/Wordmark";
 
 export default function AdminLoginPage() {
-  const { user, isLoading, login } = useAuth();
+  const { user, isLoading, login, logout } = useAuth();
   const router = useRouter();
   const prefersReducedMotion = useReducedMotion();
 
@@ -43,7 +43,11 @@ export default function AdminLoginPage() {
       setError(result.error);
       return;
     }
+    // The role check above already came from a live, RLS-protected profiles
+    // query — but a matched customer credential shouldn't leave that
+    // customer signed in app-wide just because they tried the admin form.
     if (result.user.role !== "admin") {
+      await logout();
       setError("This account doesn't have admin access.");
       return;
     }
@@ -92,7 +96,7 @@ export default function AdminLoginPage() {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="admin@deltra.com"
+              placeholder="Enter your Email"
               className="mt-2 w-full rounded-full border border-navy-950/15 bg-white px-5 py-3 text-sm text-navy-950 outline-none transition-colors focus:border-accent"
             />
           </div>
@@ -109,7 +113,7 @@ export default function AdminLoginPage() {
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
+                placeholder="Enter your password"
                 className="w-full rounded-full border border-navy-950/15 bg-white px-5 py-3 pr-12 text-sm text-navy-950 outline-none transition-colors focus:border-accent"
               />
               <button
@@ -146,11 +150,6 @@ export default function AdminLoginPage() {
           >
             {isSubmitting ? "Signing in…" : "Sign in"}
           </MagneticButton>
-
-          <p className="rounded-xl border-l-2 border-gold/60 bg-navy-950/[0.03] px-4 py-3 text-xs text-navy-950/50">
-            Demo access: <span className="font-semibold text-navy-950/70">admin@deltra.com</span> /{" "}
-            <span className="font-semibold text-navy-950/70">admin123</span>
-          </p>
         </form>
 
         <p className="mt-8 text-center text-sm text-navy-950/60">

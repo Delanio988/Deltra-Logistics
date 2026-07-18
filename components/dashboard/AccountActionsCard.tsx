@@ -3,9 +3,10 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
-import { useAuth } from "@/lib/auth-context";
-import { useDataStore } from "@/lib/data-store";
-import { getPackagesNeedingInvoiceAction } from "@/lib/invoices";
+import { getPackagesNeedingInvoiceAction, type Invoice } from "@/lib/invoices";
+import { markMessagesRead } from "@/lib/actions/messages";
+import type { Package } from "@/lib/dashboard-data";
+import type { Message } from "@/lib/messages";
 import ActionRow from "@/components/dashboard/ActionRow";
 import Toast from "@/components/ui/Toast";
 
@@ -32,24 +33,29 @@ const messageIcon = (
   </svg>
 );
 
-export default function AccountActionsCard() {
-  const { user } = useAuth();
+type AccountActionsCardProps = {
+  packages: Package[];
+  invoices: Invoice[];
+  messages: Message[];
+};
+
+export default function AccountActionsCard({ packages, invoices, messages }: AccountActionsCardProps) {
   const router = useRouter();
-  const { getPackagesForAccount, getMessagesForAccount, getInvoicesForAccount, markMessagesRead } = useDataStore();
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [showMessages, setShowMessages] = useState(false);
 
-  const accountCode = user?.accountCode ?? "";
-  const packages = getPackagesForAccount(accountCode);
-  const messages = getMessagesForAccount(accountCode);
   const unreadCount = messages.filter((m) => !m.read).length;
-  const invoiceCount = getPackagesNeedingInvoiceAction(packages, getInvoicesForAccount(accountCode)).length;
+  const invoiceCount = getPackagesNeedingInvoiceAction(packages, invoices).length;
 
   const handleStub = (label: string) => setToastMessage(`${label} is coming soon in a future update.`);
 
-  const handleMessagesToggle = () => {
-    setShowMessages((v) => !v);
-    if (!showMessages) markMessagesRead(accountCode);
+  const handleMessagesToggle = async () => {
+    const opening = !showMessages;
+    setShowMessages(opening);
+    if (opening && unreadCount > 0) {
+      const result = await markMessagesRead();
+      if (result.success) router.refresh();
+    }
   };
 
   return (

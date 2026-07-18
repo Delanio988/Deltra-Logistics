@@ -1,15 +1,12 @@
 "use client";
 
 import { useAuth } from "@/lib/auth-context";
-import { useDataStore } from "@/lib/data-store";
 import { BRANCHES } from "@/lib/dashboard-data";
 import { formatCurrency } from "@/lib/quote-config";
 
-export default function AccountSummaryCard() {
+export default function AccountSummaryCard({ walletBalance }: { walletBalance: number }) {
   const { user } = useAuth();
-  const { getWalletBalance } = useDataStore();
   const firstName = user?.name.split(" ")[0] ?? "there";
-  const walletBalance = getWalletBalance(user?.accountCode ?? "");
 
   return (
     <div className="rounded-2xl border border-fg/8 bg-surface p-8 shadow-card">

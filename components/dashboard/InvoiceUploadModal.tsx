@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useId, useRef, useState, type ChangeEvent, type DragEvent, type FormEvent } from "react";
+import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import type { Package } from "@/lib/dashboard-data";
 import { INVOICE_CURRENCIES, type Invoice } from "@/lib/invoices";
@@ -14,7 +15,7 @@ import {
   validateInvoiceFile,
   type UploadedInvoiceFile,
 } from "@/lib/uploads";
-import { useDataStore } from "@/lib/data-store";
+import { submitInvoice, addInvoiceFiles } from "@/lib/actions/invoices";
 import { useModalA11y } from "@/lib/useModalA11y";
 import { useReducedMotion } from "@/lib/useReducedMotion";
 import MagneticButton from "@/components/ui/MagneticButton";
@@ -64,7 +65,7 @@ const CloseIcon = (
  * transition could run).
  */
 export default function InvoiceUploadModal({ pkg, existingInvoice, onClose, onSubmitted }: InvoiceUploadModalProps) {
-  const { submitInvoice, addInvoiceFiles } = useDataStore();
+  const router = useRouter();
   const prefersReducedMotion = useReducedMotion();
   // A pending invoice's modal adds files alongside what's already there
   // instead of replacing everything — a fresh upload or a rejected
@@ -185,35 +186,49 @@ export default function InvoiceUploadModal({ pkg, existingInvoice, onClose, onSu
   const isUploading = pendingFiles.some((f) => f.status === "uploading");
   const canSubmit = doneFiles.length > 0 && !isUploading;
 
-  const handleSubmit = (e: FormEvent) => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (!canSubmit) return;
+    if (!canSubmit || isSubmitting) return;
     const parsedValue = value.trim() ? parseFloat(value) : NaN;
     const resolvedMerchant = merchant.trim() || undefined;
     const resolvedValue = Number.isFinite(parsedValue) ? parsedValue : undefined;
 
-    if (isAppendMode && existingInvoice) {
-      addInvoiceFiles({
-        invoiceId: existingInvoice.id,
-        files: doneFiles.map((f) => f.result),
-        merchant: resolvedMerchant,
-        value: resolvedValue,
-        currency,
-      });
-      hasSubmittedRef.current = true;
-      onSubmitted(`Added ${doneFiles.length} file(s) to your invoice for ${pkg.trackingNumber}.`);
-    } else {
-      submitInvoice({
-        packageId: pkg.id,
-        accountCode: pkg.accountCode,
-        files: doneFiles.map((f) => f.result),
-        merchant: resolvedMerchant,
-        value: resolvedValue,
-        currency,
-      });
-      hasSubmittedRef.current = true;
-      onSubmitted(`Invoice ${existingInvoice ? "re-submitted" : "submitted"} for ${pkg.trackingNumber} — pending review.`);
+    setIsSubmitting(true);
+    setSubmitError(null);
+
+    const result =
+      isAppendMode && existingInvoice
+        ? await addInvoiceFiles({
+            invoiceId: existingInvoice.id,
+            files: doneFiles.map((f) => f.result),
+            merchant: resolvedMerchant,
+            value: resolvedValue,
+            currency,
+          })
+        : await submitInvoice({
+            packageId: pkg.id,
+            files: doneFiles.map((f) => f.result),
+            merchant: resolvedMerchant,
+            value: resolvedValue,
+            currency,
+          });
+
+    setIsSubmitting(false);
+    if (!result.success) {
+      setSubmitError(result.error);
+      return;
     }
+
+    hasSubmittedRef.current = true;
+    onSubmitted(
+      isAppendMode
+        ? `Added ${doneFiles.length} file(s) to your invoice for ${pkg.trackingNumber}.`
+        : `Invoice ${existingInvoice ? "re-submitted" : "submitted"} for ${pkg.trackingNumber} — pending review.`
+    );
+    router.refresh();
     onClose();
   };
 
@@ -408,13 +423,27 @@ export default function InvoiceUploadModal({ pkg, existingInvoice, onClose, onSu
             </div>
           </div>
 
+          {submitError && (
+            <p role="alert" className="rounded-xl border border-accent/30 bg-accent/5 px-4 py-3 text-xs text-accent-text">
+              {submitError}
+            </p>
+          )}
+
           <MagneticButton
             type="submit"
-            disabled={!canSubmit}
+            disabled={!canSubmit || isSubmitting}
             cursorLabel="Submit"
             className="w-full justify-center bg-accent text-navy-950 shadow-accent hover:bg-accent-dark hover:text-white disabled:opacity-50"
           >
-            {isUploading ? "Uploading…" : isAppendMode ? "Add files" : existingInvoice ? "Re-submit invoice" : "Submit invoice"}
+            {isUploading
+              ? "Uploading…"
+              : isSubmitting
+                ? "Submitting…"
+                : isAppendMode
+                  ? "Add files"
+                  : existingInvoice
+                    ? "Re-submit invoice"
+                    : "Submit invoice"}
           </MagneticButton>
         </form>
       </motion.div>

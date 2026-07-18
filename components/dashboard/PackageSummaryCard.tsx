@@ -2,9 +2,8 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { useAuth } from "@/lib/auth-context";
-import { useDataStore } from "@/lib/data-store";
-import { getOutstandingBills } from "@/lib/billing";
+import type { Bill } from "@/lib/billing";
+import type { Package } from "@/lib/dashboard-data";
 import { useLenis } from "@/components/layout/SmoothScrollProvider";
 import ActionRow from "@/components/dashboard/ActionRow";
 import Toast from "@/components/ui/Toast";
@@ -32,18 +31,14 @@ const billsIcon = (
   </svg>
 );
 
-export default function PackageSummaryCard() {
-  const { user } = useAuth();
-  const { getPackagesForAccount, bills } = useDataStore();
+export default function PackageSummaryCard({ packages, bills }: { packages: Package[]; bills: Bill[] }) {
   const lenis = useLenis();
   const router = useRouter();
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  const accountCode = user?.accountCode ?? "";
-  const packages = getPackagesForAccount(accountCode);
   const preAlertCount = packages.filter((p) => p.status === "Pre-Alerted").length;
   const notPickedUpCount = packages.filter((p) => p.status !== "Delivered").length;
-  const outstandingBillCount = getOutstandingBills(bills, accountCode).length;
+  const outstandingBillCount = bills.filter((b) => b.status !== "paid").length;
 
   const handleStub = (label: string) => setToastMessage(`${label} is coming soon in a future update.`);
 

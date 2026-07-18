@@ -1,6 +1,3 @@
-// Centralized placeholder content for Deltra Logistics (placeholder brand name).
-// Swap copy, numbers, and TODO-marked assets with real brand data before launch.
-
 export const NAV_LINKS = [
   { label: "Services", href: "#services" },
   { label: "Get a Quote", href: "/quote" },
@@ -9,18 +6,11 @@ export const NAV_LINKS = [
   { label: "Contact", href: "#contact" },
 ] as const;
 
-export const STATS = [
-  { value: 2, suffix: "M+", label: "Shipments delivered" },
-  { value: 180, suffix: "+", label: "Countries served" },
-  { value: 99.8, suffix: "%", label: "On-time performance", decimals: 1 },
-  { value: 24, suffix: "/7", label: "Live support" },
-] as const;
-
 export type Service = {
   id: string;
   title: string;
   description: string;
-  icon: "ocean" | "air" | "road" | "warehouse" | "customs" | "lastmile";
+  icon: "ocean" | "air" | "lastmile";
 };
 
 export const SERVICES: Service[] = [
@@ -39,27 +29,6 @@ export const SERVICES: Service[] = [
     icon: "air",
   },
   {
-    id: "road",
-    title: "Road & Ground",
-    description:
-      "Dense regional trucking networks and cross-border ground transport engineered for reliable door-to-door delivery.",
-    icon: "road",
-  },
-  {
-    id: "warehouse",
-    title: "Warehousing",
-    description:
-      "Strategically located fulfillment hubs with real-time inventory visibility, pick-and-pack, and value-added services.",
-    icon: "warehouse",
-  },
-  {
-    id: "customs",
-    title: "Customs Brokerage",
-    description:
-      "Licensed brokers and compliance specialists who clear your cargo fast and keep you ahead of shifting trade regulations.",
-    icon: "customs",
-  },
-  {
     id: "lastmile",
     title: "Last-Mile Delivery",
     description:
@@ -74,17 +43,16 @@ export type TrackingStatus = {
   timestamp: string;
 };
 
-// Mock tracking data keyed by tracking number. Any unrecognized number falls
-// back to DEFAULT_TRACKING so the widget always has something to show.
-export const TRACKING_DATA: Record<string, TrackingStatus[]> = {
-  DEFAULT: [
-    { label: "Picked up", description: "Shipment collected from origin facility", timestamp: "Mon, 08:14" },
-    { label: "In transit", description: "Departed regional hub en route to port", timestamp: "Mon, 19:40" },
-    { label: "Customs", description: "Cleared customs at destination country", timestamp: "Wed, 06:02" },
-    { label: "Out for delivery", description: "Loaded on final-mile vehicle", timestamp: "Thu, 09:15" },
-    { label: "Delivered", description: "Signed for at destination address", timestamp: "Thu, 13:47" },
-  ],
-};
+// Illustrative example shown on the public marketing page's tracking
+// preview — not a live lookup. Real per-package tracking lives behind sign-in
+// on /dashboard, driven by buildPackageTimeline() in dashboard-data.ts.
+export const EXAMPLE_TRACKING_STEPS: TrackingStatus[] = [
+  { label: "Picked up", description: "Shipment collected from origin facility", timestamp: "Day 1" },
+  { label: "In transit", description: "Departed regional hub en route to port", timestamp: "Day 1" },
+  { label: "Customs", description: "Cleared customs at destination country", timestamp: "Day 3" },
+  { label: "Out for delivery", description: "Loaded on final-mile vehicle", timestamp: "Day 4" },
+  { label: "Delivered", description: "Signed for at destination address", timestamp: "Day 4" },
+];
 
 export const PROCESS_STEPS = [
   {
@@ -156,34 +124,3 @@ export const BENTO_FEATURES: BentoFeature[] = [
   },
 ] as const;
 
-export const TESTIMONIALS = [
-  {
-    quote:
-      "Deltra Logistics replatformed our entire supply chain visibility. We went from guessing ETAs to knowing them down to the hour.",
-    name: "Elena Marsh",
-    title: "VP Supply Chain, Nordholt Retail",
-  },
-  {
-    quote:
-      "Their customs brokerage team alone has saved us weeks of delays a year. Genuinely the most responsive partner we've worked with.",
-    name: "Rafael Costa",
-    title: "Head of Logistics, Aurora Manufacturing",
-  },
-  {
-    quote:
-      "We scaled from 3 markets to 40 without ever outgrowing Deltra's network. That kind of reliability is rare at this scale.",
-    name: "Priya Nandan",
-    title: "COO, Fernbridge Goods",
-  },
-] as const;
-
-export const CLIENT_MARQUEE = [
-  "Nordholt Retail",
-  "Aurora Manufacturing",
-  "Fernbridge Goods",
-  "Vantage Industrial",
-  "Solace Consumer Group",
-  "Kestrel Components",
-  "Larkspur Trading Co.",
-  "Havenwood Imports",
-] as const;

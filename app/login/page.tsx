@@ -10,17 +10,22 @@ import MagneticButton from "@/components/ui/MagneticButton";
 import Wordmark from "@/components/ui/Wordmark";
 
 export default function LoginPage() {
-  const { user, isLoading, login } = useAuth();
+  const { user, isLoading, login, resetPassword } = useAuth();
   const router = useRouter();
   const prefersReducedMotion = useReducedMotion();
 
   const emailId = useId();
   const passwordId = useId();
+  const resetEmailId = useId();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [showForgotNote, setShowForgotNote] = useState(false);
+  const [showForgotForm, setShowForgotForm] = useState(false);
+  const [resetEmail, setResetEmail] = useState("");
+  const [resetError, setResetError] = useState<string | null>(null);
+  const [resetSent, setResetSent] = useState(false);
+  const [isSendingReset, setIsSendingReset] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -41,6 +46,30 @@ export default function LoginPage() {
       router.replace(result.user.role === "admin" ? "/admin" : "/dashboard");
     } else {
       setError(result.error);
+    }
+  };
+
+  const toggleForgotForm = () => {
+    setShowForgotForm((v) => {
+      const next = !v;
+      if (next) {
+        setResetEmail(email);
+        setResetSent(false);
+        setResetError(null);
+      }
+      return next;
+    });
+  };
+
+  const handleForgotSubmit = async () => {
+    setResetError(null);
+    setIsSendingReset(true);
+    const result = await resetPassword(resetEmail);
+    setIsSendingReset(false);
+    if (result.success) {
+      setResetSent(true);
+    } else {
+      setResetError(result.error);
     }
   };
 
@@ -87,7 +116,7 @@ export default function LoginPage() {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="you@company.com"
+              placeholder="Enter your Email"
               className="mt-2 w-full rounded-full border border-navy-950/15 bg-white px-5 py-3 text-sm text-navy-950 outline-none transition-colors focus:border-accent"
             />
           </div>
@@ -99,7 +128,7 @@ export default function LoginPage() {
               </label>
               <button
                 type="button"
-                onClick={() => setShowForgotNote((v) => !v)}
+                onClick={toggleForgotForm}
                 className="text-xs font-medium text-accent transition-colors hover:text-accent-dark"
               >
                 Forgot password?
@@ -113,7 +142,7 @@ export default function LoginPage() {
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
+                placeholder="Enter your password"
                 className="w-full rounded-full border border-navy-950/15 bg-white px-5 py-3 pr-12 text-sm text-navy-950 outline-none transition-colors focus:border-accent"
               />
               <button
@@ -134,11 +163,40 @@ export default function LoginPage() {
                 )}
               </button>
             </div>
-            {showForgotNote && (
-              <p className="mt-2 text-xs text-navy-950/50">
-                Demo mode — sign in with <span className="font-semibold">demo@deltra.com</span> /{" "}
-                <span className="font-semibold">demo123</span>.
-              </p>
+            {showForgotForm && (
+              <div className="mt-3 rounded-xl border border-navy-950/10 bg-navy-950/[0.03] p-4">
+                {resetSent ? (
+                  <p className="text-xs text-navy-950/60">
+                    If an account exists for that email, a reset link is on its way — check your inbox.
+                  </p>
+                ) : (
+                  <>
+                    <label htmlFor={resetEmailId} className="text-xs font-semibold uppercase tracking-widest text-navy-950/50">
+                      Reset email
+                    </label>
+                    <div className="mt-2 flex gap-2">
+                      <input
+                        id={resetEmailId}
+                        type="email"
+                        autoComplete="email"
+                        value={resetEmail}
+                        onChange={(e) => setResetEmail(e.target.value)}
+                        placeholder="Enter your Email"
+                        className="min-w-0 flex-1 rounded-full border border-navy-950/15 bg-white px-4 py-2 text-sm text-navy-950 outline-none transition-colors focus:border-accent"
+                      />
+                      <button
+                        type="button"
+                        onClick={handleForgotSubmit}
+                        disabled={isSendingReset || !resetEmail.trim()}
+                        className="shrink-0 rounded-full bg-navy-950 px-4 py-2 text-xs font-semibold text-white transition-colors hover:bg-navy-950/85 disabled:opacity-50"
+                      >
+                        {isSendingReset ? "Sending…" : "Send link"}
+                      </button>
+                    </div>
+                    {resetError && <p className="mt-2 text-xs text-red-500">{resetError}</p>}
+                  </>
+                )}
+              </div>
             )}
           </div>
 
@@ -156,11 +214,6 @@ export default function LoginPage() {
           >
             {isSubmitting ? "Signing in…" : "Sign in"}
           </MagneticButton>
-
-          <p className="rounded-xl border-l-2 border-gold/60 bg-navy-950/[0.03] px-4 py-3 text-xs text-navy-950/50">
-            Demo access: <span className="font-semibold text-navy-950/70">demo@deltra.com</span> /{" "}
-            <span className="font-semibold text-navy-950/70">demo123</span>
-          </p>
         </form>
 
         <p className="mt-8 text-center text-sm text-navy-950/60">

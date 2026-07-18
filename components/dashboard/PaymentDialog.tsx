@@ -36,9 +36,14 @@ type PaymentDialogProps = {
   allowPartial: boolean;
   /** Top-up only — lets the customer choose how much to add. */
   editableAmount?: boolean;
+  /** Whether a real hosted checkout (Fygaro) is configured — when false,
+   *  card/bank stay as a "coming soon" placeholder that can't be continued. */
+  hostedCheckoutEnabled: boolean;
   onClose: () => void;
   onConfirmWallet: (amount: number) => void;
   onConfirmCash: (amount: number) => void;
+  /** Redirects to the hosted checkout for the given method. */
+  onConfirmHosted: (method: "card" | "bank", amount: number) => void;
 };
 
 export default function PaymentDialog({
@@ -49,9 +54,11 @@ export default function PaymentDialog({
   allowWallet,
   allowPartial,
   editableAmount = false,
+  hostedCheckoutEnabled,
   onClose,
   onConfirmWallet,
   onConfirmCash,
+  onConfirmHosted,
 }: PaymentDialogProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const headingId = useId();
@@ -74,11 +81,12 @@ export default function PaymentDialog({
       ? effectiveAmount > 0
       : method === "wallet"
         ? effectiveAmount > 0 && walletBalance > 0 && (canPayInFull || allowPartial)
-        : false;
+        : hostedCheckoutEnabled && effectiveAmount > 0;
 
   const handleConfirm = () => {
     if (method === "wallet") onConfirmWallet(effectiveAmount);
     else if (method === "cash") onConfirmCash(effectiveAmount);
+    else onConfirmHosted(method, effectiveAmount);
     setConfirming(false);
     onClose();
   };
@@ -198,17 +206,24 @@ export default function PaymentDialog({
             </div>
           )}
 
-          {(method === "card" || method === "bank") && (
-            <div className="rounded-xl border border-fg/10 bg-fg/5 px-5 py-6 text-center">
-              <p className="text-sm font-semibold text-fg">{method === "card" ? "Card payments" : "Bank transfer"} coming soon</p>
-              <p className="mx-auto mt-2 max-w-sm text-xs text-fg/50">
-                You&rsquo;ll be redirected to a secure, PCI-compliant payment page to complete this — we never collect
-                card or bank details directly in this app.
-              </p>
-              {/* TODO: integrate hosted payment processor (redirect/embed —
-                  never collect raw card data client-side). */}
-            </div>
-          )}
+          {(method === "card" || method === "bank") &&
+            (hostedCheckoutEnabled ? (
+              <div className="rounded-xl border border-fg/10 bg-fg/5 px-5 py-6 text-center">
+                <p className="text-sm font-semibold text-fg">Pay by {method === "card" ? "card" : "bank transfer"}</p>
+                <p className="mx-auto mt-2 max-w-sm text-xs text-fg/50">
+                  You&rsquo;ll be redirected to a secure, PCI-compliant payment page to complete this — we never
+                  collect card or bank details directly in this app.
+                </p>
+              </div>
+            ) : (
+              <div className="rounded-xl border border-fg/10 bg-fg/5 px-5 py-6 text-center">
+                <p className="text-sm font-semibold text-fg">{method === "card" ? "Card payments" : "Bank transfer"} coming soon</p>
+                <p className="mx-auto mt-2 max-w-sm text-xs text-fg/50">
+                  You&rsquo;ll be redirected to a secure, PCI-compliant payment page to complete this — we never collect
+                  card or bank details directly in this app.
+                </p>
+              </div>
+            ))}
 
           {method === "cash" && (
             <div className="space-y-3">
@@ -245,7 +260,7 @@ export default function PaymentDialog({
             data-cursor-hover="Continue"
             className="min-h-11 rounded-full bg-accent px-6 py-2.5 text-sm font-semibold text-navy-950 shadow-accent transition-colors hover:bg-accent-dark hover:text-white disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none"
           >
-            {method === "cash" ? (editableAmount ? "Confirm — I'll pay at the branch" : "Confirm — I'll pay at the branch") : "Continue"}
+            {method === "cash" ? "Confirm — I'll pay at the branch" : "Continue"}
           </button>
         </div>
       </motion.div>
@@ -259,7 +274,9 @@ export default function PaymentDialog({
                 ? editableAmount
                   ? `We'll mark ${formatCurrency(effectiveAmount)} as expected at the branch. Your wallet is credited once payment is received.`
                   : `This marks the bill "Pending — Pay at Branch." Bring the amount due to any branch listed.`
-                : `Pay ${formatCurrency(Math.min(walletBalance, effectiveAmount))} from your wallet now?`
+                : method === "wallet"
+                  ? `Pay ${formatCurrency(Math.min(walletBalance, effectiveAmount))} from your wallet now?`
+                  : `You'll be redirected to a secure payment page to pay ${formatCurrency(effectiveAmount)}.`
             }
             confirmLabel="Confirm"
             destructive={false}

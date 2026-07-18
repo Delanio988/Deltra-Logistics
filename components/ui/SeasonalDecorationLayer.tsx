@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { usePathname } from "next/navigation";
-import { useDataStore } from "@/lib/data-store";
+import { useSeasonal } from "@/lib/seasonal-context";
 import { useReducedMotion } from "@/lib/useReducedMotion";
 import type { SeasonalDecorationKind } from "@/lib/seasonal-themes";
 
@@ -47,11 +47,18 @@ function buildParticles(glyphs: string[], count: number): Particle[] {
  */
 export default function SeasonalDecorationLayer() {
   const pathname = usePathname();
-  const { getActiveSeasonalTheme } = useDataStore();
+  const { getActiveSeasonalTheme } = useSeasonal();
   const prefersReducedMotion = useReducedMotion();
   const [isMobile, setIsMobile] = useState(false);
+  // Particle positions use Math.random(), which can't match between the
+  // server render and the client's first hydration pass — gating on mount
+  // means both render nothing initially (identical output), and particles
+  // appear a moment later via a normal post-hydration state update instead
+  // of during hydration itself.
+  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
+    setIsMounted(true);
     const mediaQuery = window.matchMedia("(max-width: 640px)");
     setIsMobile(mediaQuery.matches);
     const handleChange = (event: MediaQueryListEvent) => setIsMobile(event.matches);
@@ -68,10 +75,10 @@ export default function SeasonalDecorationLayer() {
   // off it directly would regenerate particles (and restart their
   // animations) on every render instead of only when the theme truly changes.
   const particles = useMemo(() => {
-    if (!theme || theme.decoration === "none") return [];
+    if (!isMounted || !theme || theme.decoration === "none") return [];
     return buildParticles(theme.particleGlyphs, count);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [theme?.id, count]);
+  }, [isMounted, theme?.id, count]);
 
   if (!theme || theme.decoration === "none" || particles.length === 0) return null;
 

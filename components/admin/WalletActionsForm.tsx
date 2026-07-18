@@ -1,15 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import { CUSTOMERS } from "@/lib/dashboard-data";
+import type { Customer } from "@/lib/dashboard-data";
 
 type WalletActionsFormProps = {
+  customers: Customer[];
   onCredit: (accountCode: string, amount: number, note: string) => void;
   onRefund: (accountCode: string, amount: number, note: string) => void;
 };
 
-export default function WalletActionsForm({ onCredit, onRefund }: WalletActionsFormProps) {
-  const [accountCode, setAccountCode] = useState(CUSTOMERS[0]?.accountCode ?? "");
+export default function WalletActionsForm({ customers, onCredit, onRefund }: WalletActionsFormProps) {
+  const [accountCode, setAccountCode] = useState(customers[0]?.accountCode ?? "");
   const [amount, setAmount] = useState("");
   const [note, setNote] = useState("");
 
@@ -20,6 +21,14 @@ export default function WalletActionsForm({ onCredit, onRefund }: WalletActionsF
     setAmount("");
     setNote("");
   };
+
+  if (customers.length === 0) {
+    return (
+      <div className="rounded-2xl border border-fg/8 bg-surface p-8 text-center text-sm text-fg/50 shadow-card">
+        No customers yet — wallet actions are available once at least one customer has signed up.
+      </div>
+    );
+  }
 
   return (
     <div className="rounded-2xl border border-fg/8 bg-surface p-6 shadow-card sm:p-8">
@@ -37,7 +46,7 @@ export default function WalletActionsForm({ onCredit, onRefund }: WalletActionsF
             onChange={(e) => setAccountCode(e.target.value)}
             className="mt-1.5 min-h-11 w-full rounded-full border border-fg/15 bg-fg/5 px-4 py-2 text-sm text-fg outline-none transition-colors focus:border-accent"
           >
-            {CUSTOMERS.map((c) => (
+            {customers.map((c) => (
               <option key={c.accountCode} value={c.accountCode} className="bg-surface text-fg">
                 {c.name} ({c.accountCode})
               </option>

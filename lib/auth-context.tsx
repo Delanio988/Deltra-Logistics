@@ -7,6 +7,9 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import type { SupabaseClient, User } from "@supabase/supabase-js";
+import { createClient } from "@/lib/supabase/client";
+import type { Database } from "@/lib/database.types";
 
 export type UserRole = "customer" | "admin";
 
@@ -20,6 +23,13 @@ export type AuthUser = {
 
 type LoginResult = { success: true; user: AuthUser } | { success: false; error: string };
 
+type RegisterResult =
+  | { success: true; status: "verify-email"; email: string }
+  | { success: true; status: "signed-in"; user: AuthUser }
+  | { success: false; error: string };
+
+type ActionResult = { success: true } | { success: false; error: string };
+
 export type RegisterInput = {
   firstName: string;
   lastName: string;
@@ -30,122 +40,163 @@ export type RegisterInput = {
 
 type AuthContextValue = {
   user: AuthUser | null;
-  /** True until the initial localStorage check on mount resolves — consumers
-   *  should wait on this before redirecting, to avoid bouncing a logged-in
-   *  user to /login on first render. */
+  /** True until the initial session check resolves — consumers should wait
+   *  on this before redirecting, to avoid bouncing a logged-in user to
+   *  /login on first render. */
   isLoading: boolean;
   login: (email: string, password: string) => Promise<LoginResult>;
-  register: (input: RegisterInput) => Promise<LoginResult>;
-  logout: () => void;
+  register: (input: RegisterInput) => Promise<RegisterResult>;
+  logout: () => Promise<void>;
+  /** Sends a password-reset email. The link lands on /auth/callback, which
+   *  exchanges it for a session and forwards to /reset-password. */
+  resetPassword: (email: string) => Promise<ActionResult>;
+  /** Sets a new password for the currently-active (recovery) session. */
+  updatePassword: (newPassword: string) => Promise<ActionResult>;
 };
-
-function generateAccountCode(): string {
-  const digits = Math.floor(1000 + Math.random() * 9000);
-  const letter = String.fromCharCode(65 + Math.floor(Math.random() * 26));
-  return `DLT${digits}-${letter}`;
-}
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
-const STORAGE_KEY = "deltra_auth_session";
+function mapAuthError(message: string): string {
+  if (message === "Invalid login credentials") return "Invalid email or password.";
+  if (message === "User already registered") return "An account with this email already exists.";
+  return message;
+}
 
-// Demo-only credentials. Swap the whole `login()` body below for a real API
-// call (which would also return the role/accountCode from the backend) and
-// this array goes away entirely.
-const DEMO_CREDENTIALS: Array<{ email: string; password: string; user: AuthUser }> = [
-  {
-    email: "demo@deltra.com",
-    password: "demo123",
-    user: { name: "Alex Morgan", email: "demo@deltra.com", role: "customer", accountCode: "DLT1789-A" },
-  },
-  {
-    email: "admin@deltra.com",
-    password: "admin123",
-    user: { name: "Deltra Admin", email: "admin@deltra.com", role: "admin" },
-  },
-];
+async function hydrateUser(
+  supabase: SupabaseClient<Database>,
+  supabaseUser: User
+): Promise<AuthUser | null> {
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("first_name, last_name, email, role, account_code")
+    .eq("id", supabaseUser.id)
+    .single();
+
+  if (!profile) return null;
+
+  return {
+    name: `${profile.first_name} ${profile.last_name}`.trim(),
+    email: profile.email,
+    role: profile.role as UserRole,
+    accountCode: profile.account_code ?? undefined,
+  };
+}
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const stored = window.localStorage.getItem(STORAGE_KEY);
-    if (stored) {
-      try {
-        const parsed = JSON.parse(stored) as Partial<AuthUser>;
-        // Guard against a session shape from an older version of this app
-        // (e.g. before `role` existed) — without this, a stale session
-        // missing `role` would make RequireAuth's role check permanently
-        // fail, redirecting in a loop instead of ever rendering the page.
-        if (parsed.role === "customer" || parsed.role === "admin") {
-          setUser(parsed as AuthUser);
-        } else {
-          window.localStorage.removeItem(STORAGE_KEY);
-        }
-      } catch {
-        window.localStorage.removeItem(STORAGE_KEY);
+    const supabase = createClient();
+    let mounted = true;
+
+    const syncUser = async (supabaseUser: User | null) => {
+      if (!supabaseUser) {
+        if (mounted) setUser(null);
+        return;
       }
-    }
-    setIsLoading(false);
+      const authUser = await hydrateUser(supabase, supabaseUser);
+      if (mounted) setUser(authUser);
+    };
+
+    supabase.auth.getUser().then(({ data }) => {
+      syncUser(data.user).finally(() => {
+        if (mounted) setIsLoading(false);
+      });
+    });
+
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      syncUser(session?.user ?? null);
+    });
+
+    return () => {
+      mounted = false;
+      listener.subscription.unsubscribe();
+    };
   }, []);
 
   const login = async (email: string, password: string): Promise<LoginResult> => {
-    // ---- MOCK AUTH: replace this block with a real API / NextAuth call. ----
-    // A real implementation would also return `role`/`accountCode` from the
-    // backend rather than a hardcoded list. The rest of the app only depends
-    // on the `LoginResult` shape returned here and on `user`/`logout`, so
-    // swapping this block out doesn't require touching any consuming component.
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    const supabase = createClient();
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: email.trim().toLowerCase(),
+      password,
+    });
 
-    const match = DEMO_CREDENTIALS.find(
-      (c) => c.email === email.trim().toLowerCase() && c.password === password
-    );
-
-    if (match) {
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(match.user));
-      setUser(match.user);
-      return { success: true, user: match.user };
+    if (error) {
+      return { success: false, error: mapAuthError(error.message) };
     }
 
-    return { success: false, error: "Invalid email or password." };
-    // ---- END MOCK AUTH ----
+    const authUser = await hydrateUser(supabase, data.user);
+    if (!authUser) {
+      await supabase.auth.signOut();
+      return { success: false, error: "Account setup is incomplete. Please contact support." };
+    }
+
+    setUser(authUser);
+    return { success: true, user: authUser };
   };
 
-  const register = async (input: RegisterInput): Promise<LoginResult> => {
-    // ---- MOCK REGISTRATION: replace this block with a real registration API call. ----
-    // A real backend would check the full user table for an existing email;
-    // this demo only has the two hardcoded demo accounts to collide with.
-    // It would also send the phone number for WhatsApp/SMS verification and
-    // verify the Turnstile token (see app/signup/page.tsx) before creating
-    // the account — both are no-ops here since there's no backend yet.
-    await new Promise((resolve) => setTimeout(resolve, 600));
-
+  const register = async (input: RegisterInput): Promise<RegisterResult> => {
+    const supabase = createClient();
     const email = input.email.trim().toLowerCase();
-    if (DEMO_CREDENTIALS.some((c) => c.email === email)) {
-      return { success: false, error: "An account with this email already exists." };
+
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password: input.password,
+      options: {
+        data: {
+          first_name: input.firstName.trim(),
+          last_name: input.lastName.trim(),
+          phone: input.phone.trim(),
+        },
+        emailRedirectTo: `${window.location.origin}/auth/callback?next=/dashboard`,
+      },
+    });
+
+    if (error) {
+      return { success: false, error: mapAuthError(error.message) };
     }
 
-    const newUser: AuthUser = {
-      name: `${input.firstName.trim()} ${input.lastName.trim()}`,
-      email,
-      role: "customer",
-      accountCode: generateAccountCode(),
-    };
+    // No session yet means email confirmation is pending — this is the
+    // expected path with "Confirm email" enabled on the Supabase project.
+    if (!data.session || !data.user) {
+      return { success: true, status: "verify-email", email };
+    }
 
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(newUser));
-    setUser(newUser);
-    return { success: true, user: newUser };
-    // ---- END MOCK REGISTRATION ----
+    const authUser = await hydrateUser(supabase, data.user);
+    if (!authUser) {
+      return { success: false, error: "Account setup is incomplete. Please contact support." };
+    }
+    setUser(authUser);
+    return { success: true, status: "signed-in", user: authUser };
   };
 
-  const logout = () => {
-    window.localStorage.removeItem(STORAGE_KEY);
+  const logout = async () => {
+    const supabase = createClient();
+    await supabase.auth.signOut();
     setUser(null);
   };
 
+  const resetPassword = async (email: string): Promise<ActionResult> => {
+    const supabase = createClient();
+    const { error } = await supabase.auth.resetPasswordForEmail(email.trim().toLowerCase(), {
+      redirectTo: `${window.location.origin}/auth/callback?next=/reset-password`,
+    });
+    if (error) return { success: false, error: mapAuthError(error.message) };
+    return { success: true };
+  };
+
+  const updatePassword = async (newPassword: string): Promise<ActionResult> => {
+    const supabase = createClient();
+    const { error } = await supabase.auth.updateUser({ password: newPassword });
+    if (error) return { success: false, error: mapAuthError(error.message) };
+    return { success: true };
+  };
+
   return (
-    <AuthContext.Provider value={{ user, isLoading, login, register, logout }}>
+    <AuthContext.Provider
+      value={{ user, isLoading, login, register, logout, resetPassword, updatePassword }}
+    >
       {children}
     </AuthContext.Provider>
   );

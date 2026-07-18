@@ -6,7 +6,8 @@ import CustomCursor from "@/components/ui/CustomCursor";
 import Noise from "@/components/ui/Noise";
 import SeasonalDecorationLayer from "@/components/ui/SeasonalDecorationLayer";
 import { AuthProvider } from "@/lib/auth-context";
-import { DataStoreProvider } from "@/lib/data-store";
+import { SeasonalProvider } from "@/lib/seasonal-context";
+import { getSiteSettings } from "@/lib/settings";
 import ThemeProvider from "@/lib/theme-provider";
 
 const poppins = Poppins({
@@ -18,11 +19,10 @@ const poppins = Poppins({
 
 const title = "Deltra Logistics | Global Shipping & Logistics";
 const description =
-  "Deltra Logistics moves the world's cargo by ocean, air, and road — 180+ countries, 2M+ shipments delivered, 99.8% on-time performance.";
+  "Deltra Logistics moves your packages from US retailers straight to your door in Jamaica — ocean and air freight, tracked from warehouse to branch.";
 
 export const metadata: Metadata = {
-  // TODO: swap for the real production domain before launch.
-  metadataBase: new URL("http://localhost:3000"),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"),
   title,
   description,
   openGraph: {
@@ -38,11 +38,13 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const seasonalSettings = await getSiteSettings();
+
   // suppressHydrationWarning: some browser extensions (ad blockers, dev
   // tools, etc.) inject attributes onto <html> right after the server's
   // HTML arrives but before React hydrates — a false-positive mismatch
@@ -53,14 +55,14 @@ export default function RootLayout({
       <body className="bg-bg text-fg font-sans antialiased transition-colors duration-200 motion-reduce:transition-none">
         <ThemeProvider>
           <AuthProvider>
-            <DataStoreProvider>
+            <SeasonalProvider initialSettings={seasonalSettings}>
               <SmoothScrollProvider>
                 <CustomCursor />
                 <Noise />
                 <SeasonalDecorationLayer />
                 {children}
               </SmoothScrollProvider>
-            </DataStoreProvider>
+            </SeasonalProvider>
           </AuthProvider>
         </ThemeProvider>
       </body>

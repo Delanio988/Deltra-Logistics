@@ -1,11 +1,14 @@
 "use client";
 
-import { useDataStore } from "@/lib/data-store";
-import { SEASONAL_THEMES, resolveAutoSeasonalTheme, type SeasonalThemeScope } from "@/lib/seasonal-themes";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { updateSiteSettings } from "@/lib/actions/settings";
+import { SEASONAL_THEMES, resolveAutoSeasonalTheme, type SeasonalSettings, type SeasonalThemeScope } from "@/lib/seasonal-themes";
+import Toast from "@/components/ui/Toast";
 import { cn } from "@/lib/utils";
 
 type SeasonalThemeFormProps = {
-  onChange: (message: string) => void;
+  initialSettings: SeasonalSettings;
 };
 
 const SCOPE_OPTIONS: { value: SeasonalThemeScope; label: string }[] = [
@@ -41,12 +44,28 @@ function ToggleSwitch({ checked, onToggle, label }: { checked: boolean; onToggle
 /**
  * Admin control for the sitewide seasonal decoration layer — a decorative
  * add-on to the existing light/dark mode, never a replacement for it. Every
- * control applies instantly (matches PackagesTable's invoice-flag toggle and
- * WalletActionsForm's immediate-fire buttons) — no Save button.
+ * control applies instantly via local state, then persists through the
+ * updateSiteSettings server action and re-syncs everyone else's next
+ * navigation via revalidatePath — no Save button, matching the original UX.
  */
-export default function SeasonalThemeForm({ onChange }: SeasonalThemeFormProps) {
-  const { seasonalSettings, updateSeasonalSettings } = useDataStore();
+export default function SeasonalThemeForm({ initialSettings }: SeasonalThemeFormProps) {
+  const router = useRouter();
+  const [settings, setSettings] = useState(initialSettings);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
   const todayTheme = resolveAutoSeasonalTheme(new Date());
+
+  const applyChange = async (partial: Partial<SeasonalSettings>, message: string) => {
+    setSettings((prev) => ({ ...prev, ...partial }));
+    setToastMessage(message);
+    const result = await updateSiteSettings(partial);
+    if (!result.success) {
+      // Roll back the optimistic update and let the admin know it didn't stick.
+      setSettings(initialSettings);
+      setToastMessage(`Couldn't save: ${result.error}`);
+      return;
+    }
+    router.refresh();
+  };
 
   return (
     <div className="rounded-2xl border border-fg/8 bg-surface p-6 shadow-card sm:p-8">
@@ -62,12 +81,11 @@ export default function SeasonalThemeForm({ onChange }: SeasonalThemeFormProps) 
           <p className="text-xs text-fg/50">Turn decorations and the greeting banner on or off.</p>
         </div>
         <ToggleSwitch
-          checked={seasonalSettings.enabled}
+          checked={settings.enabled}
           label="Seasonal theme"
-          onToggle={() => {
-            updateSeasonalSettings({ enabled: !seasonalSettings.enabled });
-            onChange(seasonalSettings.enabled ? "Seasonal theme turned off." : "Seasonal theme turned on.");
-          }}
+          onToggle={() =>
+            applyChange({ enabled: !settings.enabled }, settings.enabled ? "Seasonal theme turned off." : "Seasonal theme turned on.")
+          }
         />
       </div>
 
@@ -78,14 +96,11 @@ export default function SeasonalThemeForm({ onChange }: SeasonalThemeFormProps) 
             <button
               key={opt.value}
               type="button"
-              onClick={() => {
-                updateSeasonalSettings({ scope: opt.value });
-                onChange(`Scope set to ${opt.label}.`);
-              }}
+              onClick={() => applyChange({ scope: opt.value }, `Scope set to ${opt.label}.`)}
               data-cursor-hover={opt.label}
               className={cn(
                 "min-h-11 rounded-full border px-3 py-2.5 text-xs font-semibold transition-colors",
-                seasonalSettings.scope === opt.value
+                settings.scope === opt.value
                   ? "border-accent bg-accent/10 text-accent-text"
                   : "border-fg/15 text-fg/70 hover:border-accent hover:text-accent"
               )}
@@ -102,16 +117,18 @@ export default function SeasonalThemeForm({ onChange }: SeasonalThemeFormProps) 
           <p className="text-xs text-fg/50">Let each theme&rsquo;s date range turn it on automatically.</p>
         </div>
         <ToggleSwitch
-          checked={seasonalSettings.autoScheduleEnabled}
+          checked={settings.autoScheduleEnabled}
           label="Auto-schedule by date"
-          onToggle={() => {
-            updateSeasonalSettings({ autoScheduleEnabled: !seasonalSettings.autoScheduleEnabled });
-            onChange(seasonalSettings.autoScheduleEnabled ? "Auto-schedule turned off." : "Auto-schedule turned on.");
-          }}
+          onToggle={() =>
+            applyChange(
+              { autoScheduleEnabled: !settings.autoScheduleEnabled },
+              settings.autoScheduleEnabled ? "Auto-schedule turned off." : "Auto-schedule turned on."
+            )
+          }
         />
       </div>
 
-      {seasonalSettings.autoScheduleEnabled ? (
+      {settings.autoScheduleEnabled ? (
         <div className="mt-5 rounded-xl border border-fg/10 bg-fg/5 px-5 py-4 text-sm text-fg/70">
           Today&rsquo;s auto-selected theme: <span className="font-semibold text-fg">{todayTheme.label}</span>
         </div>
@@ -125,15 +142,12 @@ export default function SeasonalThemeForm({ onChange }: SeasonalThemeFormProps) 
                 .filter((v): v is string => Boolean(v))
                 .map((v) => `rgb(${v})`);
               const swatch = stops.length > 0 ? `linear-gradient(135deg, ${stops.join(", ")})` : undefined;
-              const selected = seasonalSettings.selectedThemeId === theme.id;
+              const selected = settings.selectedThemeId === theme.id;
               return (
                 <button
                   key={theme.id}
                   type="button"
-                  onClick={() => {
-                    updateSeasonalSettings({ selectedThemeId: theme.id });
-                    onChange(`${theme.label} selected.`);
-                  }}
+                  onClick={() => applyChange({ selectedThemeId: theme.id }, `${theme.label} selected.`)}
                   data-cursor-hover={theme.label}
                   className={cn(
                     "flex flex-col items-start gap-2 rounded-xl border p-4 text-left transition-colors",
@@ -152,6 +166,8 @@ export default function SeasonalThemeForm({ onChange }: SeasonalThemeFormProps) 
           </div>
         </div>
       )}
+
+      <Toast message={toastMessage} onDismiss={() => setToastMessage(null)} />
     </div>
   );
 }

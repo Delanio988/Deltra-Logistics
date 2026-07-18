@@ -1,6 +1,6 @@
 "use client";
 
-import { useDataStore } from "@/lib/data-store";
+import { useSeasonal } from "@/lib/seasonal-context";
 import { cn } from "@/lib/utils";
 
 const CloseIcon = (
@@ -23,7 +23,7 @@ type SeasonalGreetingBannerProps = {
  * "portal" (so it naturally pushes the header down).
  */
 export default function SeasonalGreetingBanner({ scope, className }: SeasonalGreetingBannerProps) {
-  const { getActiveSeasonalTheme, isSeasonalBannerVisible, dismissSeasonalBanner } = useDataStore();
+  const { getActiveSeasonalTheme, isSeasonalBannerVisible, dismissSeasonalBanner } = useSeasonal();
 
   const theme = getActiveSeasonalTheme(scope);
   if (!theme.greeting || !isSeasonalBannerVisible(scope)) return null;

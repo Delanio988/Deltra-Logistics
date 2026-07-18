@@ -1,7 +1,6 @@
-// Seasonal theme types, registry, and pure helpers. Live/mutable settings
-// (which theme is active, scope, auto-schedule) live in lib/data-store.tsx —
-// this file only holds shape/types/registry content, same split as
-// lib/billing.ts / lib/invoices.ts.
+// Seasonal theme types, registry, and pure helpers. Live settings (which
+// theme is active, scope, auto-schedule) are read from the real
+// `site_settings` table — see lib/settings.ts / lib/actions/settings.ts.
 //
 // This is a decorative LAYER on top of the existing light/dark mode — it
 // never touches the --color-* tokens that back bg-bg/text-fg/etc. Each

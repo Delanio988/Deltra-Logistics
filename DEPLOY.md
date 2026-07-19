@@ -10,8 +10,10 @@ are the same either way.
 ## One-time setup (do once, verify it's still correct if anything's failing)
 
 1. **Node version** — this app needs Node 18.18+ (Next.js 15's minimum) or
-   Node 20+. In hPanel's Node.js app settings (or `node -v` over SSH on a
-   VPS), confirm it's not pinned to an older version.
+   Node 20+ (`package.json`'s `engines.node` now enforces this — `npm install`
+   will warn loudly if the server's Node is too old). In hPanel's Node.js app
+   settings (or `node -v` over SSH on a VPS), confirm it's not pinned to an
+   older version.
 2. **Environment variables** — set these wherever your plan exposes them
    (hPanel's Node.js app "Environment Variables" section, or a `.env.production`
    file / PM2 ecosystem file on a VPS — never commit real values to the repo):

@@ -62,7 +62,10 @@ export async function getBillsForCurrentUser(): Promise<Bill[]> {
   if (!ctx) return [];
 
   const { data, error } = await supabase.from("bills").select("*").order("created_at", { ascending: false });
-  if (error) throw new Error(error.message);
+  if (error) {
+    console.error("[getBillsForCurrentUser]", error.message);
+    return [];
+  }
   return Promise.all((data ?? []).map((row) => mapBillRow(supabase, row, ctx.accountCode)));
 }
 
@@ -72,7 +75,10 @@ export async function getTransactionsForCurrentUser(): Promise<Transaction[]> {
   if (!ctx) return [];
 
   const { data, error } = await supabase.from("transactions").select("*").order("created_at", { ascending: false });
-  if (error) throw new Error(error.message);
+  if (error) {
+    console.error("[getTransactionsForCurrentUser]", error.message);
+    return [];
+  }
   return (data ?? []).map((row) => mapTransactionRow(row, ctx.accountCode));
 }
 
@@ -96,7 +102,10 @@ export async function getAllBillsWithCustomer(): Promise<BillWithCustomer[]> {
     .from("bills")
     .select("*, profiles(first_name, last_name, account_code)")
     .order("created_at", { ascending: false });
-  if (error) throw new Error(error.message);
+  if (error) {
+    console.error("[getAllBillsWithCustomer]", error.message);
+    return [];
+  }
 
   return Promise.all(
     (data ?? []).map(async (row) => {

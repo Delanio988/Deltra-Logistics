@@ -26,14 +26,20 @@ function mapPackageRow(row: Tables<"packages">, accountCode: string): Package {
   };
 }
 
-/** RLS scopes this to the caller's own rows — no explicit filter needed. */
+/** RLS scopes this to the caller's own rows — no explicit filter needed.
+ *  A query error degrades to an empty list rather than crashing the page
+ *  render — this runs directly in a Server Component on every dashboard
+ *  load, so a transient failure here must not 500 the whole page. */
 export async function getPackagesForCurrentUser(): Promise<Package[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("packages")
     .select("*, profiles(account_code)")
     .order("date_received", { ascending: false });
-  if (error) throw new Error(error.message);
+  if (error) {
+    console.error("[getPackagesForCurrentUser]", error.message);
+    return [];
+  }
 
   return (data ?? []).map((row) => mapPackageRow(row, row.profiles?.account_code ?? ""));
 }
@@ -45,7 +51,10 @@ export async function getAllPackagesWithCustomer(): Promise<PackageWithCustomer[
     .from("packages")
     .select("*, profiles(first_name, last_name, account_code)")
     .order("created_at", { ascending: false });
-  if (error) throw new Error(error.message);
+  if (error) {
+    console.error("[getAllPackagesWithCustomer]", error.message);
+    return [];
+  }
 
   return (data ?? []).map((row) => {
     const profile = row.profiles;
@@ -63,7 +72,10 @@ export async function getCustomerPickerList(): Promise<Customer[]> {
     .select("first_name, last_name, account_code, email")
     .eq("role", "customer")
     .order("created_at", { ascending: false });
-  if (error) throw new Error(error.message);
+  if (error) {
+    console.error("[getCustomerPickerList]", error.message);
+    return [];
+  }
 
   return (data ?? [])
     .filter((row) => row.account_code)

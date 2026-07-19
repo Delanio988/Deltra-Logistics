@@ -77,7 +77,10 @@ export async function getInvoicesForCurrentUser(): Promise<Invoice[]> {
   const accountCode = profile?.account_code ?? "";
 
   const { data, error } = await supabase.from("invoices").select("*").order("submitted_at", { ascending: false });
-  if (error) throw new Error(error.message);
+  if (error) {
+    console.error("[getInvoicesForCurrentUser]", error.message);
+    return [];
+  }
 
   return Promise.all((data ?? []).map((row) => mapInvoiceRow(supabase, row, accountCode)));
 }
@@ -91,7 +94,10 @@ export async function getAllInvoicesWithCustomer(): Promise<InvoiceWithCustomer[
     .from("invoices")
     .select("*, profiles!invoices_customer_id_fkey(first_name, last_name, account_code)")
     .order("submitted_at", { ascending: false });
-  if (error) throw new Error(error.message);
+  if (error) {
+    console.error("[getAllInvoicesWithCustomer]", error.message);
+    return [];
+  }
 
   return Promise.all(
     (data ?? []).map(async (row) => {

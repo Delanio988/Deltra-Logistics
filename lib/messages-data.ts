@@ -17,7 +17,10 @@ export async function getMessagesForCurrentUser(): Promise<Message[]> {
   const accountCode = profile?.account_code ?? "";
 
   const { data, error } = await supabase.from("messages").select("*").order("created_at", { ascending: false });
-  if (error) throw new Error(error.message);
+  if (error) {
+    console.error("[getMessagesForCurrentUser]", error.message);
+    return [];
+  }
 
   return (data ?? []).map((row) => ({
     id: row.id,

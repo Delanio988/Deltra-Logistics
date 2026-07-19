@@ -100,7 +100,7 @@ export async function getAllBillsWithCustomer(): Promise<BillWithCustomer[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("bills")
-    .select("*, profiles(first_name, last_name, account_code)")
+    .select("*, profiles!bills_customer_id_fkey(first_name, last_name, account_code)")
     .order("created_at", { ascending: false });
   if (error) {
     console.error("[getAllBillsWithCustomer]", error.message);

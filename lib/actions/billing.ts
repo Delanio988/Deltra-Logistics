@@ -186,6 +186,7 @@ export async function addLineItemToBill(input: z.infer<typeof addLineItemSchema>
     bill_id: parsed.data.billId,
     label: parsed.data.label,
     amount: parsed.data.amount,
+    created_by: user.id,
   };
   const { error } = await supabase.from("line_items").insert(payload);
   if (error) return { success: false, error: error.message };

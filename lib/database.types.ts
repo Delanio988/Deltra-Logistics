@@ -53,37 +53,50 @@ export type Database = {
         Row: {
           amount_paid: number
           created_at: string
+          created_by: string | null
           customer_id: string
           due_date: string | null
           id: string
           package_id: string
           paid_at: string | null
+          paid_confirmed_by: string | null
           status: string
           total: number
         }
         Insert: {
           amount_paid?: number
           created_at?: string
+          created_by?: string | null
           customer_id: string
           due_date?: string | null
           id?: string
           package_id: string
           paid_at?: string | null
+          paid_confirmed_by?: string | null
           status?: string
           total?: number
         }
         Update: {
           amount_paid?: number
           created_at?: string
+          created_by?: string | null
           customer_id?: string
           due_date?: string | null
           id?: string
           package_id?: string
           paid_at?: string | null
+          paid_confirmed_by?: string | null
           status?: string
           total?: number
         }
         Relationships: [
+          {
+            foreignKeyName: "bills_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "bills_customer_id_fkey"
             columns: ["customer_id"]
@@ -96,6 +109,13 @@ export type Database = {
             columns: ["package_id"]
             isOneToOne: true
             referencedRelation: "packages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bills_paid_confirmed_by_fkey"
+            columns: ["paid_confirmed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -356,6 +376,7 @@ export type Database = {
       packages: {
         Row: {
           created_at: string
+          created_by: string | null
           customer_id: string
           date_received: string
           description: string
@@ -369,6 +390,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          created_by?: string | null
           customer_id: string
           date_received: string
           description: string
@@ -382,6 +404,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          created_by?: string | null
           customer_id?: string
           date_received?: string
           description?: string
@@ -394,6 +417,13 @@ export type Database = {
           weight_lb?: number
         }
         Relationships: [
+          {
+            foreignKeyName: "packages_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "packages_customer_id_fkey"
             columns: ["customer_id"]

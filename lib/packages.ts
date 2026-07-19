@@ -34,7 +34,7 @@ export async function getPackagesForCurrentUser(): Promise<Package[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("packages")
-    .select("*, profiles(account_code)")
+    .select("*, profiles!packages_customer_id_fkey(account_code)")
     .order("date_received", { ascending: false });
   if (error) {
     console.error("[getPackagesForCurrentUser]", error.message);
@@ -49,7 +49,7 @@ export async function getAllPackagesWithCustomer(): Promise<PackageWithCustomer[
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("packages")
-    .select("*, profiles(first_name, last_name, account_code)")
+    .select("*, profiles!packages_customer_id_fkey(first_name, last_name, account_code)")
     .order("created_at", { ascending: false });
   if (error) {
     console.error("[getAllPackagesWithCustomer]", error.message);

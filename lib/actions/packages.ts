@@ -34,8 +34,8 @@ export async function addPackage(input: z.infer<typeof addPackageSchema>): Promi
   const parsed = addPackageSchema.safeParse(input);
   if (!parsed.success) return { success: false, error: "Invalid package details." };
 
-  const { supabase, isAdmin } = await requireAdmin();
-  if (!isAdmin) return { success: false, error: "Admin access required." };
+  const { supabase, user, isAdmin } = await requireAdmin();
+  if (!isAdmin || !user) return { success: false, error: "Admin access required." };
 
   const { data: customer, error: customerError } = await supabase
     .from("profiles")
@@ -53,6 +53,7 @@ export async function addPackage(input: z.infer<typeof addPackageSchema>): Promi
     date_received: parsed.data.dateReceived,
     status: parsed.data.status,
     invoice_required: parsed.data.invoiceRequired,
+    created_by: user.id,
   };
 
   const { error } = await supabase.from("packages").insert(insertPayload);
@@ -85,8 +86,8 @@ export async function updatePackageStatus(input: z.infer<typeof updateStatusSche
   const parsed = updateStatusSchema.safeParse(input);
   if (!parsed.success) return { success: false, error: "Invalid status update." };
 
-  const { supabase, isAdmin } = await requireAdmin();
-  if (!isAdmin) return { success: false, error: "Admin access required." };
+  const { supabase, user, isAdmin } = await requireAdmin();
+  if (!isAdmin || !user) return { success: false, error: "Admin access required." };
 
   const { data: pkg, error: fetchError } = await supabase
     .from("packages")
@@ -120,6 +121,7 @@ export async function updatePackageStatus(input: z.infer<typeof updateStatusSche
           customer_id: pkg.customer_id,
           package_id: pkg.id,
           due_date: dueDate.toISOString().slice(0, 10),
+          created_by: user.id,
         })
         .select("id")
         .single();

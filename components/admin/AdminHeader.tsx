@@ -48,7 +48,7 @@ export default function AdminHeader() {
         </nav>
 
         <div className="flex items-center gap-4">
-          {user && <span className="hidden text-sm font-medium text-fg/70 sm:inline">{user.name}</span>}
+          {user && <span className="max-w-[7rem] truncate text-sm font-medium text-fg/70 sm:max-w-none">{user.name}</span>}
           <ThemeToggle />
           <MagneticButton
             onClick={handleLogout}

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Wordmark from "@/components/ui/Wordmark";
+import BackButton from "@/components/ui/BackButton";
 import { CONTACT_EMAIL, CONTACT_EMAIL_HREF } from "@/lib/siteConfig";
 
 export const metadata: Metadata = {
@@ -15,6 +16,7 @@ export default function PrivacyPage() {
   return (
     <div className="min-h-screen bg-navy-radial px-6 py-16 text-fg">
       <div className="mx-auto max-w-2xl">
+        <BackButton href="/" label="Back to home" className="-ml-3 mb-4" />
         <Link href="/" data-cursor-hover="Home">
           <Wordmark className="h-8" />
         </Link>

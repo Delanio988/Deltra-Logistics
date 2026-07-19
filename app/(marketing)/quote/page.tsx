@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import RateCalculator from "@/components/dashboard/RateCalculator";
 import ScrollReveal from "@/components/ui/ScrollReveal";
+import BackButton from "@/components/ui/BackButton";
 
 export const metadata: Metadata = {
   title: "Get a Quote | Deltra Logistics",
@@ -12,6 +13,7 @@ export default function QuotePage() {
     <div className="relative overflow-hidden bg-bg py-28 text-fg lg:py-36">
       <div aria-hidden className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(255,46,46,0.18),transparent_55%)]" />
       <div className="relative mx-auto max-w-container px-6 lg:px-12">
+        <BackButton href="/" label="Back to home" className="-ml-3 mb-6" />
         <ScrollReveal className="mx-auto max-w-2xl text-center">
           <span className="gold-label justify-center">Get a Quote</span>
           <h1 className="mt-6 text-display-lg font-extrabold text-fg">

@@ -1,7 +1,6 @@
 "use client";
 
 import { useRef, useState, type ChangeEvent } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AnimatePresence } from "framer-motion";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
@@ -11,6 +10,7 @@ import InvoiceStatusBadge from "@/components/ui/InvoiceStatusBadge";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import Toast from "@/components/ui/Toast";
 import ScrollReveal from "@/components/ui/ScrollReveal";
+import BackButton from "@/components/ui/BackButton";
 import type { Package } from "@/lib/dashboard-data";
 import {
   formatInvoiceValue,
@@ -216,9 +216,7 @@ export default function InvoicesPageContent({ packages, invoices }: { packages: 
 
       <main className="mx-auto max-w-container px-6 py-12 lg:px-12 lg:py-16">
         <ScrollReveal direction="none">
-          <Link href="/dashboard" className="text-sm font-medium text-fg/60 transition-colors hover:text-accent">
-            ← Back to dashboard
-          </Link>
+          <BackButton href="/dashboard" label="Back to dashboard" className="-ml-3" />
           <h1 ref={headingRef} tabIndex={-1} className="mt-4 text-display-sm font-extrabold text-fg outline-none">
             Invoices
           </h1>

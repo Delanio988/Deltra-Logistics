@@ -8,6 +8,7 @@ import { useAuth } from "@/lib/auth-context";
 import { useReducedMotion } from "@/lib/useReducedMotion";
 import MagneticButton from "@/components/ui/MagneticButton";
 import Wordmark from "@/components/ui/Wordmark";
+import BackButton from "@/components/ui/BackButton";
 
 export default function AdminLoginPage() {
   const { user, isLoading, login, logout } = useAuth();
@@ -67,6 +68,9 @@ export default function AdminLoginPage() {
   return (
     <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-navy-radial px-6 py-16 text-fg">
       <div aria-hidden className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(255,101,56,0.3),transparent_45%)]" />
+      <div className="absolute left-6 top-6 z-20 sm:left-8 sm:top-8">
+        <BackButton href="/" label="Back to home" />
+      </div>
 
       <motion.div className="relative z-10 mb-10" {...fadeUp(0)}>
         <Link href="/" data-cursor-hover="Home">

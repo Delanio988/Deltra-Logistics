@@ -7,6 +7,7 @@ import BillingAdminRow from "@/components/admin/BillingAdminRow";
 import WalletActionsForm from "@/components/admin/WalletActionsForm";
 import Toast from "@/components/ui/Toast";
 import ScrollReveal from "@/components/ui/ScrollReveal";
+import BackButton from "@/components/ui/BackButton";
 import { addLineItemToBill, markBillPaidByAdmin, creditWallet, issueRefund } from "@/lib/actions/billing";
 import type { BillWithCustomer } from "@/lib/billing-data";
 import type { PackageWithCustomer } from "@/lib/packages";
@@ -34,7 +35,8 @@ export default function AdminBillingContent({ bills, packages, customers }: Admi
 
       <main className="mx-auto max-w-container px-6 py-12 lg:px-12 lg:py-16">
         <ScrollReveal direction="none">
-          <h1 className="text-display-sm font-extrabold text-fg">Billing</h1>
+          <BackButton href="/admin" label="Back to dashboard" className="-ml-3" />
+          <h1 className="mt-4 text-display-sm font-extrabold text-fg">Billing</h1>
           <p className="mt-2 text-fg/60">Add charges, confirm branch payments, and manage customer wallets.</p>
         </ScrollReveal>
 

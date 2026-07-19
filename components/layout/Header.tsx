@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { NAV_LINKS } from "@/lib/data";
 import { useLenis } from "@/components/layout/SmoothScrollProvider";
@@ -15,6 +16,8 @@ export default function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const lenis = useLenis();
+  const pathname = usePathname();
+  const isHomepage = pathname === "/";
 
   useEffect(() => {
     const onScroll = () => setIsScrolled(window.scrollY > 40);
@@ -26,6 +29,14 @@ export default function Header() {
   const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
     e.preventDefault();
     setIsMobileOpen(false);
+
+    // Off the homepage there's nothing here for these anchors to scroll to —
+    // navigate to the homepage section instead of silently doing nothing.
+    if (!isHomepage) {
+      window.location.href = `/${href}`;
+      return;
+    }
+
     const target = document.querySelector(href);
     if (!target) return;
     if (lenis) {
@@ -46,14 +57,15 @@ export default function Header() {
     >
       <SeasonalGreetingBanner scope="public" />
       <div className="mx-auto flex h-[--header-height] max-w-container items-center justify-between px-6 lg:px-12">
-        <a
-          href="#top"
-          onClick={(e) => handleNavClick(e, "#top")}
-          data-cursor-hover="Home"
-          className="text-fg"
-        >
-          <Wordmark responsive animated className="h-8 lg:h-9" />
-        </a>
+        {isHomepage ? (
+          <a href="#top" onClick={(e) => handleNavClick(e, "#top")} data-cursor-hover="Home" className="text-fg">
+            <Wordmark responsive animated className="h-8 lg:h-9" />
+          </a>
+        ) : (
+          <Link href="/" data-cursor-hover="Home" className="text-fg">
+            <Wordmark responsive animated className="h-8 lg:h-9" />
+          </Link>
+        )}
 
         <nav className="hidden items-center gap-10 lg:flex" aria-label="Primary">
           {NAV_LINKS.map((link) =>

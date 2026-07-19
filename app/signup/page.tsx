@@ -11,6 +11,7 @@ import { useReducedMotion } from "@/lib/useReducedMotion";
 import { COUNTRIES } from "@/lib/countries";
 import MagneticButton from "@/components/ui/MagneticButton";
 import Wordmark from "@/components/ui/Wordmark";
+import BackButton from "@/components/ui/BackButton";
 import signupVisual from "@/public/images/signup-visual.svg";
 import logoMark from "@/public/deltra-mark-ondark.png";
 
@@ -147,6 +148,7 @@ export default function SignupPage() {
       <div className="grid min-h-screen grid-cols-1 bg-bg lg:grid-cols-2">
         <div className="flex flex-col justify-center px-6 py-16 sm:px-12 lg:px-16">
           <motion.div {...fadeUp(0)} className="mx-auto w-full max-w-md">
+            <BackButton href="/" label="Back to home" className="-ml-3 mb-4" />
             <Link href="/" data-cursor-hover="Home">
               <Wordmark className="h-8" />
             </Link>
@@ -185,6 +187,7 @@ export default function SignupPage() {
       <div className="flex flex-col justify-center px-6 py-16 sm:px-12 lg:px-16">
         <div className="mx-auto w-full max-w-md">
           <motion.div {...fadeUp(0)}>
+            <BackButton href="/" label="Back to home" className="-ml-3 mb-4" />
             <Link href="/" data-cursor-hover="Home">
               <Wordmark className="h-8" />
             </Link>

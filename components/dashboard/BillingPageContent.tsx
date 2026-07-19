@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AnimatePresence } from "framer-motion";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
@@ -12,6 +11,7 @@ import PaymentDialog from "@/components/dashboard/PaymentDialog";
 import ReceiptModal from "@/components/dashboard/ReceiptModal";
 import Toast from "@/components/ui/Toast";
 import ScrollReveal from "@/components/ui/ScrollReveal";
+import BackButton from "@/components/ui/BackButton";
 import { useAuth } from "@/lib/auth-context";
 import { payBillsFromWallet, markBillsPendingBranch, startHostedBillPayment, startHostedWalletTopup } from "@/lib/actions/billing";
 import { getOutstandingBills, sumBalanceDue, type Bill, type Transaction } from "@/lib/billing";
@@ -139,9 +139,7 @@ export default function BillingPageContent({
 
       <main className="mx-auto max-w-container px-6 py-12 lg:px-12 lg:py-16">
         <ScrollReveal direction="none">
-          <Link href="/dashboard" className="text-sm font-medium text-fg/60 transition-colors hover:text-accent">
-            ← Back to dashboard
-          </Link>
+          <BackButton href="/dashboard" label="Back to dashboard" className="-ml-3" />
           <h1 className="mt-4 text-display-sm font-extrabold text-fg">Bills &amp; Transactions</h1>
           <p className="mt-2 text-fg/60">Pay outstanding bills, top up your wallet, and review your payment history.</p>
         </ScrollReveal>

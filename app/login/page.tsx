@@ -2,7 +2,7 @@
 
 import { useEffect, useId, useState, type FormEvent } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { useAuth } from "@/lib/auth-context";
 import { useReducedMotion } from "@/lib/useReducedMotion";
@@ -13,6 +13,7 @@ import BackButton from "@/components/ui/BackButton";
 export default function LoginPage() {
   const { user, isLoading, login, resetPassword } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const prefersReducedMotion = useReducedMotion();
 
   const emailId = useId();
@@ -36,6 +37,13 @@ export default function LoginPage() {
       router.replace(user.role === "admin" ? "/admin" : "/dashboard");
     }
   }, [isLoading, user, router]);
+
+  // Landed here from a failed /auth/callback (expired or already-used email link).
+  useEffect(() => {
+    if (searchParams.get("error") === "auth-callback-failed") {
+      setError("That link has expired or was already used. Request a new one below.");
+    }
+  }, [searchParams]);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();

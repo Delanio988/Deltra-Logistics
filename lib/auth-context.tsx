@@ -10,6 +10,7 @@ import {
 import type { SupabaseClient, User } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/client";
 import type { Database } from "@/lib/database.types";
+import { SITE_URL } from "@/lib/siteConfig";
 
 export type UserRole = "customer" | "admin";
 
@@ -52,6 +53,8 @@ type AuthContextValue = {
   resetPassword: (email: string) => Promise<ActionResult>;
   /** Sets a new password for the currently-active (recovery) session. */
   updatePassword: (newPassword: string) => Promise<ActionResult>;
+  /** Re-sends the signup confirmation email (e.g. "didn't get it?" on /signup). */
+  resendConfirmationEmail: (email: string) => Promise<ActionResult>;
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -149,7 +152,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           last_name: input.lastName.trim(),
           phone: input.phone.trim(),
         },
-        emailRedirectTo: `${window.location.origin}/auth/callback?next=/dashboard`,
+        emailRedirectTo: `${SITE_URL}/auth/callback?next=/dashboard`,
       },
     });
 
@@ -180,7 +183,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const resetPassword = async (email: string): Promise<ActionResult> => {
     const supabase = createClient();
     const { error } = await supabase.auth.resetPasswordForEmail(email.trim().toLowerCase(), {
-      redirectTo: `${window.location.origin}/auth/callback?next=/reset-password`,
+      redirectTo: `${SITE_URL}/auth/callback?next=/reset-password`,
+    });
+    if (error) return { success: false, error: mapAuthError(error.message) };
+    return { success: true };
+  };
+
+  const resendConfirmationEmail = async (email: string): Promise<ActionResult> => {
+    const supabase = createClient();
+    const { error } = await supabase.auth.resend({
+      type: "signup",
+      email: email.trim().toLowerCase(),
+      options: { emailRedirectTo: `${SITE_URL}/auth/callback?next=/dashboard` },
     });
     if (error) return { success: false, error: mapAuthError(error.message) };
     return { success: true };
@@ -195,7 +209,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ user, isLoading, login, register, logout, resetPassword, updatePassword }}
+      value={{ user, isLoading, login, register, logout, resetPassword, updatePassword, resendConfirmationEmail }}
     >
       {children}
     </AuthContext.Provider>

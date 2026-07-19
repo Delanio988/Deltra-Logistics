@@ -53,7 +53,7 @@ const inputBase =
   "mt-2 w-full rounded-full border border-fg/15 bg-fg/5 py-3 text-sm text-fg outline-none transition-colors focus:border-accent focus:shadow-accent";
 
 export default function SignupPage() {
-  const { user, isLoading, register } = useAuth();
+  const { user, isLoading, register, resendConfirmationEmail } = useAuth();
   const router = useRouter();
   const prefersReducedMotion = useReducedMotion();
 
@@ -77,6 +77,8 @@ export default function SignupPage() {
   const [formError, setFormError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [verifyEmailSent, setVerifyEmailSent] = useState<string | null>(null);
+  const [isResending, setIsResending] = useState(false);
+  const [resendMessage, setResendMessage] = useState<string | null>(null);
 
   const markTouched = (field: string) => setTouched((t) => ({ ...t, [field]: true }));
 
@@ -133,6 +135,15 @@ export default function SignupPage() {
     router.replace("/dashboard");
   };
 
+  const handleResend = async () => {
+    if (!verifyEmailSent) return;
+    setIsResending(true);
+    setResendMessage(null);
+    const result = await resendConfirmationEmail(verifyEmailSent);
+    setIsResending(false);
+    setResendMessage(result.success ? "Sent again — check your inbox (and spam folder)." : result.error);
+  };
+
   if (isLoading || user) {
     return <div className="min-h-screen bg-bg" />;
   }
@@ -160,9 +171,23 @@ export default function SignupPage() {
               We sent a verification link to <span className="font-semibold text-fg">{verifyEmailSent}</span>.
               Click it to activate your account, then log in.
             </p>
+            <p className="mt-2 text-sm text-fg/60">Don&rsquo;t see it? Check your spam or junk folder.</p>
+
+            {resendMessage && <p className="mt-4 text-sm text-fg/70">{resendMessage}</p>}
+
+            <button
+              type="button"
+              onClick={handleResend}
+              disabled={isResending}
+              data-cursor-hover="Resend email"
+              className="mt-4 block font-semibold text-accent hover:text-accent-dark disabled:opacity-60"
+            >
+              {isResending ? "Sending…" : "Didn't get the email? Resend it"}
+            </button>
+
             <Link
               href="/login"
-              className="mt-8 inline-block font-semibold text-accent hover:text-accent-dark"
+              className="mt-6 inline-block font-semibold text-fg/60 hover:text-fg"
               data-cursor-hover="Login"
             >
               Back to login

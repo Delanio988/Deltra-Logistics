@@ -42,6 +42,9 @@ export default function AdminHeader() {
           <Link href="/admin/billing" data-cursor-hover="Billing" className="text-sm font-medium text-fg/70 transition-colors hover:text-accent">
             Billing
           </Link>
+          <Link href="/admin/warehouse" data-cursor-hover="Warehouse" className="text-sm font-medium text-fg/70 transition-colors hover:text-accent">
+            Warehouse
+          </Link>
           <Link href="/admin/theme" data-cursor-hover="Theme" className="text-sm font-medium text-fg/70 transition-colors hover:text-accent">
             Theme
           </Link>

@@ -494,6 +494,7 @@ export type Database = {
           id: string
           is_active: boolean
           last_name: string
+          mailbox_number: number | null
           phone: string | null
           role: string
           updated_at: string
@@ -508,6 +509,7 @@ export type Database = {
           id: string
           is_active?: boolean
           last_name: string
+          mailbox_number?: number | null
           phone?: string | null
           role?: string
           updated_at?: string
@@ -522,6 +524,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           last_name?: string
+          mailbox_number?: number | null
           phone?: string | null
           role?: string
           updated_at?: string
@@ -653,6 +656,10 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      admin_set_mailbox_number: {
+        Args: { new_mailbox_number: number; target_id: string }
+        Returns: undefined
       }
       admin_set_role: {
         Args: { new_role: string; target_id: string }

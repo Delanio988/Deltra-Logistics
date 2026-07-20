@@ -42,10 +42,12 @@ export default async function AdminWarehousePage() {
 
           <section className="mt-12">
             <OxReadOnlyView
-              packages={packagesResult.packages}
+              packages={packagesResult.items}
               packagesError={packagesResult.error}
-              customers={customersResult.customers}
+              packagesConfigured={packagesResult.configured}
+              customers={customersResult.items}
               customersError={customersResult.error}
+              customersConfigured={customersResult.configured}
             />
           </section>
         </main>

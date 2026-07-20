@@ -48,11 +48,20 @@ export class OxApiError extends Error {
   }
 }
 
+/** Thrown when OX_API_BASE_URL/OX_API_KEY are missing — distinct from a live
+ *  API failure so callers can show "not set up yet" instead of an error, and
+ *  skip offering a retry (retrying won't help until env vars are set). */
+export class OxNotConfiguredError extends OxApiError {
+  constructor() {
+    super("This integration isn't configured yet.");
+  }
+}
+
 function getConfig() {
   const baseUrl = process.env.OX_API_BASE_URL;
   const apiKey = process.env.OX_API_KEY;
   if (!baseUrl || !apiKey) {
-    throw new OxApiError("OX_API_BASE_URL/OX_API_KEY are not configured.");
+    throw new OxNotConfiguredError();
   }
   return { baseUrl, apiKey };
 }

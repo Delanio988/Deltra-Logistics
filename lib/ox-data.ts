@@ -1,5 +1,12 @@
 import { createClient } from "@/lib/supabase/server";
-import { getAllOxPackages, getOxCustomers, OxApiError, type OxPackage, type OxCustomer } from "@/lib/ox-api";
+import {
+  getAllOxPackages,
+  getOxCustomers,
+  OxApiError,
+  OxNotConfiguredError,
+  type OxPackage,
+  type OxCustomer,
+} from "@/lib/ox-api";
 
 export type MailboxLinkRow = {
   id: string;
@@ -29,24 +36,30 @@ export async function getCustomersForMailboxLinking(): Promise<MailboxLinkRow[]>
   }));
 }
 
+export type OxFetchResult<T> = { items: T[]; error: string | null; configured: boolean };
+
 /** A misconfigured/unreachable OX API must not 500 the admin page — degrade
- *  to an empty list plus a visible error message instead. */
-export async function getOxPackagesSafe(): Promise<{ packages: OxPackage[]; error: string | null }> {
+ *  to an empty list instead. `configured: false` means env vars are missing
+ *  (an admin setup gap, not a failure — no retry will fix it); `error` is
+ *  only ever set for a genuine live API failure, worth retrying. */
+export async function getOxPackagesSafe(): Promise<OxFetchResult<OxPackage>> {
   try {
-    return { packages: await getAllOxPackages(), error: null };
+    return { items: await getAllOxPackages(), error: null, configured: true };
   } catch (err) {
-    const message = err instanceof OxApiError ? err.message : "Failed to load OX packages.";
-    console.error("[getOxPackagesSafe]", message);
-    return { packages: [], error: message };
+    if (err instanceof OxNotConfiguredError) return { items: [], error: null, configured: false };
+    const message = err instanceof OxApiError ? err.message : "Couldn't load OX packages right now.";
+    console.error("[getOxPackagesSafe]", err);
+    return { items: [], error: message, configured: true };
   }
 }
 
-export async function getOxCustomersSafe(): Promise<{ customers: OxCustomer[]; error: string | null }> {
+export async function getOxCustomersSafe(): Promise<OxFetchResult<OxCustomer>> {
   try {
-    return { customers: await getOxCustomers(), error: null };
+    return { items: await getOxCustomers(), error: null, configured: true };
   } catch (err) {
-    const message = err instanceof OxApiError ? err.message : "Failed to load OX customers.";
-    console.error("[getOxCustomersSafe]", message);
-    return { customers: [], error: message };
+    if (err instanceof OxNotConfiguredError) return { items: [], error: null, configured: false };
+    const message = err instanceof OxApiError ? err.message : "Couldn't load OX customers right now.";
+    console.error("[getOxCustomersSafe]", err);
+    return { items: [], error: message, configured: true };
   }
 }

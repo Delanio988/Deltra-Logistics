@@ -1,10 +1,16 @@
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import type { OxPackage, OxCustomer } from "@/lib/ox-api";
 
 type OxReadOnlyViewProps = {
   packages: OxPackage[];
   packagesError: string | null;
+  packagesConfigured: boolean;
   customers: OxCustomer[];
   customersError: string | null;
+  customersConfigured: boolean;
 };
 
 function formatDate(iso: string | null): string {
@@ -12,16 +18,47 @@ function formatDate(iso: string | null): string {
   return new Date(iso).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
 }
 
+function RetryButton() {
+  const router = useRouter();
+  const [isRetrying, setIsRetrying] = useState(false);
+
+  return (
+    <button
+      type="button"
+      onClick={() => {
+        setIsRetrying(true);
+        router.refresh();
+      }}
+      data-cursor-hover="Retry"
+      className="mt-3 text-xs font-semibold text-red-600 underline transition-colors hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
+    >
+      {isRetrying ? "Retrying…" : "Retry"}
+    </button>
+  );
+}
+
 /** Raw OX data, unfiltered — mainly so an admin can cross-reference a
  *  customer's real mailbox number here before linking it in the table above. */
-export default function OxReadOnlyView({ packages, packagesError, customers, customersError }: OxReadOnlyViewProps) {
+export default function OxReadOnlyView({
+  packages,
+  packagesError,
+  packagesConfigured,
+  customers,
+  customersError,
+  customersConfigured,
+}: OxReadOnlyViewProps) {
   return (
     <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
       <div>
         <h3 className="text-xs font-semibold uppercase tracking-widest text-fg/50">OX packages (read-only)</h3>
-        {packagesError ? (
+        {!packagesConfigured ? (
+          <div className="mt-3 rounded-2xl border border-fg/8 bg-surface p-6 text-center text-sm text-fg/50 shadow-card">
+            This integration isn&rsquo;t configured yet.
+          </div>
+        ) : packagesError ? (
           <div className="mt-3 rounded-xl border border-red-500/30 bg-red-500/5 px-5 py-4 text-sm text-red-600 dark:text-red-400">
-            {packagesError}
+            <p>Couldn&rsquo;t load OX packages: {packagesError}</p>
+            <RetryButton />
           </div>
         ) : packages.length === 0 ? (
           <div className="mt-3 rounded-2xl border border-fg/8 bg-surface p-6 text-center text-sm text-fg/50 shadow-card">
@@ -69,9 +106,14 @@ export default function OxReadOnlyView({ packages, packagesError, customers, cus
 
       <div>
         <h3 className="text-xs font-semibold uppercase tracking-widest text-fg/50">OX customers (read-only)</h3>
-        {customersError ? (
+        {!customersConfigured ? (
+          <div className="mt-3 rounded-2xl border border-fg/8 bg-surface p-6 text-center text-sm text-fg/50 shadow-card">
+            This integration isn&rsquo;t configured yet.
+          </div>
+        ) : customersError ? (
           <div className="mt-3 rounded-xl border border-red-500/30 bg-red-500/5 px-5 py-4 text-sm text-red-600 dark:text-red-400">
-            {customersError}
+            <p>Couldn&rsquo;t load OX customers: {customersError}</p>
+            <RetryButton />
           </div>
         ) : customers.length === 0 ? (
           <div className="mt-3 rounded-2xl border border-fg/8 bg-surface p-6 text-center text-sm text-fg/50 shadow-card">

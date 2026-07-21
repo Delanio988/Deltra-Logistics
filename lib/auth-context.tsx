@@ -11,6 +11,7 @@ import type { SupabaseClient, User } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/client";
 import type { Database } from "@/lib/database.types";
 import { SITE_URL } from "@/lib/siteConfig";
+import { verifyTurnstileToken } from "@/lib/actions/turnstile";
 
 export type UserRole = "customer" | "admin";
 
@@ -37,6 +38,7 @@ export type RegisterInput = {
   email: string;
   phone: string;
   password: string;
+  turnstileToken: string;
 };
 
 type AuthContextValue = {
@@ -140,6 +142,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const register = async (input: RegisterInput): Promise<RegisterResult> => {
+    const verification = await verifyTurnstileToken(input.turnstileToken);
+    if (!verification.success) {
+      return { success: false, error: verification.error };
+    }
+
     const supabase = createClient();
     const email = input.email.trim().toLowerCase();
 

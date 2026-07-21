@@ -1,9 +1,8 @@
 "use client";
 
-import { useEffect, useId, useState, type FormEvent, type ReactNode } from "react";
+import { useEffect, useId, useRef, useState, type FormEvent, type ReactNode } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import Script from "next/script";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { useAuth } from "@/lib/auth-context";
@@ -12,17 +11,9 @@ import { COUNTRIES } from "@/lib/countries";
 import MagneticButton from "@/components/ui/MagneticButton";
 import Wordmark from "@/components/ui/Wordmark";
 import BackButton from "@/components/ui/BackButton";
+import TurnstileWidget, { type TurnstileHandle } from "@/components/ui/TurnstileWidget";
 import signupVisual from "@/public/images/signup-visual.svg";
 import logoMark from "@/public/deltra-mark-ondark.png";
-
-// Falls back to Cloudflare's public "always passes" test key only when
-// NEXT_PUBLIC_TURNSTILE_SITE_KEY isn't configured, so local dev keeps working
-// before a real site key is issued. The widget renders and collects a token,
-// but nothing currently verifies that token server-side against
-// TURNSTILE_SECRET_KEY before account creation — a real deployment should add
-// that check (Cloudflare's siteverify endpoint) to a signup Server Action.
-const TURNSTILE_TEST_SITE_KEY = "1x00000000000000000000AA";
-const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || TURNSTILE_TEST_SITE_KEY;
 
 const PersonIcon = (
   <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={1.8}>
@@ -79,6 +70,9 @@ export default function SignupPage() {
   const [verifyEmailSent, setVerifyEmailSent] = useState<string | null>(null);
   const [isResending, setIsResending] = useState(false);
   const [resendMessage, setResendMessage] = useState<string | null>(null);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const [turnstileError, setTurnstileError] = useState(false);
+  const turnstileRef = useRef<TurnstileHandle>(null);
 
   const markTouched = (field: string) => setTouched((t) => ({ ...t, [field]: true }));
 
@@ -103,13 +97,20 @@ export default function SignupPage() {
   const privacyError = !agreePrivacy ? "Required to continue." : null;
 
   const isFormValid =
-    !firstNameError && !lastNameError && !emailError && !phoneError && !passwordError && !termsError && !privacyError;
+    !firstNameError &&
+    !lastNameError &&
+    !emailError &&
+    !phoneError &&
+    !passwordError &&
+    !termsError &&
+    !privacyError &&
+    Boolean(turnstileToken);
 
   const showError = (field: string, message: string | null) => (touched[field] ? message : null);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (!isFormValid) return;
+    if (!isFormValid || !turnstileToken) return;
 
     setIsSubmitting(true);
     setFormError(null);
@@ -121,11 +122,15 @@ export default function SignupPage() {
       email,
       phone: `${country.dial} ${phoneNumber.trim()}`,
       password,
+      turnstileToken,
     });
     setIsSubmitting(false);
 
     if (!result.success) {
       setFormError(result.error);
+      // The token is single-use — re-challenge before the next attempt.
+      setTurnstileToken(null);
+      turnstileRef.current?.reset();
       return;
     }
     if (result.status === "verify-email") {
@@ -206,8 +211,6 @@ export default function SignupPage() {
 
   return (
     <div className="grid min-h-screen grid-cols-1 bg-bg lg:grid-cols-2">
-      <Script src="https://challenges.cloudflare.com/turnstile/v0/api.js" strategy="lazyOnload" />
-
       {/* Left: form */}
       <div className="flex flex-col justify-center px-6 py-16 sm:px-12 lg:px-16">
         <div className="mx-auto w-full max-w-md">
@@ -425,7 +428,23 @@ export default function SignupPage() {
             )}
 
             <motion.div {...fadeUp(0.35)}>
-              <div className="cf-turnstile" data-sitekey={TURNSTILE_SITE_KEY} data-theme="auto" />
+              <TurnstileWidget
+                ref={turnstileRef}
+                onVerify={(token) => {
+                  setTurnstileToken(token);
+                  setTurnstileError(false);
+                }}
+                onExpire={() => setTurnstileToken(null)}
+                onError={() => {
+                  setTurnstileToken(null);
+                  setTurnstileError(true);
+                }}
+              />
+              {turnstileError && (
+                <p className="mt-2 text-xs text-red-400">
+                  Couldn&rsquo;t load verification — check your connection and refresh the page.
+                </p>
+              )}
             </motion.div>
 
             <motion.div {...fadeUp(0.4)}>

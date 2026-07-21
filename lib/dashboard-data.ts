@@ -86,20 +86,19 @@ export type OverseasAddress = {
   service: string;
 };
 
-// TODO: mock warehouse — replace with the customer's real assigned facility from the API.
 const WAREHOUSE = {
-  addressLine1: "1400 Corbin St",
-  city: "Elizabeth",
-  region: "NJ",
-  postalCode: "07201",
+  addressLine1: "2099 NW 141st Street",
+  city: "Opa-locka",
+  region: "FL",
+  postalCode: "33054",
   country: "USA",
 };
 
 export function getOverseasAddress(customerName: string, accountCode: string): OverseasAddress {
   return {
-    name: `${customerName} ${accountCode}`,
+    name: `${customerName}-${accountCode}`,
     addressLine1: WAREHOUSE.addressLine1,
-    addressLine2: `Suite ${accountCode}`,
+    addressLine2: `Unit 8 ${accountCode}`,
     city: WAREHOUSE.city,
     region: WAREHOUSE.region,
     postalCode: WAREHOUSE.postalCode,

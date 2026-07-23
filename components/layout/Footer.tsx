@@ -12,7 +12,7 @@ export default function Footer() {
             <Wordmark className="h-10" />
             <p className="mt-5 max-w-xs text-sm leading-relaxed text-fg/55">
               Shop from any US retailer, ship it to your Deltra address, and we&rsquo;ll
-              fly it home to your branch in Jamaica — fast, tracked, and reliable.
+              fly it home to you in Montego Bay — fast, tracked, and reliable.
             </p>
           </div>
 

@@ -52,7 +52,7 @@ const SpinnerIcon = (
   </svg>
 );
 
-const LOCKED_TOOLTIP = "Approved invoices can't be changed. Contact your branch if something's wrong.";
+const LOCKED_TOOLTIP = "Approved invoices can't be changed. Contact us if something's wrong.";
 
 function LockedButton({ label }: { label: string }) {
   return (
@@ -384,7 +384,7 @@ export default function InvoicesPageContent({ packages, invoices }: { packages: 
 
                     {isApproved && (
                       <div className="mt-4 rounded-xl border border-fg/8 bg-fg/[0.03] px-4 py-3">
-                        <p className="text-xs text-fg/60">This invoice has been approved and can no longer be changed. Contact your branch if something&rsquo;s wrong.</p>
+                        <p className="text-xs text-fg/60">This invoice has been approved and can no longer be changed. Contact us if something&rsquo;s wrong.</p>
                         <div className="mt-3 flex flex-wrap gap-2">
                           <LockedButton label="Add files" />
                           <LockedButton label="Withdraw submission" />

@@ -1,9 +1,9 @@
 "use client";
 
 import { useAuth } from "@/lib/auth-context";
-import { BRANCHES } from "@/lib/dashboard-data";
+import { SERVICE_AREA } from "@/lib/dashboard-data";
 import { formatCurrency } from "@/lib/quote-config";
-import { CONTACT_PHONE_HREF } from "@/lib/siteConfig";
+import { CONTACT_PHONE, CONTACT_PHONE_HREF } from "@/lib/siteConfig";
 
 export default function AccountSummaryCard({ walletBalance }: { walletBalance: number }) {
   const { user } = useAuth();
@@ -27,21 +27,17 @@ export default function AccountSummaryCard({ walletBalance }: { walletBalance: n
       </div>
 
       <div className="mt-6">
-        <h4 className="text-xs font-semibold uppercase tracking-widest text-fg/50">Your Local Branch</h4>
-        <ul className="mt-3 space-y-3">
-          {BRANCHES.map((branch) => (
-            <li key={branch.name} className="flex items-center justify-between gap-3 text-sm">
-              <span className="text-fg/80">{branch.name}</span>
-              <a
-                href={CONTACT_PHONE_HREF}
-                data-cursor-hover="Call"
-                className="shrink-0 text-fg/50 transition-colors hover:text-accent"
-              >
-                {branch.phone}
-              </a>
-            </li>
-          ))}
-        </ul>
+        <h4 className="text-xs font-semibold uppercase tracking-widest text-fg/50">Delivery &amp; Pickup</h4>
+        <p className="mt-3 text-sm text-fg/70">
+          No branch to visit — we deliver and arrange pickup throughout the {SERVICE_AREA}.
+        </p>
+        <a
+          href={CONTACT_PHONE_HREF}
+          data-cursor-hover="Call"
+          className="mt-2 inline-block text-sm font-medium text-fg/50 transition-colors hover:text-accent"
+        >
+          {CONTACT_PHONE}
+        </a>
       </div>
     </div>
   );

@@ -66,7 +66,7 @@ export default function BillRow({ bill, pkg, selected, onToggleSelect, onPayNow 
 
       <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-fg/8 pt-4">
         {bill.status === "pending_branch" ? (
-          <p className="text-xs text-fg/50">You chose to pay this in cash at the branch.</p>
+          <p className="text-xs text-fg/50">You chose to pay this in cash on delivery/pickup.</p>
         ) : (
           <span aria-hidden />
         )}

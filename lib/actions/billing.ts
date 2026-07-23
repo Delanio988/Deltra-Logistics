@@ -224,7 +224,7 @@ export async function markBillPaidByAdmin(input: z.infer<typeof markPaidByAdminS
     await notifyCustomer(supabase, {
       customerId: txnRow.customer_id,
       title: "Payment confirmed",
-      body: "Your payment was confirmed as paid in cash at the branch.",
+      body: "Your payment was confirmed as paid in cash.",
     });
   }
 

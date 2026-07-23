@@ -33,7 +33,7 @@ export default function WalletActionsForm({ customers, onCredit, onRefund }: Wal
   return (
     <div className="rounded-2xl border border-fg/8 bg-surface p-6 shadow-card sm:p-8">
       <h3 className="text-sm font-bold text-fg">Wallet actions</h3>
-      <p className="mt-1 text-xs text-fg/50">Credit a wallet for a branch top-up, or issue a refund.</p>
+      <p className="mt-1 text-xs text-fg/50">Credit a wallet for a cash top-up, or issue a refund.</p>
 
       <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-3">
         <div>
@@ -77,7 +77,7 @@ export default function WalletActionsForm({ customers, onCredit, onRefund }: Wal
             type="text"
             value={note}
             onChange={(e) => setNote(e.target.value)}
-            placeholder="e.g. Paid at Fairview branch"
+            placeholder="e.g. Paid in cash on delivery"
             className="mt-1.5 min-h-11 w-full rounded-full border border-fg/15 bg-fg/5 px-4 py-2 text-sm text-fg outline-none transition-colors focus:border-accent"
           />
         </div>

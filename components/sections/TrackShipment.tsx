@@ -16,7 +16,7 @@ export default function TrackShipment() {
             </h2>
             <p className="mt-5 max-w-sm text-[15px] leading-relaxed text-navy-950/65">
               Every package is logged the moment it hits our US warehouse and tracked all the way
-              to your branch. Sign in to your dashboard to see the real-time status of your own
+              to delivery or pickup. Sign in to your dashboard to see the real-time status of your own
               shipments.
             </p>
 

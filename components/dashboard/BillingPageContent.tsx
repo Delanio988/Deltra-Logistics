@@ -87,12 +87,12 @@ export default function BillingPageContent({
       if (!result.success) {
         showToast(result.error);
       } else {
-        showToast("Marked as pending — pay at the branch.");
+        showToast("Marked as pending — pay in cash on delivery/pickup.");
       }
       setSelectedIds((prev) => prev.filter((id) => !billIds.includes(id)));
       router.refresh();
     } else {
-      showToast(`Visit any branch to pay ${formatCurrency(amount)} — we'll credit your wallet once payment is confirmed.`);
+      showToast(`Pay ${formatCurrency(amount)} in cash on delivery/pickup — we'll credit your wallet once payment is confirmed.`);
     }
   };
 

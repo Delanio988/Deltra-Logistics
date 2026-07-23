@@ -37,7 +37,7 @@ export default function AdminBillingContent({ bills, packages, customers }: Admi
         <ScrollReveal direction="none">
           <BackButton href="/admin" label="Back to dashboard" className="-ml-3" />
           <h1 className="mt-4 text-display-sm font-extrabold text-fg">Billing</h1>
-          <p className="mt-2 text-fg/60">Add charges, confirm branch payments, and manage customer wallets.</p>
+          <p className="mt-2 text-fg/60">Add charges, confirm cash payments, and manage customer wallets.</p>
         </ScrollReveal>
 
         <ScrollReveal index={0} className="mt-10">

@@ -74,7 +74,8 @@ export default function Hero() {
           className="mt-8 max-w-xl text-lg text-fg/70 lg:text-xl"
         >
           Shop from any US retailer and get it home fast — Deltra Logistics
-          consolidates and flies your packages from our US warehouse straight to your local branch in Jamaica.
+          consolidates and flies your packages from our US warehouse straight to you, with delivery and pickup
+          throughout Montego Bay.
         </motion.p>
 
         <motion.div

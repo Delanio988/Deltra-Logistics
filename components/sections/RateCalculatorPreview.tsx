@@ -17,7 +17,7 @@ export default function RateCalculatorPreview() {
           </h2>
           <p className="mt-6 max-w-md text-[15px] leading-relaxed text-fg/65">
             One flat rate, shown up front: J$600 per pound. Enter a weight and get an instant
-            estimate — the same math our branches use to bill every package.
+            estimate — the same math we use to bill every package.
           </p>
           <div className="mt-8">
             <MagneticButton

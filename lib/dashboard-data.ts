@@ -1,5 +1,4 @@
 import type { TrackingStatus } from "@/lib/data";
-import { CONTACT_PHONE } from "@/lib/siteConfig";
 
 export type PackageStatus =
   | "Pre-Alerted"
@@ -27,8 +26,8 @@ const STEP_DESCRIPTIONS: Record<PackageStatus, string> = {
   "Pre-Alerted": "Customer submitted a pre-alert for this shipment",
   "Received at Warehouse": "Package received and logged at our US warehouse",
   "In Transit": "Departed the warehouse en route to Jamaica",
-  "Arrived at Local Branch": "Cleared customs and arrived at your local branch",
-  "Ready for Pickup": "Ready for collection at your local branch",
+  "Arrived at Local Branch": "Cleared customs and arrived in Jamaica, ready for delivery or pickup",
+  "Ready for Pickup": "Ready — we'll arrange delivery or a pickup time with you",
   Delivered: "Collected by / delivered to the customer",
 };
 
@@ -63,17 +62,9 @@ export type Customer = {
   email: string;
 };
 
-export type Branch = {
-  name: string;
-  phone: string;
-};
-
-// Same contact number for both branches for now — update lib/siteConfig.ts if
-// each branch gets its own direct line.
-export const BRANCHES: Branch[] = [
-  { name: "Montego Bay — Fairview", phone: CONTACT_PHONE },
-  { name: "Montego Bay — Half Moon", phone: CONTACT_PHONE },
-];
+// No physical branch/storefront — every package is delivered or picked up by
+// arrangement within this area. See lib/siteConfig.ts for the contact number.
+export const SERVICE_AREA = "Montego Bay area";
 
 export type OverseasAddress = {
   name: string;

@@ -72,8 +72,8 @@ export const PROCESS_STEPS = [
   },
   {
     number: "04",
-    title: "Collect at your branch",
-    description: "Get notified the moment it lands, then pick up at your nearest Deltra branch — or have it delivered.",
+    title: "Get it delivered or arrange pickup",
+    description: "Get notified the moment it lands — we'll deliver it to you or arrange a convenient pickup, anywhere in the Montego Bay area.",
   },
 ] as const;
 
@@ -90,7 +90,7 @@ export const BENTO_FEATURES: BentoFeature[] = [
     id: "air-freight",
     title: "Fast air freight",
     description:
-      "Scheduled flights out of our US warehouses mean your packages are airborne within days, not weeks — every run tracked door to branch.",
+      "Scheduled flights out of our US warehouses mean your packages are airborne within days, not weeks — every run tracked from pickup to delivery.",
     icon: "bolt",
     size: "lg",
   },
@@ -104,14 +104,14 @@ export const BENTO_FEATURES: BentoFeature[] = [
   {
     id: "tracking",
     title: "Package tracking",
-    description: "Every package logged the moment it hits our US warehouse, visible in your dashboard from arrival to branch.",
+    description: "Every package logged the moment it hits our US warehouse, visible in your dashboard from arrival to delivery.",
     icon: "radar",
     size: "sm",
   },
   {
     id: "branches",
-    title: "Local branches",
-    description: "Multiple Jamaican pickup locations, with real people ready to help — not just a tracking number.",
+    title: "Montego Bay delivery & pickup",
+    description: "We deliver straight to you or arrange a pickup time that works — real people coordinating it, not just a tracking number.",
     icon: "branch",
     size: "md",
   },

@@ -1,6 +1,6 @@
 // Small country/dial-code list for the sign-up phone field. Jamaica is first
-// (and the default selection) since it's the primary market for the mock
-// Montego Bay branches in lib/dashboard-data.ts; the rest cover common
+// (and the default selection) since it's the primary market — Deltra
+// delivers/picks up in the Montego Bay area; the rest cover common
 // Caribbean/North American markets. Extend freely — nothing else depends on
 // this list being exhaustive.
 export type Country = {

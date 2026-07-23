@@ -40,7 +40,7 @@ export const BILL_STATUS_LABELS: Record<BillStatus, string> = {
   unpaid: "Unpaid",
   partially_paid: "Partially Paid",
   paid: "Paid",
-  pending_branch: "Pending — Pay at Branch",
+  pending_branch: "Pending — Cash on Delivery/Pickup",
 };
 
 export function billBalanceDue(bill: Bill): number {

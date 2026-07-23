@@ -5,8 +5,8 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useModalA11y } from "@/lib/useModalA11y";
 import { useReducedMotion } from "@/lib/useReducedMotion";
 import { formatCurrency } from "@/lib/quote-config";
-import { BRANCHES } from "@/lib/dashboard-data";
 import type { PaymentMethod } from "@/lib/billing";
+import { CONTACT_PHONE, CONTACT_PHONE_HREF } from "@/lib/siteConfig";
 import { cn } from "@/lib/utils";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
 
@@ -20,7 +20,7 @@ const METHOD_LABELS: Record<PaymentMethod, string> = {
   wallet: "Wallet Balance",
   card: "Card",
   bank: "Bank Transfer",
-  cash: "Cash at Branch",
+  cash: "Cash on Delivery/Pickup",
 };
 
 type PaymentDialogProps = {
@@ -228,18 +228,16 @@ export default function PaymentDialog({
           {method === "cash" && (
             <div className="space-y-3">
               <p className="text-sm text-fg/60">
-                {editableAmount
-                  ? "Pay at any branch below — we'll credit your wallet once the payment is confirmed."
-                  : "Pay in cash at any of our branches:"}
+                We don&rsquo;t have a branch to visit — pay in cash when we deliver your package or when you
+                collect it.
+                {editableAmount && " We'll credit your wallet once the payment is confirmed."}
               </p>
-              <ul className="space-y-2">
-                {BRANCHES.map((b) => (
-                  <li key={b.name} className="flex items-center justify-between rounded-xl border border-fg/10 bg-fg/5 px-4 py-3 text-sm">
-                    <span className="text-fg/80">{b.name}</span>
-                    <span className="text-fg/50">{b.phone}</span>
-                  </li>
-                ))}
-              </ul>
+              <div className="flex items-center justify-between rounded-xl border border-fg/10 bg-fg/5 px-4 py-3 text-sm">
+                <span className="text-fg/70">Have the amount ready — questions?</span>
+                <a href={CONTACT_PHONE_HREF} data-cursor-hover="Call" className="shrink-0 font-medium text-fg/80 hover:text-accent">
+                  {CONTACT_PHONE}
+                </a>
+              </div>
             </div>
           )}
         </div>
@@ -260,7 +258,7 @@ export default function PaymentDialog({
             data-cursor-hover="Continue"
             className="min-h-11 rounded-full bg-accent px-6 py-2.5 text-sm font-semibold text-navy-950 shadow-accent transition-colors hover:bg-accent-dark hover:text-white disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none"
           >
-            {method === "cash" ? "Confirm — I'll pay at the branch" : "Continue"}
+            {method === "cash" ? "Confirm — I'll pay in cash" : "Continue"}
           </button>
         </div>
       </motion.div>
@@ -268,12 +266,12 @@ export default function PaymentDialog({
       <AnimatePresence>
         {confirming && (
           <ConfirmDialog
-            title={method === "cash" ? "Confirm branch payment" : "Confirm payment"}
+            title={method === "cash" ? "Confirm cash payment" : "Confirm payment"}
             message={
               method === "cash"
                 ? editableAmount
-                  ? `We'll mark ${formatCurrency(effectiveAmount)} as expected at the branch. Your wallet is credited once payment is received.`
-                  : `This marks the bill "Pending — Pay at Branch." Bring the amount due to any branch listed.`
+                  ? `We'll mark ${formatCurrency(effectiveAmount)} as expected in cash. Your wallet is credited once payment is received.`
+                  : `This marks the bill "Pending — Cash on Delivery/Pickup." Have the amount ready when we deliver or you collect your package.`
                 : method === "wallet"
                   ? `Pay ${formatCurrency(Math.min(walletBalance, effectiveAmount))} from your wallet now?`
                   : `You'll be redirected to a secure payment page to pay ${formatCurrency(effectiveAmount)}.`

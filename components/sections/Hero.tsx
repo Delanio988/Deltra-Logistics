@@ -5,7 +5,7 @@ import { motion, useScroll, useTransform } from "framer-motion";
 import SplitText from "@/components/ui/SplitText";
 import MagneticButton from "@/components/ui/MagneticButton";
 import HeroTrackRateWidget from "@/components/sections/HeroTrackRateWidget";
-import HeroVehicleVisual from "@/components/sections/HeroVehicleVisual";
+import HeroVanBoxesVisual from "@/components/sections/HeroVanBoxesVisual";
 import { useReducedMotion } from "@/lib/useReducedMotion";
 import { useSeasonal } from "@/lib/seasonal-context";
 import { cn } from "@/lib/utils";
@@ -109,7 +109,7 @@ export default function Hero() {
         </div>
 
         <motion.div style={{ y: visualY }}>
-          <HeroVehicleVisual className="max-w-[280px] lg:max-w-none" />
+          <HeroVanBoxesVisual className="max-w-[280px] lg:max-w-none" />
         </motion.div>
       </motion.div>
 

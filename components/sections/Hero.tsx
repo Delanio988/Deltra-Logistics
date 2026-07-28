@@ -5,7 +5,7 @@ import { motion, useScroll, useTransform } from "framer-motion";
 import SplitText from "@/components/ui/SplitText";
 import MagneticButton from "@/components/ui/MagneticButton";
 import HeroTrackRateWidget from "@/components/sections/HeroTrackRateWidget";
-import HeroRouteVisual from "@/components/sections/HeroRouteVisual";
+import HeroTruckVisual from "@/components/sections/HeroTruckVisual";
 import { useReducedMotion } from "@/lib/useReducedMotion";
 import { useSeasonal } from "@/lib/seasonal-context";
 import { cn } from "@/lib/utils";
@@ -108,13 +108,8 @@ export default function Hero() {
           </motion.div>
         </div>
 
-        <motion.div
-          style={{ y: visualY }}
-          initial={{ opacity: 0, scale: 0.92 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 1, delay: 0.6, ease: [0.22, 1, 0.36, 1] }}
-        >
-          <HeroRouteVisual className="max-w-[280px] lg:max-w-none" />
+        <motion.div style={{ y: visualY }}>
+          <HeroTruckVisual className="max-w-[280px] lg:max-w-none" />
         </motion.div>
       </motion.div>
 

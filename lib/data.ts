@@ -77,14 +77,6 @@ export const PROCESS_STEPS = [
   },
 ] as const;
 
-export type BentoFeature = {
-  id: string;
-  title: string;
-  description: string;
-  icon: "globe" | "bolt" | "tag" | "radar" | "branch";
-  size: "lg" | "md" | "sm";
-};
-
 export type FeatureGridItem = {
   id: string;
   number: string;
@@ -144,43 +136,4 @@ export const FEATURE_GRID_ITEMS: FeatureGridItem[] = [
     icon: "sms",
   },
 ];
-
-export const BENTO_FEATURES: BentoFeature[] = [
-  {
-    id: "air-freight",
-    title: "Fast air freight",
-    description:
-      "Scheduled flights out of our US warehouses mean your packages are airborne within days, not weeks — every run tracked from pickup to delivery.",
-    icon: "bolt",
-    size: "lg",
-  },
-  {
-    id: "pricing",
-    title: "Transparent pricing",
-    description: "One flat rate per pound, shown up front. No surprise fees at pickup.",
-    icon: "tag",
-    size: "sm",
-  },
-  {
-    id: "tracking",
-    title: "Package tracking",
-    description: "Every package logged the moment it hits our US warehouse, visible in your dashboard from arrival to delivery.",
-    icon: "radar",
-    size: "sm",
-  },
-  {
-    id: "branches",
-    title: "Montego Bay delivery & pickup",
-    description: "We deliver straight to you or arrange a pickup time that works — real people coordinating it, not just a tracking number.",
-    icon: "branch",
-    size: "md",
-  },
-  {
-    id: "reach",
-    title: "Global reach, local roots",
-    description: "Shop from any US retailer. Collect in Jamaica.",
-    icon: "globe",
-    size: "md",
-  },
-] as const;
 

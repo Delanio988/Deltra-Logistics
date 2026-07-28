@@ -9,13 +9,13 @@ type StatusTimelineProps = {
   /** Index of the last completed step; steps at or before this are marked done. */
   currentStepIndex: number;
   className?: string;
-  /** "light" for a white/light card (TrackShipment); "dark" for a dark-gray card (dashboard). */
+  /** "light" for a white/light card; "dark" for a dark-gray card (hero widget, dashboard). */
   variant?: "light" | "dark";
 };
 
 /**
  * Vertical step timeline with an animated accent-red fill connecting
- * completed steps. Shared by the public tracking widget (TrackShipment) and
+ * completed steps. Shared by the hero's example tracking preview and
  * the dashboard's package detail view, which sit on different-toned cards —
  * hence the light/dark variant rather than hardcoded text/border colors.
  */

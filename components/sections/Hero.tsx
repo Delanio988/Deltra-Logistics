@@ -4,6 +4,8 @@ import { useRef } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import SplitText from "@/components/ui/SplitText";
 import MagneticButton from "@/components/ui/MagneticButton";
+import HeroTrackRateWidget from "@/components/sections/HeroTrackRateWidget";
+import HeroRouteVisual from "@/components/sections/HeroRouteVisual";
 import { useReducedMotion } from "@/lib/useReducedMotion";
 import { useSeasonal } from "@/lib/seasonal-context";
 import { cn } from "@/lib/utils";
@@ -17,7 +19,8 @@ export default function Hero() {
   const bannerVisible = isSeasonalBannerVisible("public");
 
   // Parallax: background drifts slower than scroll, content fades out faster,
-  // so the hero feels like it recedes as you scroll past it.
+  // the hero visual drifts independently — so the hero feels like it recedes
+  // as you scroll past it.
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ["start start", "end start"],
@@ -25,6 +28,7 @@ export default function Hero() {
   const bgY = useTransform(scrollYProgress, [0, 1], ["0%", prefersReducedMotion ? "0%" : "30%"]);
   const contentY = useTransform(scrollYProgress, [0, 1], ["0%", prefersReducedMotion ? "0%" : "18%"]);
   const contentOpacity = useTransform(scrollYProgress, [0, 0.7], [1, 0]);
+  const visualY = useTransform(scrollYProgress, [0, 1], ["0%", prefersReducedMotion ? "0%" : "12%"]);
 
   return (
     <section
@@ -32,8 +36,7 @@ export default function Hero() {
       id="top"
       className="relative flex min-h-[100svh] flex-col overflow-hidden bg-bg text-fg"
     >
-      {/* Background layer: animated gradient + parallax drift. TODO: swap for a
-          slow-panning container-ship / globe video or image plate. */}
+      {/* Background layer: animated gradient + parallax drift. */}
       <motion.div
         aria-hidden
         style={{ y: bgY }}
@@ -47,53 +50,71 @@ export default function Hero() {
       <motion.div
         style={{ y: contentY, opacity: contentOpacity }}
         className={cn(
-          "relative z-10 mx-auto flex w-full max-w-container flex-1 flex-col justify-center px-6 lg:px-12",
+          "relative z-10 mx-auto grid w-full max-w-container flex-1 grid-cols-1 items-center gap-16 px-6 py-28 lg:grid-cols-[1.05fr_0.95fr] lg:gap-12 lg:px-12",
           bannerVisible ? "pt-[calc(var(--header-height)+2.75rem)]" : "pt-[--header-height]"
         )}
       >
-        <motion.span
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.1 }}
-          className="gold-label mb-8"
-        >
-          Global Logistics, Reimagined
-        </motion.span>
+        <div>
+          <motion.span
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.1 }}
+            className="gold-label mb-8 inline-block"
+          >
+            Global Logistics, Reimagined
+          </motion.span>
 
-        <SplitText
-          as="h1"
-          text="Moving the world, one shipment at a time"
-          startDelay={0.25}
-          className="max-w-5xl text-display-xl font-extrabold text-fg"
-        />
+          <SplitText
+            as="h1"
+            text="SHOP THE US. FLY IT HOME."
+            startDelay={0.25}
+            highlightWords={["US", "HOME"]}
+            className="max-w-2xl text-display-xl font-extrabold uppercase text-fg"
+          />
 
-        <motion.p
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 1.1 }}
-          className="mt-8 max-w-xl text-lg text-fg/70 lg:text-xl"
-        >
-          Shop from any US retailer and get it home fast — Deltra Logistics
-          consolidates and flies your packages from our US warehouse straight to you, with delivery and pickup
-          throughout Montego Bay.
-        </motion.p>
+          <motion.p
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 1.1 }}
+            className="mt-8 max-w-xl text-lg text-fg/70 lg:text-xl"
+          >
+            Shop from any US retailer and get it home fast — Deltra Logistics
+            consolidates and flies your packages from our US warehouse straight to you, with delivery and pickup
+            throughout Montego Bay.
+          </motion.p>
+
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 1.3 }}
+            className="mt-10"
+          >
+            <MagneticButton
+              href="/quote"
+              cursorLabel="Quote"
+              className="bg-accent text-navy-950 shadow-accent hover:bg-accent-dark hover:text-white"
+            >
+              Get a Quote
+            </MagneticButton>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 1.5 }}
+            className="mt-10"
+          >
+            <HeroTrackRateWidget />
+          </motion.div>
+        </div>
 
         <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 1.3 }}
-          className="mt-12 flex flex-wrap items-center gap-5"
+          style={{ y: visualY }}
+          initial={{ opacity: 0, scale: 0.92 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 1, delay: 0.6, ease: [0.22, 1, 0.36, 1] }}
         >
-          <MagneticButton href="/quote" cursorLabel="Quote" className="bg-accent text-navy-950 shadow-accent hover:bg-accent-dark hover:text-white">
-            Get a Quote
-          </MagneticButton>
-          <MagneticButton
-            href="#tracking"
-            cursorLabel="Track"
-            className="border border-fg/25 text-fg hover:border-accent hover:text-accent"
-          >
-            Track a Shipment
-          </MagneticButton>
+          <HeroRouteVisual className="max-w-[280px] lg:max-w-none" />
         </motion.div>
       </motion.div>
 
@@ -104,7 +125,7 @@ export default function Hero() {
         className="relative z-10 flex justify-center pb-10"
       >
         <a
-          href="#calculator"
+          href="#services"
           data-cursor-hover="Scroll"
           aria-label="Scroll to next section"
           className="flex flex-col items-center gap-3 text-fg/60 transition-colors hover:text-accent"

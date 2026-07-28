@@ -12,9 +12,10 @@ import type { Config } from "tailwindcss";
 //    a visitor toggles light/dark.
 // 2. FIXED tokens (navy, offwhite, ink, accent, gold's DEFAULT/light/dark
 //    shades) are plain hex, unaffected by the toggle. `navy`/`offwhite`/`ink`
-//    back the marketing site's already-light bands (Services, Why Choose Us,
-//    Tracking, Process) and the login/signup white form card — deliberately
-//    light-styled regardless of overall theme, so they don't participate.
+//    back individual marketing-site sections that are deliberately fixed
+//    light or fixed dark regardless of overall theme (e.g. Services/Process
+//    stay light, FeatureGrid stays dark) and the login/signup white form
+//    card — so they don't participate in the toggle at all.
 //    `accent`/`gold` (as backgrounds/borders/shadows, not text) stay vivid
 //    red/red-orange in both themes — the brand doesn't change.
 const config: Config = {
@@ -69,6 +70,7 @@ const config: Config = {
       },
       fontSize: {
         // Fluid, clamp-based display sizes for confident, agency-grade headings.
+        "display-2xl": ["clamp(3.5rem, 10vw, 11rem)", { lineHeight: "0.95", letterSpacing: "-0.02em" }],
         "display-xl": ["clamp(2.75rem, 6vw, 7rem)", { lineHeight: "1.02", letterSpacing: "-0.02em" }],
         "display-lg": ["clamp(2.25rem, 5vw, 5.5rem)", { lineHeight: "1.04", letterSpacing: "-0.02em" }],
         "display-md": ["clamp(1.875rem, 3.5vw, 3.5rem)", { lineHeight: "1.08", letterSpacing: "-0.015em" }],

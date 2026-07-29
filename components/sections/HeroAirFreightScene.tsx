@@ -136,7 +136,7 @@ export default function HeroAirFreightScene({ className }: HeroAirFreightScenePr
       onMouseLeave={handleMouseLeave}
       className={cn("relative mb-6", className)}
     >
-      <div className="relative mx-auto aspect-[3/2] w-full max-w-[240px] lg:max-w-[420px]">
+      <div className="relative mx-auto aspect-[3/2] w-full max-w-[240px] overflow-hidden rounded-3xl lg:max-w-[420px]">
         {/* ---- 1. Background / lighting / glow layer ---- */}
         <motion.div aria-hidden className="absolute inset-0" style={{ x: bgX, y: bgY }}>
           {/* Faint background route texture — ambient context, not connective (see the lit flight-path arcs below for that) */}

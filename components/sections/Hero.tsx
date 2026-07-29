@@ -6,6 +6,7 @@ import SplitText from "@/components/ui/SplitText";
 import MagneticButton from "@/components/ui/MagneticButton";
 import HeroTrackRateWidget from "@/components/sections/HeroTrackRateWidget";
 import HeroVanBoxesVisual from "@/components/sections/HeroVanBoxesVisual";
+import HeroAirFreightScene from "@/components/sections/HeroAirFreightScene";
 import { useReducedMotion } from "@/lib/useReducedMotion";
 import { useSeasonal } from "@/lib/seasonal-context";
 import { cn } from "@/lib/utils";
@@ -29,6 +30,7 @@ export default function Hero() {
   const contentY = useTransform(scrollYProgress, [0, 1], ["0%", prefersReducedMotion ? "0%" : "18%"]);
   const contentOpacity = useTransform(scrollYProgress, [0, 0.7], [1, 0]);
   const visualY = useTransform(scrollYProgress, [0, 1], ["0%", prefersReducedMotion ? "0%" : "12%"]);
+  const sceneY = useTransform(scrollYProgress, [0, 1], ["0%", prefersReducedMotion ? "0%" : "20%"]);
 
   return (
     <section
@@ -108,9 +110,14 @@ export default function Hero() {
           </motion.div>
         </div>
 
-        <motion.div style={{ y: visualY }}>
-          <HeroVanBoxesVisual className="max-w-[280px] lg:max-w-none" />
-        </motion.div>
+        <div className="flex flex-col">
+          <motion.div style={{ y: sceneY }}>
+            <HeroAirFreightScene />
+          </motion.div>
+          <motion.div style={{ y: visualY }}>
+            <HeroVanBoxesVisual className="max-w-[280px] lg:max-w-none" />
+          </motion.div>
+        </div>
       </motion.div>
 
       <motion.div

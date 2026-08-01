@@ -12,6 +12,7 @@ import { getOverseasAddress, type Package } from "@/lib/dashboard-data";
 import type { Invoice } from "@/lib/invoices";
 import type { Message } from "@/lib/messages";
 import type { Bill } from "@/lib/billing";
+import type { PreAlert } from "@/lib/pre-alerts";
 import { useAuth } from "@/lib/auth-context";
 
 type DashboardContentProps = {
@@ -20,9 +21,17 @@ type DashboardContentProps = {
   messages: Message[];
   bills: Bill[];
   walletBalance: number;
+  preAlerts: PreAlert[];
 };
 
-export default function DashboardContent({ packages, invoices, messages, bills, walletBalance }: DashboardContentProps) {
+export default function DashboardContent({
+  packages,
+  invoices,
+  messages,
+  bills,
+  walletBalance,
+  preAlerts,
+}: DashboardContentProps) {
   const { user } = useAuth();
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
@@ -46,7 +55,7 @@ export default function DashboardContent({ packages, invoices, messages, bills, 
           <AccountActionsCard packages={packages} invoices={invoices} messages={messages} />
         </ScrollReveal>
         <ScrollReveal index={2}>
-          <PackageSummaryCard packages={packages} bills={bills} />
+          <PackageSummaryCard packages={packages} bills={bills} preAlerts={preAlerts} />
         </ScrollReveal>
         <ScrollReveal index={3}>
           <OverseasAddressCard address={overseasAddress} />

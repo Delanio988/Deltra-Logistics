@@ -1,12 +1,11 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
 import type { Bill } from "@/lib/billing";
 import type { Package } from "@/lib/dashboard-data";
+import type { PreAlert } from "@/lib/pre-alerts";
 import { useLenis } from "@/components/layout/SmoothScrollProvider";
 import ActionRow from "@/components/dashboard/ActionRow";
-import Toast from "@/components/ui/Toast";
 
 const preAlertIcon = (
   <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={1.8}>
@@ -31,16 +30,21 @@ const billsIcon = (
   </svg>
 );
 
-export default function PackageSummaryCard({ packages, bills }: { packages: Package[]; bills: Bill[] }) {
+export default function PackageSummaryCard({
+  packages,
+  bills,
+  preAlerts,
+}: {
+  packages: Package[];
+  bills: Bill[];
+  preAlerts: PreAlert[];
+}) {
   const lenis = useLenis();
   const router = useRouter();
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  const preAlertCount = packages.filter((p) => p.status === "Pre-Alerted").length;
+  const preAlertCount = preAlerts.filter((p) => p.status === "pending").length;
   const notPickedUpCount = packages.filter((p) => p.status !== "Delivered").length;
   const outstandingBillCount = bills.filter((b) => b.status !== "paid").length;
-
-  const handleStub = (label: string) => setToastMessage(`${label} is coming soon in a future update.`);
 
   const scrollToPackages = () => {
     const target = document.getElementById("packages");
@@ -62,7 +66,7 @@ export default function PackageSummaryCard({ packages, bills }: { packages: Pack
           label="Pre-Alert"
           sublabel="Pre-alerts submitted by me"
           badge={preAlertCount}
-          onClick={() => handleStub("Pre-Alert")}
+          onClick={() => router.push("/dashboard/pre-alerts")}
         />
         <ActionRow
           icon={packageIcon}
@@ -79,8 +83,6 @@ export default function PackageSummaryCard({ packages, bills }: { packages: Pack
           onClick={() => router.push("/dashboard/billing")}
         />
       </div>
-
-      <Toast message={toastMessage} onDismiss={() => setToastMessage(null)} />
     </div>
   );
 }

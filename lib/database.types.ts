@@ -433,10 +433,50 @@ export type Database = {
           },
         ]
       }
+      pre_alert_files: {
+        Row: {
+          id: string
+          mime_type: string
+          name: string
+          pre_alert_id: string
+          size: number
+          storage_path: string
+          uploaded_at: string
+        }
+        Insert: {
+          id?: string
+          mime_type: string
+          name: string
+          pre_alert_id: string
+          size: number
+          storage_path: string
+          uploaded_at?: string
+        }
+        Update: {
+          id?: string
+          mime_type?: string
+          name?: string
+          pre_alert_id?: string
+          size?: number
+          storage_path?: string
+          uploaded_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pre_alert_files_pre_alert_id_fkey"
+            columns: ["pre_alert_id"]
+            isOneToOne: false
+            referencedRelation: "pre_alerts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pre_alerts: {
         Row: {
           created_at: string
+          currency: string | null
           customer_id: string
+          declared_value: number | null
           description: string | null
           expected_weight_lb: number | null
           id: string
@@ -447,7 +487,9 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          currency?: string | null
           customer_id: string
+          declared_value?: number | null
           description?: string | null
           expected_weight_lb?: number | null
           id?: string
@@ -458,7 +500,9 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          currency?: string | null
           customer_id?: string
+          declared_value?: number | null
           description?: string | null
           expected_weight_lb?: number | null
           id?: string
@@ -478,7 +522,7 @@ export type Database = {
           {
             foreignKeyName: "pre_alerts_matched_package_id_fkey"
             columns: ["matched_package_id"]
-            isOneToOne: false
+            isOneToOne: true
             referencedRelation: "packages"
             referencedColumns: ["id"]
           },

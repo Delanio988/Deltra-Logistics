@@ -5,14 +5,16 @@ import { getPackagesForCurrentUser } from "@/lib/packages";
 import { getInvoicesForCurrentUser } from "@/lib/invoices-data";
 import { getMessagesForCurrentUser } from "@/lib/messages-data";
 import { getBillsForCurrentUser, getWalletBalanceForCurrentUser } from "@/lib/billing-data";
+import { getPreAlertsForCurrentUser } from "@/lib/pre-alerts-data";
 
 export default async function DashboardPage() {
-  const [packages, invoices, messages, bills, walletBalance] = await Promise.all([
+  const [packages, invoices, messages, bills, walletBalance, preAlerts] = await Promise.all([
     getPackagesForCurrentUser(),
     getInvoicesForCurrentUser(),
     getMessagesForCurrentUser(),
     getBillsForCurrentUser(),
     getWalletBalanceForCurrentUser(),
+    getPreAlertsForCurrentUser(),
   ]);
 
   return (
@@ -26,6 +28,7 @@ export default async function DashboardPage() {
             messages={messages}
             bills={bills}
             walletBalance={walletBalance}
+            preAlerts={preAlerts}
           />
         </main>
       </div>

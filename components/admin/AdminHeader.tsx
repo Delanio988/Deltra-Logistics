@@ -3,12 +3,13 @@
 import { useState } from "react";
 import Link from "next/link";
 import { flushSync } from "react-dom";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { useAuth } from "@/lib/auth-context";
 import Wordmark from "@/components/ui/Wordmark";
 import MagneticButton from "@/components/ui/MagneticButton";
 import ThemeToggle from "@/components/ui/ThemeToggle";
+import NavPillIndicator from "@/components/ui/NavPillIndicator";
 import { cn } from "@/lib/utils";
 
 const ADMIN_NAV_LINKS = [
@@ -19,6 +20,9 @@ const ADMIN_NAV_LINKS = [
   { href: "/admin/theme", label: "Theme" },
 ];
 
+const FOCUS_RING =
+  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-surface";
+
 /** Simplified chrome for the admin area — brand, an "Admin" tag, and Logout.
  *  The nav links only show inline at lg+; below that, a hamburger opens a
  *  dropdown with the same links (there was previously no way to reach them
@@ -26,7 +30,10 @@ const ADMIN_NAV_LINKS = [
 export default function AdminHeader() {
   const { user, logout } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
   const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const [hoveredHref, setHoveredHref] = useState<string | null>(null);
+  const activeHref = ADMIN_NAV_LINKS.find((link) => link.href === pathname)?.href ?? null;
 
   const handleLogout = () => {
     // See components/dashboard/DashboardHeader.tsx for why flushSync is
@@ -47,17 +54,34 @@ export default function AdminHeader() {
           </span>
         </Link>
 
-        <nav className="hidden items-center gap-6 lg:flex" aria-label="Admin">
-          {ADMIN_NAV_LINKS.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              data-cursor-hover={link.label}
-              className="text-sm font-medium text-fg/70 transition-colors hover:text-accent"
-            >
-              {link.label}
-            </Link>
-          ))}
+        <nav
+          className="hidden items-center gap-1 lg:flex"
+          aria-label="Admin"
+          onMouseLeave={() => setHoveredHref(null)}
+        >
+          {ADMIN_NAV_LINKS.map((link) => {
+            const target = hoveredHref ?? activeHref;
+            const isTarget = target === link.href;
+            const isActive = activeHref === link.href;
+            return (
+              <Link
+                key={link.href}
+                href={link.href}
+                data-cursor-hover={link.label}
+                onMouseEnter={() => setHoveredHref(link.href)}
+                onFocus={() => setHoveredHref(link.href)}
+                onBlur={() => setHoveredHref(null)}
+                className={cn(
+                  "relative rounded-full px-4 py-2 text-sm font-medium transition-colors",
+                  FOCUS_RING,
+                  isActive ? "text-navy-950" : "text-fg/70 hover:text-accent"
+                )}
+              >
+                {isTarget && <NavPillIndicator layoutId="admin-nav-pill" active={isActive} />}
+                <span className="relative">{link.label}</span>
+              </Link>
+            );
+          })}
         </nav>
 
         <div className="flex items-center gap-2 sm:gap-4">
@@ -100,16 +124,22 @@ export default function AdminHeader() {
             aria-label="Admin mobile"
           >
             <div className="flex flex-col gap-1 px-6 pb-6 pt-2">
-              {ADMIN_NAV_LINKS.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  onClick={() => setIsMobileOpen(false)}
-                  className="border-b border-fg/10 py-4 text-lg font-medium text-fg/90"
-                >
-                  {link.label}
-                </Link>
-              ))}
+              {ADMIN_NAV_LINKS.map((link) => {
+                const isActive = activeHref === link.href;
+                return (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    onClick={() => setIsMobileOpen(false)}
+                    className={cn(
+                      "border-b border-fg/10 py-4 text-lg font-medium",
+                      isActive ? "rounded-full border-b-0 bg-accent px-4 text-navy-950" : "text-fg/90"
+                    )}
+                  >
+                    {link.label}
+                  </Link>
+                );
+              })}
               <button
                 type="button"
                 onClick={() => {

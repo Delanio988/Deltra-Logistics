@@ -10,14 +10,23 @@ import MagneticButton from "@/components/ui/MagneticButton";
 import Wordmark from "@/components/ui/Wordmark";
 import ThemeToggle from "@/components/ui/ThemeToggle";
 import SeasonalGreetingBanner from "@/components/ui/SeasonalGreetingBanner";
+import NavPillIndicator from "@/components/ui/NavPillIndicator";
 import { cn } from "@/lib/utils";
+
+const FOCUS_RING =
+  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg";
 
 export default function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const [hoveredHref, setHoveredHref] = useState<string | null>(null);
   const lenis = useLenis();
   const pathname = usePathname();
   const isHomepage = pathname === "/";
+
+  // Hash-anchor links (#services, #tracking, ...) have no "current page" —
+  // only a real route like /quote can be the active link. No scroll-spy.
+  const activeHref = NAV_LINKS.find((link) => !link.href.startsWith("#") && link.href === pathname)?.href ?? null;
 
   useEffect(() => {
     const onScroll = () => setIsScrolled(window.scrollY > 40);
@@ -67,29 +76,40 @@ export default function Header() {
           </Link>
         )}
 
-        <nav className="hidden items-center gap-10 lg:flex" aria-label="Primary">
-          {NAV_LINKS.map((link) =>
-            link.href.startsWith("#") ? (
-              <a
-                key={link.href}
-                href={link.href}
-                onClick={(e) => handleNavClick(e, link.href)}
-                data-cursor-hover={link.label}
-                className="text-sm font-medium tracking-wide text-fg/80 transition-colors hover:text-accent"
-              >
-                {link.label}
+        <nav
+          className="hidden items-center gap-1 lg:flex"
+          aria-label="Primary"
+          onMouseLeave={() => setHoveredHref(null)}
+        >
+          {NAV_LINKS.map((link) => {
+            const target = hoveredHref ?? activeHref;
+            const isTarget = target === link.href;
+            const isActive = activeHref === link.href;
+            const linkClassName = cn(
+              "relative rounded-full px-4 py-2 text-sm font-medium tracking-wide transition-colors",
+              FOCUS_RING,
+              isActive ? "text-navy-950" : "text-fg/80 hover:text-accent"
+            );
+            const linkProps = {
+              "data-cursor-hover": link.label,
+              onMouseEnter: () => setHoveredHref(link.href),
+              onFocus: () => setHoveredHref(link.href),
+              onBlur: () => setHoveredHref(null),
+              className: linkClassName,
+            };
+
+            return link.href.startsWith("#") ? (
+              <a key={link.href} {...linkProps} href={link.href} onClick={(e) => handleNavClick(e, link.href)}>
+                {isTarget && <NavPillIndicator layoutId="marketing-nav-pill" active={isActive} />}
+                <span className="relative">{link.label}</span>
               </a>
             ) : (
-              <Link
-                key={link.href}
-                href={link.href}
-                data-cursor-hover={link.label}
-                className="text-sm font-medium tracking-wide text-fg/80 transition-colors hover:text-accent"
-              >
-                {link.label}
+              <Link key={link.href} {...linkProps} href={link.href}>
+                {isTarget && <NavPillIndicator layoutId="marketing-nav-pill" active={isActive} />}
+                <span className="relative">{link.label}</span>
               </Link>
-            )
-          )}
+            );
+          })}
         </nav>
 
         <div className="hidden items-center gap-4 lg:flex">
@@ -145,27 +165,22 @@ export default function Header() {
             aria-label="Mobile"
           >
             <div className="flex flex-col gap-1 px-6 pb-8 pt-2">
-              {NAV_LINKS.map((link) =>
-                link.href.startsWith("#") ? (
-                  <a
-                    key={link.href}
-                    href={link.href}
-                    onClick={(e) => handleNavClick(e, link.href)}
-                    className="border-b border-fg/10 py-4 text-lg font-medium text-fg/90"
-                  >
+              {NAV_LINKS.map((link) => {
+                const isActive = activeHref === link.href;
+                const mobileClassName = cn(
+                  "border-b border-fg/10 py-4 text-lg font-medium",
+                  isActive ? "rounded-full border-b-0 bg-accent px-4 text-navy-950" : "text-fg/90"
+                );
+                return link.href.startsWith("#") ? (
+                  <a key={link.href} href={link.href} onClick={(e) => handleNavClick(e, link.href)} className={mobileClassName}>
                     {link.label}
                   </a>
                 ) : (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    onClick={() => setIsMobileOpen(false)}
-                    className="border-b border-fg/10 py-4 text-lg font-medium text-fg/90"
-                  >
+                  <Link key={link.href} href={link.href} onClick={() => setIsMobileOpen(false)} className={mobileClassName}>
                     {link.label}
                   </Link>
-                )
-              )}
+                );
+              })}
               <Link
                 href="/login"
                 onClick={() => setIsMobileOpen(false)}

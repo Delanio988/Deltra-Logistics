@@ -3,10 +3,15 @@ import Link from "next/link";
 type AdminDashboardBadgesProps = {
   pendingInvoiceCount: number;
   billsAwaitingCollectionCount: number;
+  pendingPreAlertCount: number;
 };
 
-export default function AdminDashboardBadges({ pendingInvoiceCount, billsAwaitingCollectionCount }: AdminDashboardBadgesProps) {
-  if (pendingInvoiceCount === 0 && billsAwaitingCollectionCount === 0) return null;
+export default function AdminDashboardBadges({
+  pendingInvoiceCount,
+  billsAwaitingCollectionCount,
+  pendingPreAlertCount,
+}: AdminDashboardBadgesProps) {
+  if (pendingInvoiceCount === 0 && billsAwaitingCollectionCount === 0 && pendingPreAlertCount === 0) return null;
 
   return (
     <div className="mt-4 flex flex-wrap gap-3">
@@ -17,6 +22,15 @@ export default function AdminDashboardBadges({ pendingInvoiceCount, billsAwaitin
           className="inline-flex items-center gap-2 rounded-full border border-amber-500/40 bg-amber-500/10 px-4 py-2 text-xs font-semibold text-amber-700 transition-colors hover:bg-amber-500/20 dark:text-amber-400"
         >
           {pendingInvoiceCount} invoice{pendingInvoiceCount === 1 ? "" : "s"} awaiting review → Review invoices
+        </Link>
+      )}
+      {pendingPreAlertCount > 0 && (
+        <Link
+          href="/admin/pre-alerts"
+          data-cursor-hover="Match"
+          className="inline-flex items-center gap-2 rounded-full border border-amber-500/40 bg-amber-500/10 px-4 py-2 text-xs font-semibold text-amber-700 transition-colors hover:bg-amber-500/20 dark:text-amber-400"
+        >
+          {pendingPreAlertCount} pre-alert{pendingPreAlertCount === 1 ? "" : "s"} awaiting match → Match pre-alerts
         </Link>
       )}
       {billsAwaitingCollectionCount > 0 && (

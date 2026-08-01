@@ -84,7 +84,7 @@ export async function getAllPendingPreAlertsWithCustomer(): Promise<PreAlertWith
       const accountCode = profile?.account_code ?? "";
       const customerName = profile ? `${profile.first_name} ${profile.last_name}`.trim() : accountCode;
       const preAlert = await mapPreAlertRow(supabase, row);
-      return { ...preAlert, customerName, accountCode };
+      return { ...preAlert, customerId: row.customer_id, customerName, accountCode };
     })
   );
 }

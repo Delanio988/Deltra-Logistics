@@ -15,6 +15,7 @@ import { cn } from "@/lib/utils";
 const ADMIN_NAV_LINKS = [
   { href: "/admin", label: "Dashboard" },
   { href: "/admin/invoices", label: "Invoices" },
+  { href: "/admin/pre-alerts", label: "Pre-Alerts" },
   { href: "/admin/billing", label: "Billing" },
   { href: "/admin/warehouse", label: "Warehouse" },
   { href: "/admin/theme", label: "Theme" },

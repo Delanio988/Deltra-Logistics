@@ -28,7 +28,7 @@ export type PreAlert = {
   files: PreAlertFile[];
 };
 
-export type PreAlertWithCustomer = PreAlert & { customerName: string; accountCode: string };
+export type PreAlertWithCustomer = PreAlert & { customerId: string; customerName: string; accountCode: string };
 
 /** A package not yet linked to any pre-alert — for the admin's match picker. */
 export type UnmatchedPackageForMatching = {

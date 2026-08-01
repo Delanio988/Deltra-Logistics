@@ -7,16 +7,19 @@ import ScrollReveal from "@/components/ui/ScrollReveal";
 import { getAllPackagesWithCustomer, getCustomerPickerList } from "@/lib/packages";
 import { getAllInvoicesWithCustomer } from "@/lib/invoices-data";
 import { getAllBillsWithCustomer } from "@/lib/billing-data";
+import { getAllPendingPreAlertsWithCustomer } from "@/lib/pre-alerts-data";
 
 export default async function AdminPage() {
-  const [packages, customers, invoices, bills] = await Promise.all([
+  const [packages, customers, invoices, bills, preAlerts] = await Promise.all([
     getAllPackagesWithCustomer(),
     getCustomerPickerList(),
     getAllInvoicesWithCustomer(),
     getAllBillsWithCustomer(),
+    getAllPendingPreAlertsWithCustomer(),
   ]);
   const pendingInvoiceCount = invoices.filter((inv) => inv.status === "pending").length;
   const billsAwaitingCollectionCount = bills.filter((b) => b.status !== "paid").length;
+  const pendingPreAlertCount = preAlerts.length;
 
   return (
     <RequireAuth role="admin" redirectTo="/admin/login">
@@ -27,7 +30,11 @@ export default async function AdminPage() {
           <ScrollReveal direction="none">
             <h1 className="text-display-sm font-extrabold text-fg">Warehouse dashboard</h1>
             <p className="mt-2 text-fg/60">Add packages and keep customers updated.</p>
-            <AdminDashboardBadges pendingInvoiceCount={pendingInvoiceCount} billsAwaitingCollectionCount={billsAwaitingCollectionCount} />
+            <AdminDashboardBadges
+              pendingInvoiceCount={pendingInvoiceCount}
+              billsAwaitingCollectionCount={billsAwaitingCollectionCount}
+              pendingPreAlertCount={pendingPreAlertCount}
+            />
           </ScrollReveal>
 
           <section className="mt-10">

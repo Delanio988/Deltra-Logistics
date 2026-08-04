@@ -67,9 +67,11 @@ export type Customer = {
 export const SERVICE_AREA = "Montego Bay area";
 
 export type OverseasAddress = {
+  /** Customer name with the account code fused on (e.g. "Delan Thelwell-DLT9641-J")
+   *  so it's visible right on the name line without a separate address line. */
   name: string;
+  accountCode: string;
   addressLine1: string;
-  addressLine2: string;
   city: string;
   region: string;
   postalCode: string;
@@ -78,18 +80,18 @@ export type OverseasAddress = {
 };
 
 const WAREHOUSE = {
-  addressLine1: "2099 NW 141st Street",
-  city: "Opa-locka",
+  addressLine1: "5587 NW 72nd Ave",
+  city: "Miami",
   region: "FL",
-  postalCode: "33054",
+  postalCode: "33166",
   country: "USA",
 };
 
 export function getOverseasAddress(customerName: string, accountCode: string): OverseasAddress {
   return {
     name: `${customerName}-${accountCode}`,
+    accountCode,
     addressLine1: WAREHOUSE.addressLine1,
-    addressLine2: `Unit 8 ${accountCode}`,
     city: WAREHOUSE.city,
     region: WAREHOUSE.region,
     postalCode: WAREHOUSE.postalCode,

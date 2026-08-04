@@ -11,7 +11,7 @@ type OverseasAddressCardProps = {
 export default function OverseasAddressCard({ address }: OverseasAddressCardProps) {
   const [copyState, setCopyState] = useState<"idle" | "copied" | "error">("idle");
 
-  const fullAddress = `${address.name}, ${address.addressLine1}, ${address.addressLine2}, ${address.city}, ${address.region} ${address.postalCode}, ${address.country}`;
+  const fullAddress = `${address.name}, ${address.addressLine1}, ${address.city}, ${address.region} ${address.postalCode}, ${address.country}`;
 
   const handleCopy = async () => {
     try {
@@ -38,7 +38,6 @@ export default function OverseasAddressCard({ address }: OverseasAddressCardProp
       <address className="mt-4 space-y-1 not-italic text-sm leading-relaxed text-fg/85">
         <p className="font-semibold text-fg">{address.name}</p>
         <p>{address.addressLine1}</p>
-        <p className="font-semibold text-accent">{address.addressLine2}</p>
         <p>
           {address.city}, {address.region} {address.postalCode}
         </p>
@@ -56,7 +55,7 @@ export default function OverseasAddressCard({ address }: OverseasAddressCardProp
       </button>
 
       <p className="mt-5 rounded-xl border-l-2 border-gold/60 bg-fg/[0.03] px-4 py-3 text-xs text-fg/50">
-        Always include your account code (<span className="font-semibold text-fg/70">{address.addressLine2}</span>) on
+        Always include your account code (<span className="font-semibold text-fg/70">{address.accountCode}</span>) on
         every package label so our warehouse can match it to your account.
       </p>
     </div>

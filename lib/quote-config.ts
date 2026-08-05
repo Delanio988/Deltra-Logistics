@@ -4,7 +4,7 @@
 // package's displayed cost) stays in sync automatically.
 
 export const CURRENCY = "J$"; // Jamaican dollars — swap for your real currency symbol/code.
-export const RATE_PER_LB = 600; // J$ per pound.
+export const RATE_PER_LB = 650; // J$ per pound.
 
 // Standard courier behavior: round weight up to the next whole pound before
 // charging. Toggle off to charge the exact decimal weight instead.

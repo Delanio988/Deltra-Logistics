@@ -36,7 +36,7 @@ export default function DashboardContent({
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
   const accountCode = user?.accountCode ?? "";
-  const overseasAddress = getOverseasAddress(user?.name ?? "Customer", accountCode);
+  const overseasAddress = getOverseasAddress(user?.firstName ?? "", user?.lastName ?? "", accountCode);
 
   return (
     <>
@@ -58,7 +58,7 @@ export default function DashboardContent({
           <PackageSummaryCard packages={packages} bills={bills} preAlerts={preAlerts} />
         </ScrollReveal>
         <ScrollReveal index={3}>
-          <OverseasAddressCard address={overseasAddress} />
+          <OverseasAddressCard address={overseasAddress} firstName={user?.firstName ?? ""} lastName={user?.lastName ?? ""} />
         </ScrollReveal>
       </div>
 

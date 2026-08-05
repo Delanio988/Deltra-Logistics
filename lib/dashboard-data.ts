@@ -1,4 +1,5 @@
 import type { TrackingStatus } from "@/lib/data";
+import { formatShippingName, type FormatShippingNameResult } from "@/lib/formatShippingName";
 
 export type PackageStatus =
   | "Pre-Alerted"
@@ -67,9 +68,13 @@ export type Customer = {
 export const SERVICE_AREA = "Montego Bay area";
 
 export type OverseasAddress = {
-  /** Customer name with the account code fused on (e.g. "Delan Thelwell-DLT9641-J")
-   *  so it's visible right on the name line without a separate address line. */
+  /** Auto-shortened "{Name}-{Code}" string — see lib/formatShippingName.ts.
+   *  The account code portion is always complete; only the name shortens. */
   name: string;
+  /** Full detail behind `name` (which shortening step was used, whether it
+   *  still overflows the limit) so the UI can show the live character
+   *  count and "why" note next to it. */
+  nameResult: FormatShippingNameResult;
   accountCode: string;
   addressLine1: string;
   city: string;
@@ -83,13 +88,22 @@ const WAREHOUSE = {
   addressLine1: "5587 NW 72nd Ave",
   city: "Miami",
   region: "FL",
+  regionFull: "Florida",
   postalCode: "33166",
   country: "USA",
+  countryFull: "United States",
 };
 
-export function getOverseasAddress(customerName: string, accountCode: string): OverseasAddress {
+/** Generous default for the general "ships to most stores" address — most
+ *  retailers don't enforce anything like SHEIN's 34-character limit, so
+ *  shortening should essentially never kick in here for a real name. */
+const GENERAL_NAME_CHAR_LIMIT = 60;
+
+export function getOverseasAddress(firstName: string, lastName: string, accountCode: string): OverseasAddress {
+  const nameResult = formatShippingName(firstName, lastName, accountCode, GENERAL_NAME_CHAR_LIMIT, "-");
   return {
-    name: `${customerName}-${accountCode}`,
+    name: nameResult.value,
+    nameResult,
     accountCode,
     addressLine1: WAREHOUSE.addressLine1,
     city: WAREHOUSE.city,
@@ -99,3 +113,58 @@ export function getOverseasAddress(customerName: string, accountCode: string): O
     service: "Standard Air",
   };
 }
+
+// ============================================================
+// Retailer-specific address formats
+// ============================================================
+// Most stores accept the general format above as-is. A handful have their
+// own checkout quirks (name-field limits, different address-line layouts)
+// that need a dedicated set of fields — each gets an entry here, keyed by
+// retailer id, so adding another one later is just another key + config.
+// Only build an entry for a retailer once its actual checkout constraints
+// are known — don't invent quirks speculatively.
+
+export type RetailerAddressField = {
+  label: string;
+  value: string;
+};
+
+export type RetailerCustomerInput = {
+  firstName: string;
+  lastName: string;
+  accountCode: string;
+};
+
+export type RetailerId = "shein";
+
+export type RetailerAddressFormat = {
+  /** Tab label shown in the UI. */
+  label: string;
+  /** Combined "{Name}-{Code}" character limit this retailer enforces. */
+  nameCharLimit: number;
+  /** Character joining the shortened name to the account code. Configurable
+   *  per retailer in case one rejects hyphens — defaults to "-". The
+   *  account code's own characters are never touched either way. */
+  nameSeparator?: string;
+  /** The rest of the address fields (everything except Name), in display order. */
+  getAddressFields: () => RetailerAddressField[];
+};
+
+function getSheinAddressFields(): RetailerAddressField[] {
+  return [
+    { label: "Address Line 1", value: WAREHOUSE.addressLine1 },
+    { label: "City", value: WAREHOUSE.city },
+    { label: "State", value: WAREHOUSE.regionFull },
+    { label: "Zip Code", value: WAREHOUSE.postalCode },
+    { label: "Country", value: WAREHOUSE.countryFull },
+  ];
+}
+
+export const RETAILER_ADDRESS_FORMATS: Record<RetailerId, RetailerAddressFormat> = {
+  shein: {
+    label: "SHEIN",
+    nameCharLimit: 34,
+    nameSeparator: "-",
+    getAddressFields: getSheinAddressFields,
+  },
+};

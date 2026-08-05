@@ -17,6 +17,10 @@ export type UserRole = "customer" | "admin";
 
 export type AuthUser = {
   name: string;
+  /** Separate first/last — needed wherever a combined "name" string can't be
+   *  used as-is, e.g. retailer checkout forms with their own First/Last fields. */
+  firstName: string;
+  lastName: string;
   email: string;
   role: UserRole;
   /** Customers only — keys their packages, messages, and shipping address. */
@@ -81,6 +85,8 @@ async function hydrateUser(
 
   return {
     name: `${profile.first_name} ${profile.last_name}`.trim(),
+    firstName: profile.first_name,
+    lastName: profile.last_name,
     email: profile.email,
     role: profile.role as UserRole,
     accountCode: profile.account_code ?? undefined,

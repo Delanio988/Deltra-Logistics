@@ -409,7 +409,6 @@ export default function PreAlertFormModal({ existingPreAlert, onClose, onSubmitt
                     id={fileInputId}
                     type="file"
                     accept={ACCEPT_ATTR}
-                    capture="environment"
                     onChange={handleInputChange}
                     className="sr-only"
                   />

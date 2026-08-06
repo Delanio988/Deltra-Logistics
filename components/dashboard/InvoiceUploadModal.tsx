@@ -302,7 +302,6 @@ export default function InvoiceUploadModal({ pkg, existingInvoice, onClose, onSu
                   type="file"
                   multiple
                   accept={ACCEPT_ATTR}
-                  capture="environment"
                   onChange={handleInputChange}
                   className="sr-only"
                 />

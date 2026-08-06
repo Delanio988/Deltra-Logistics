@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Poppins } from "next/font/google";
+import { Montserrat } from "next/font/google";
 import "./globals.css";
 import SmoothScrollProvider from "@/components/layout/SmoothScrollProvider";
 import CustomCursor from "@/components/ui/CustomCursor";
@@ -10,8 +10,8 @@ import { SeasonalProvider } from "@/lib/seasonal-context";
 import { getSiteSettings } from "@/lib/settings";
 import ThemeProvider from "@/lib/theme-provider";
 
-const poppins = Poppins({
-  variable: "--font-poppins",
+const montserrat = Montserrat({
+  variable: "--font-montserrat",
   subsets: ["latin"],
   weight: ["400", "500", "600", "700", "800"],
   display: "swap",
@@ -51,7 +51,7 @@ export default async function RootLayout({
   // that isn't caused by app code. This only suppresses warnings for
   // this element's own attributes, not its children.
   return (
-    <html lang="en" className={poppins.variable} suppressHydrationWarning>
+    <html lang="en" className={montserrat.variable} suppressHydrationWarning>
       <body className="bg-bg text-fg font-sans antialiased transition-colors duration-200 motion-reduce:transition-none">
         <ThemeProvider>
           <AuthProvider>

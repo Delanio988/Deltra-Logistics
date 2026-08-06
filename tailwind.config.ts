@@ -66,7 +66,7 @@ const config: Config = {
         ink: "#0A0A0A",
       },
       fontFamily: {
-        sans: ["var(--font-poppins)", "system-ui", "sans-serif"],
+        sans: ["var(--font-montserrat)", "system-ui", "sans-serif"],
       },
       fontSize: {
         // Fluid, clamp-based display sizes for confident, agency-grade headings.

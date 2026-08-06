@@ -57,7 +57,7 @@ Hostinger (or any registrar's) domain at it, plus a full pre-launch checklist.
 | Component/page animation | Framer Motion |
 | Scroll-driven reveals & pinned sections | GSAP + ScrollTrigger |
 | Smooth scrolling | [`lenis`](https://github.com/darkroomengineering/lenis) |
-| Font | Poppins via `next/font/google` |
+| Font | Montserrat via `next/font/google` |
 
 > **Note on Lenis:** the original brief referenced `@studio-freight/lenis`.
 > That package was renamed — the same library now ships as
@@ -175,7 +175,7 @@ deployment/pre-launch checklist.
 
 ```
 app/
-  layout.tsx              Root layout: Poppins font, AuthProvider, SeasonalProvider,
+  layout.tsx              Root layout: Montserrat font, AuthProvider, SeasonalProvider,
                           SmoothScrollProvider, CustomCursor, Noise — global across all routes
   (marketing)/
     layout.tsx             Header + <main> + Footer — marketing chrome

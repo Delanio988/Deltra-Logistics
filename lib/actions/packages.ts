@@ -3,9 +3,10 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireAdmin } from "@/lib/actions/auth-helpers";
-import { buildShippingLineItem } from "@/lib/billing";
+import { buildShippingLineItem, type BillStatus } from "@/lib/billing";
 import { formatCurrency } from "@/lib/quote-config";
 import { notifyCustomer } from "@/lib/notify";
+import { sendPackageReceivedEmail, sendPackageReadyEmail } from "@/lib/email-templates";
 import type { TablesInsert } from "@/lib/database.types";
 
 const PACKAGE_STATUS_VALUES = [
@@ -39,7 +40,7 @@ export async function addPackage(input: z.infer<typeof addPackageSchema>): Promi
 
   const { data: customer, error: customerError } = await supabase
     .from("profiles")
-    .select("id")
+    .select("id, email, first_name")
     .eq("account_code", parsed.data.accountCode)
     .single();
   if (customerError || !customer) return { success: false, error: "Customer not found." };
@@ -72,6 +73,24 @@ export async function addPackage(input: z.infer<typeof addPackageSchema>): Promi
     });
   }
 
+  // Branded HTML email, additional to the in-app/plain-text notifyCustomer
+  // calls above — best-effort, never blocks the package add from succeeding.
+  if (parsed.data.status === "Received at Warehouse" && customer.email) {
+    const emailResult = await sendPackageReceivedEmail({
+      to: customer.email,
+      firstName: customer.first_name ?? "",
+      trackingNumber: parsed.data.trackingNumber,
+      merchant: parsed.data.merchant,
+      description: parsed.data.description,
+      weightLb: parsed.data.weightLb,
+      dateReceived: parsed.data.dateReceived,
+      invoiceRequired: parsed.data.invoiceRequired,
+    });
+    console.info(
+      `[addPackage] Package-received email for ${parsed.data.trackingNumber}: ${emailResult.success ? "sent" : `not sent (${emailResult.error})`}`
+    );
+  }
+
   revalidatePath("/admin");
   revalidatePath("/dashboard");
   return { success: true };
@@ -91,7 +110,9 @@ export async function updatePackageStatus(input: z.infer<typeof updateStatusSche
 
   const { data: pkg, error: fetchError } = await supabase
     .from("packages")
-    .select("id, customer_id, tracking_number, weight_lb, status")
+    .select(
+      "id, customer_id, tracking_number, merchant, description, weight_lb, date_received, status, invoice_required, profiles!packages_customer_id_fkey(email, first_name)"
+    )
     .eq("id", parsed.data.packageId)
     .single();
   if (fetchError || !pkg) return { success: false, error: "Package not found." };
@@ -106,12 +127,35 @@ export async function updatePackageStatus(input: z.infer<typeof updateStatusSche
     body: `${pkg.tracking_number} is now ${parsed.data.status}.`,
   });
 
+  const customerEmail = pkg.profiles?.email;
+  const customerFirstName = pkg.profiles?.first_name ?? "";
+
+  // Branded HTML email, additional to the plain-text notifyCustomer call
+  // above — best-effort, never blocks the status update from succeeding.
+  if (parsed.data.status === "Received at Warehouse" && customerEmail) {
+    const emailResult = await sendPackageReceivedEmail({
+      to: customerEmail,
+      firstName: customerFirstName,
+      trackingNumber: pkg.tracking_number,
+      merchant: pkg.merchant,
+      description: pkg.description,
+      weightLb: pkg.weight_lb,
+      dateReceived: pkg.date_received,
+      invoiceRequired: pkg.invoice_required,
+    });
+    console.info(
+      `[updatePackageStatus] Package-received email for ${pkg.tracking_number}: ${emailResult.success ? "sent" : `not sent (${emailResult.error})`}`
+    );
+  }
+
   // First time this package reaches Ready for Pickup, auto-create its bill
   // (base shipping charge) — bills.total is trigger-recomputed from
   // line_items, so inserting the line item is what actually sets the total.
   if (parsed.data.status === "Ready for Pickup") {
     const { data: existingBill } = await supabase.from("bills").select("id").eq("package_id", pkg.id).maybeSingle();
-    if (!existingBill) {
+    let billId = existingBill?.id;
+
+    if (!billId) {
       const dueDate = new Date();
       dueDate.setDate(dueDate.getDate() + 14);
 
@@ -134,6 +178,37 @@ export async function updatePackageStatus(input: z.infer<typeof updateStatusSche
           title: "Bill ready",
           body: `A bill of ${formatCurrency(lineItem.amount)} is ready for ${pkg.tracking_number} — view it under Bills/Transactions.`,
         });
+        billId = bill.id;
+      }
+    }
+
+    // Branded invoice-style email — always re-reads the bill/line_items
+    // fresh right before sending (never recalculates pricing itself), so it
+    // reflects the real total whether the bill was just created above or
+    // already existed with admin-added charges (duty, handling, etc.).
+    if (billId && customerEmail) {
+      const [{ data: freshBill }, { data: lineItemRows }] = await Promise.all([
+        supabase.from("bills").select("total, amount_paid, status, due_date").eq("id", billId).single(),
+        supabase.from("line_items").select("label, amount").eq("bill_id", billId).order("created_at", { ascending: true }),
+      ]);
+
+      if (freshBill) {
+        const emailResult = await sendPackageReadyEmail({
+          to: customerEmail,
+          firstName: customerFirstName,
+          trackingNumber: pkg.tracking_number,
+          merchant: pkg.merchant,
+          description: pkg.description,
+          weightLb: pkg.weight_lb,
+          lineItems: (lineItemRows ?? []).map((li) => ({ label: li.label, amount: li.amount })),
+          total: freshBill.total,
+          amountPaid: freshBill.amount_paid,
+          status: freshBill.status as BillStatus,
+          dueDate: freshBill.due_date ?? "",
+        });
+        console.info(
+          `[updatePackageStatus] Package-ready email for ${pkg.tracking_number}: ${emailResult.success ? "sent" : `not sent (${emailResult.error})`}`
+        );
       }
     }
   }

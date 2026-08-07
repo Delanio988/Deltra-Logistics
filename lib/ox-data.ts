@@ -7,6 +7,7 @@ import {
   type OxPackage,
   type OxCustomer,
 } from "@/lib/ox-api";
+import { INTERNAL_EMAIL_DOMAIN } from "@/lib/siteConfig";
 
 export type MailboxLinkRow = {
   id: string;
@@ -24,6 +25,7 @@ export async function getCustomersForMailboxLinking(): Promise<MailboxLinkRow[]>
     .from("profiles")
     .select("id, first_name, last_name, account_code, mailbox_number, email, phone")
     .eq("role", "customer")
+    .not("email", "ilike", `%@${INTERNAL_EMAIL_DOMAIN}`)
     .order("created_at", { ascending: false });
   if (error) {
     console.error("[getCustomersForMailboxLinking]", error.message);

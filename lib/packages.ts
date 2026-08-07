@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import type { Tables } from "@/lib/database.types";
 import type { Customer, Package, PackageStatus } from "@/lib/dashboard-data";
+import { INTERNAL_EMAIL_DOMAIN } from "@/lib/siteConfig";
 
 export type PackageWithCustomer = Package & { customerName: string; customerEmail: string; customerPhone: string | null };
 
@@ -77,6 +78,7 @@ export async function getCustomerPickerList(): Promise<Customer[]> {
     .from("profiles")
     .select("first_name, last_name, account_code, email, phone")
     .eq("role", "customer")
+    .not("email", "ilike", `%@${INTERNAL_EMAIL_DOMAIN}`)
     .order("created_at", { ascending: false });
   if (error) {
     console.error("[getCustomerPickerList]", error.message);

@@ -15,3 +15,8 @@ export const CONTACT_PHONE_E164 = "+18767752874";
 export const CONTACT_EMAIL_HREF = `mailto:${CONTACT_EMAIL}`;
 export const CONTACT_PHONE_HREF = `tel:${CONTACT_PHONE_E164}`;
 export const WHATSAPP_URL = `https://wa.me/${CONTACT_PHONE_E164.replace("+", "")}`;
+
+// Company-domain addresses (e.g. name@deltralogistics.com) are internal/staff
+// test accounts, not real customers — used to keep them out of admin-facing
+// customer lists even when their role is still "customer" in the database.
+export const INTERNAL_EMAIL_DOMAIN = "deltralogistics.com";

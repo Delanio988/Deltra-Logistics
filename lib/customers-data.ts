@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { INTERNAL_EMAIL_DOMAIN } from "@/lib/siteConfig";
 
 export type CustomerWithStats = {
   id: string;
@@ -18,6 +19,7 @@ export async function getAllCustomersWithStats(): Promise<CustomerWithStats[]> {
     .from("profiles")
     .select("id, first_name, last_name, account_code, email, phone, packages!packages_customer_id_fkey(count)")
     .eq("role", "customer")
+    .not("email", "ilike", `%@${INTERNAL_EMAIL_DOMAIN}`)
     .order("created_at", { ascending: false });
   if (error) {
     console.error("[getAllCustomersWithStats]", error.message);

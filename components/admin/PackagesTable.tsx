@@ -9,6 +9,7 @@ import { getInvoiceForPackage, type Invoice } from "@/lib/invoices";
 import { updatePackageStatus, setPackageInvoiceRequired } from "@/lib/actions/packages";
 import type { PackageWithCustomer } from "@/lib/packages";
 import InvoiceStatusBadge from "@/components/ui/InvoiceStatusBadge";
+import ContactLinks from "@/components/admin/ContactLinks";
 import Toast from "@/components/ui/Toast";
 
 type PackagesTableProps = {
@@ -79,7 +80,12 @@ export default function PackagesTable({ packages, invoices }: PackagesTableProps
             return (
               <tr key={pkg.id} className="border-b border-fg/8 last:border-0">
                 <td className="px-6 py-4 font-mono text-fg">{pkg.trackingNumber}</td>
-                <td className="px-6 py-4 text-fg/70">{pkg.customerName}</td>
+                <td className="px-6 py-4 text-fg/70">
+                  <div className="flex items-center gap-2">
+                    <span>{pkg.customerName}</span>
+                    <ContactLinks email={pkg.customerEmail} phone={pkg.customerPhone} variant="compact" />
+                  </div>
+                </td>
                 <td className="px-6 py-4 text-fg/70">{pkg.merchant}</td>
                 <td className="px-6 py-4 text-fg/70">{pkg.weightLb} lb</td>
                 <td className="px-6 py-4 text-fg/70">{formatCurrency(calculateShippingCost(pkg.weightLb))}</td>

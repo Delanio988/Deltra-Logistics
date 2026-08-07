@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import type { Database, Tables } from "@/lib/database.types";
 import type { Bill, BillStatus, LineItem, Transaction, TransactionType } from "@/lib/billing";
 
-export type BillWithCustomer = Bill & { customerName: string };
+export type BillWithCustomer = Bill & { customerName: string; customerEmail: string; customerPhone: string | null };
 
 function formatDbDate(iso: string): string {
   return new Date(iso).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
@@ -95,12 +95,13 @@ export async function getWalletBalanceForCurrentUser(): Promise<number> {
   return profile?.wallet_balance ?? 0;
 }
 
-/** Admin view — every bill, with the owning customer's name + account code. */
+/** Admin view — every bill, with the owning customer's name, account code,
+ *  and contact info (email/phone) so admins can reach them directly. */
 export async function getAllBillsWithCustomer(): Promise<BillWithCustomer[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("bills")
-    .select("*, profiles!bills_customer_id_fkey(first_name, last_name, account_code)")
+    .select("*, profiles!bills_customer_id_fkey(first_name, last_name, account_code, email, phone)")
     .order("created_at", { ascending: false });
   if (error) {
     console.error("[getAllBillsWithCustomer]", error.message);
@@ -113,7 +114,7 @@ export async function getAllBillsWithCustomer(): Promise<BillWithCustomer[]> {
       const accountCode = profile?.account_code ?? "";
       const customerName = profile ? `${profile.first_name} ${profile.last_name}`.trim() : accountCode;
       const bill = await mapBillRow(supabase, row, accountCode);
-      return { ...bill, customerName };
+      return { ...bill, customerName, customerEmail: profile?.email ?? "", customerPhone: profile?.phone ?? null };
     })
   );
 }

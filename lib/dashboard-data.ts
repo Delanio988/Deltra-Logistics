@@ -61,6 +61,7 @@ export type Customer = {
   name: string;
   accountCode: string;
   email: string;
+  phone: string | null;
 };
 
 // No physical branch/storefront — every package is delivered or picked up by

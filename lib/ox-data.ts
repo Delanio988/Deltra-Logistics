@@ -13,6 +13,8 @@ export type MailboxLinkRow = {
   name: string;
   accountCode: string;
   mailboxNumber: number | null;
+  email: string;
+  phone: string | null;
 };
 
 /** Every Deltra customer, for the admin's mailbox-number linking table. */
@@ -20,7 +22,7 @@ export async function getCustomersForMailboxLinking(): Promise<MailboxLinkRow[]>
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("profiles")
-    .select("id, first_name, last_name, account_code, mailbox_number")
+    .select("id, first_name, last_name, account_code, mailbox_number, email, phone")
     .eq("role", "customer")
     .order("created_at", { ascending: false });
   if (error) {
@@ -33,6 +35,8 @@ export async function getCustomersForMailboxLinking(): Promise<MailboxLinkRow[]>
     name: `${row.first_name} ${row.last_name}`.trim(),
     accountCode: row.account_code ?? "",
     mailboxNumber: row.mailbox_number,
+    email: row.email,
+    phone: row.phone,
   }));
 }
 

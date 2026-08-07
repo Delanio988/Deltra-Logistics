@@ -5,16 +5,27 @@ import type { Package } from "@/lib/dashboard-data";
 import { billBalanceDue, type Bill } from "@/lib/billing";
 import { formatCurrency } from "@/lib/quote-config";
 import BillStatusBadge from "@/components/ui/BillStatusBadge";
+import ContactLinks from "@/components/admin/ContactLinks";
 
 type BillingAdminRowProps = {
   bill: Bill;
   pkg: Package | undefined;
   customerName: string;
+  customerEmail: string;
+  customerPhone: string | null;
   onAddCharge: (label: string, amount: number) => void;
   onMarkPaid: () => void;
 };
 
-export default function BillingAdminRow({ bill, pkg, customerName, onAddCharge, onMarkPaid }: BillingAdminRowProps) {
+export default function BillingAdminRow({
+  bill,
+  pkg,
+  customerName,
+  customerEmail,
+  customerPhone,
+  onAddCharge,
+  onMarkPaid,
+}: BillingAdminRowProps) {
   const [showForm, setShowForm] = useState(false);
   const [label, setLabel] = useState("");
   const [amount, setAmount] = useState("");
@@ -38,6 +49,7 @@ export default function BillingAdminRow({ bill, pkg, customerName, onAddCharge, 
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-3">
             <span className="text-sm font-semibold text-fg">{customerName}</span>
+            <ContactLinks email={customerEmail} phone={customerPhone} variant="compact" />
             <span className="font-mono text-sm text-fg/60">{pkg?.trackingNumber ?? "—"}</span>
             <BillStatusBadge status={bill.status} />
           </div>

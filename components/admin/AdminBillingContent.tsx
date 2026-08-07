@@ -78,6 +78,8 @@ export default function AdminBillingContent({ bills, packages, customers }: Admi
                   bill={bill}
                   pkg={packages.find((p) => p.id === bill.packageId)}
                   customerName={bill.customerName || customerName(bill.accountCode)}
+                  customerEmail={bill.customerEmail}
+                  customerPhone={bill.customerPhone}
                   onAddCharge={async (label, amount) => {
                     const result = await addLineItemToBill({ billId: bill.id, label, amount });
                     if (!result.success) {

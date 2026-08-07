@@ -112,7 +112,8 @@ export default function AddPackageForm({ customers }: AddPackageFormProps) {
           >
             {customers.map((c) => (
               <option key={c.accountCode} value={c.accountCode} className="bg-surface text-fg">
-                {c.name} ({c.accountCode})
+                {c.name} ({c.accountCode}) — {c.email}
+                {c.phone ? ` — ${c.phone}` : ""}
               </option>
             ))}
           </select>

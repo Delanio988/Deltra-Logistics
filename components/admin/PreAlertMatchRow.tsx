@@ -2,6 +2,7 @@
 
 import { useId, useState } from "react";
 import { formatPreAlertValue, type PreAlertWithCustomer, type UnmatchedPackageForMatching } from "@/lib/pre-alerts";
+import ContactLinks from "@/components/admin/ContactLinks";
 
 type PreAlertMatchRowProps = {
   preAlert: PreAlertWithCustomer;
@@ -30,6 +31,7 @@ export default function PreAlertMatchRow({ preAlert, candidatePackages, onMatch 
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-wrap items-center gap-3">
           <span className="text-sm font-semibold text-fg">{preAlert.customerName}</span>
+          <ContactLinks email={preAlert.customerEmail} phone={preAlert.customerPhone} variant="compact" />
           <span className="font-mono text-sm text-fg/60">{preAlert.trackingNumber}</span>
         </div>
         <span className="text-xs text-fg/40">Submitted {preAlert.createdAt}</span>

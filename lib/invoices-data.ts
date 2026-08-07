@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import type { Database, Tables } from "@/lib/database.types";
 import type { Invoice, InvoiceFile, InvoiceStatus, InvoiceStatusHistoryEntry } from "@/lib/invoices";
 
-export type InvoiceWithCustomer = Invoice & { customerName: string };
+export type InvoiceWithCustomer = Invoice & { customerName: string; customerEmail: string; customerPhone: string | null };
 
 // Signed URLs are short-lived by design — re-generated on every page load,
 // never persisted, matching the private bucket's whole point.
@@ -85,14 +85,15 @@ export async function getInvoicesForCurrentUser(): Promise<Invoice[]> {
   return Promise.all((data ?? []).map((row) => mapInvoiceRow(supabase, row, accountCode)));
 }
 
-/** Admin view — every invoice, with the owning customer's name + account code. */
+/** Admin view — every invoice, with the owning customer's name, account
+ *  code, and contact info (email/phone) so admins can reach them directly. */
 export async function getAllInvoicesWithCustomer(): Promise<InvoiceWithCustomer[]> {
   const supabase = await createClient();
   // invoices has two FKs into profiles (customer_id and reviewed_by), so the
   // embed needs an explicit hint to resolve which relationship to follow.
   const { data, error } = await supabase
     .from("invoices")
-    .select("*, profiles!invoices_customer_id_fkey(first_name, last_name, account_code)")
+    .select("*, profiles!invoices_customer_id_fkey(first_name, last_name, account_code, email, phone)")
     .order("submitted_at", { ascending: false });
   if (error) {
     console.error("[getAllInvoicesWithCustomer]", error.message);
@@ -105,7 +106,7 @@ export async function getAllInvoicesWithCustomer(): Promise<InvoiceWithCustomer[
       const accountCode = profile?.account_code ?? "";
       const customerName = profile ? `${profile.first_name} ${profile.last_name}`.trim() : accountCode;
       const invoice = await mapInvoiceRow(supabase, row, accountCode);
-      return { ...invoice, customerName };
+      return { ...invoice, customerName, customerEmail: profile?.email ?? "", customerPhone: profile?.phone ?? null };
     })
   );
 }

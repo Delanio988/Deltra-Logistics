@@ -2,7 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import type { Tables } from "@/lib/database.types";
 import type { Customer, Package, PackageStatus } from "@/lib/dashboard-data";
 
-export type PackageWithCustomer = Package & { customerName: string };
+export type PackageWithCustomer = Package & { customerName: string; customerEmail: string; customerPhone: string | null };
 
 function formatDbDate(isoDate: string): string {
   return new Date(`${isoDate}T00:00:00`).toLocaleDateString(undefined, {
@@ -44,12 +44,13 @@ export async function getPackagesForCurrentUser(): Promise<Package[]> {
   return (data ?? []).map((row) => mapPackageRow(row, row.profiles?.account_code ?? ""));
 }
 
-/** Admin view — every package, with the owning customer's display name. */
+/** Admin view — every package, with the owning customer's display name and
+ *  contact info (email/phone) so admins can reach them without navigating away. */
 export async function getAllPackagesWithCustomer(): Promise<PackageWithCustomer[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("packages")
-    .select("*, profiles!packages_customer_id_fkey(first_name, last_name, account_code)")
+    .select("*, profiles!packages_customer_id_fkey(first_name, last_name, account_code, email, phone)")
     .order("created_at", { ascending: false });
   if (error) {
     console.error("[getAllPackagesWithCustomer]", error.message);
@@ -60,7 +61,12 @@ export async function getAllPackagesWithCustomer(): Promise<PackageWithCustomer[
     const profile = row.profiles;
     const accountCode = profile?.account_code ?? "";
     const customerName = profile ? `${profile.first_name} ${profile.last_name}`.trim() : accountCode;
-    return { ...mapPackageRow(row, accountCode), customerName };
+    return {
+      ...mapPackageRow(row, accountCode),
+      customerName,
+      customerEmail: profile?.email ?? "",
+      customerPhone: profile?.phone ?? null,
+    };
   });
 }
 
@@ -69,7 +75,7 @@ export async function getCustomerPickerList(): Promise<Customer[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("profiles")
-    .select("first_name, last_name, account_code, email")
+    .select("first_name, last_name, account_code, email, phone")
     .eq("role", "customer")
     .order("created_at", { ascending: false });
   if (error) {
@@ -83,5 +89,6 @@ export async function getCustomerPickerList(): Promise<Customer[]> {
       name: `${row.first_name} ${row.last_name}`.trim(),
       accountCode: row.account_code as string,
       email: row.email,
+      phone: row.phone,
     }));
 }

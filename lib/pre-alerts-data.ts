@@ -65,12 +65,12 @@ export async function getPreAlertsForCurrentUser(): Promise<PreAlert[]> {
 }
 
 /** Admin queue — every pending pre-alert, oldest first, with the owning
- *  customer's display name for the matching UI. */
+ *  customer's display name and contact info (email/phone) for the matching UI. */
 export async function getAllPendingPreAlertsWithCustomer(): Promise<PreAlertWithCustomer[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("pre_alerts")
-    .select("*, profiles!pre_alerts_customer_id_fkey(first_name, last_name, account_code)")
+    .select("*, profiles!pre_alerts_customer_id_fkey(first_name, last_name, account_code, email, phone)")
     .eq("status", "pending")
     .order("created_at", { ascending: true });
   if (error) {
@@ -84,7 +84,14 @@ export async function getAllPendingPreAlertsWithCustomer(): Promise<PreAlertWith
       const accountCode = profile?.account_code ?? "";
       const customerName = profile ? `${profile.first_name} ${profile.last_name}`.trim() : accountCode;
       const preAlert = await mapPreAlertRow(supabase, row);
-      return { ...preAlert, customerId: row.customer_id, customerName, accountCode };
+      return {
+        ...preAlert,
+        customerId: row.customer_id,
+        customerName,
+        accountCode,
+        customerEmail: profile?.email ?? "",
+        customerPhone: profile?.phone ?? null,
+      };
     })
   );
 }

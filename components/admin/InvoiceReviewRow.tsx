@@ -5,6 +5,7 @@ import { formatInvoiceValue, type Invoice, type InvoiceStatus } from "@/lib/invo
 import { isThumbnailableImage } from "@/lib/uploads";
 import InvoiceStatusBadge from "@/components/ui/InvoiceStatusBadge";
 import InvoiceReviewActions from "@/components/admin/InvoiceReviewActions";
+import ContactLinks from "@/components/admin/ContactLinks";
 
 const FileIcon = (
   <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={1.6}>
@@ -17,6 +18,8 @@ type InvoiceReviewRowProps = {
   invoice: Invoice;
   pkg: Package | undefined;
   customerName: string;
+  customerEmail: string;
+  customerPhone: string | null;
   onReview: (invoiceId: string, decision: Extract<InvoiceStatus, "approved" | "rejected">, rejectionReason?: string) => void;
   onOpenViewer: (invoice: Invoice) => void;
 };
@@ -25,7 +28,15 @@ type InvoiceReviewRowProps = {
  *  button opening the shared lightbox (which can page through every file),
  *  plus inline approve/reject controls for admins who don't need the full
  *  viewer. */
-export default function InvoiceReviewRow({ invoice, pkg, customerName, onReview, onOpenViewer }: InvoiceReviewRowProps) {
+export default function InvoiceReviewRow({
+  invoice,
+  pkg,
+  customerName,
+  customerEmail,
+  customerPhone,
+  onReview,
+  onOpenViewer,
+}: InvoiceReviewRowProps) {
   const firstFile = invoice.files[0];
 
   return (
@@ -33,6 +44,7 @@ export default function InvoiceReviewRow({ invoice, pkg, customerName, onReview,
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-wrap items-center gap-3">
           <span className="text-sm font-semibold text-fg">{customerName}</span>
+          <ContactLinks email={customerEmail} phone={customerPhone} variant="compact" />
           <span className="font-mono text-sm text-fg/60">{pkg?.trackingNumber ?? "—"}</span>
           <InvoiceStatusBadge status={invoice.status} />
           {invoice.status === "pending" && invoice.hasUnreviewedChanges && (

@@ -4,11 +4,14 @@ import type { Package } from "@/lib/dashboard-data";
 import { formatInvoiceValue, type Invoice } from "@/lib/invoices";
 import InvoiceStatusBadge from "@/components/ui/InvoiceStatusBadge";
 import InvoiceReviewActions from "@/components/admin/InvoiceReviewActions";
+import ContactLinks from "@/components/admin/ContactLinks";
 
 type InvoiceLightboxFooterProps = {
   invoice: Invoice;
   pkg: Package | undefined;
   customerName: string;
+  customerEmail: string;
+  customerPhone: string | null;
   onApprove: () => void;
   onReject: (reason: string) => void;
   onNextPending: () => void;
@@ -31,6 +34,8 @@ export default function InvoiceLightboxFooter({
   invoice,
   pkg,
   customerName,
+  customerEmail,
+  customerPhone,
   onApprove,
   onReject,
   onNextPending,
@@ -51,6 +56,13 @@ export default function InvoiceLightboxFooter({
             {invoice.rejectionReason}
           </span>
         )}
+      </div>
+
+      <div>
+        <p className="text-[11px] font-semibold uppercase tracking-widest text-fg/40">Contact</p>
+        <div className="mt-0.5">
+          <ContactLinks email={customerEmail} phone={customerPhone} variant="full" />
+        </div>
       </div>
 
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">

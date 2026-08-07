@@ -44,9 +44,7 @@ export default function AdminInvoicesContent({
 
   const viewingInvoice: Invoice | undefined = viewingInvoiceId ? invoices.find((inv) => inv.id === viewingInvoiceId) : undefined;
   const viewingPkg = viewingInvoice ? packages.find((p) => p.id === viewingInvoice.packageId) : undefined;
-  const viewingCustomerName = viewingInvoiceId
-    ? invoices.find((inv) => inv.id === viewingInvoiceId)?.customerName
-    : undefined;
+  const viewingInvoiceWithCustomer = viewingInvoiceId ? invoices.find((inv) => inv.id === viewingInvoiceId) : undefined;
   const nextPending = viewingInvoiceId ? getNextPendingInvoice(invoices, viewingInvoiceId) : undefined;
 
   return (
@@ -63,6 +61,8 @@ export default function AdminInvoicesContent({
               invoice={invoice}
               pkg={packages.find((p) => p.id === invoice.packageId)}
               customerName={invoice.customerName}
+              customerEmail={invoice.customerEmail}
+              customerPhone={invoice.customerPhone}
               onReview={handleReview}
               onOpenViewer={(inv) => setViewingInvoiceId(inv.id)}
             />
@@ -83,7 +83,9 @@ export default function AdminInvoicesContent({
               <InvoiceLightboxFooter
                 invoice={viewingInvoice}
                 pkg={viewingPkg}
-                customerName={viewingCustomerName ?? viewingInvoice.accountCode}
+                customerName={viewingInvoiceWithCustomer?.customerName ?? viewingInvoice.accountCode}
+                customerEmail={viewingInvoiceWithCustomer?.customerEmail ?? ""}
+                customerPhone={viewingInvoiceWithCustomer?.customerPhone ?? null}
                 onApprove={() => handleReview(viewingInvoice.id, "approved")}
                 onReject={(reason) => handleReview(viewingInvoice.id, "rejected", reason)}
                 onNextPending={() => setViewingInvoiceId(nextPending ? nextPending.id : null)}

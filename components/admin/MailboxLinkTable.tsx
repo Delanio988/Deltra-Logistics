@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { setCustomerMailboxNumber } from "@/lib/actions/ox-sync";
 import type { MailboxLinkRow } from "@/lib/ox-data";
+import ContactLinks from "@/components/admin/ContactLinks";
 import Toast from "@/components/ui/Toast";
 
 type MailboxLinkTableProps = {
@@ -72,7 +73,12 @@ export default function MailboxLinkTable({ customers }: MailboxLinkTableProps) {
         <tbody>
           {customers.map((customer) => (
             <tr key={customer.id} className="border-b border-fg/8 last:border-0">
-              <td className="px-6 py-4 text-fg">{customer.name}</td>
+              <td className="px-6 py-4 text-fg">
+                <div className="flex items-center gap-2">
+                  <span>{customer.name}</span>
+                  <ContactLinks email={customer.email} phone={customer.phone} variant="compact" />
+                </div>
+              </td>
               <td className="px-6 py-4 font-mono text-fg/70">{customer.accountCode}</td>
               <td className="px-6 py-4">
                 <label className="sr-only" htmlFor={`mailbox-${customer.id}`}>

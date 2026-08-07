@@ -28,6 +28,9 @@ type PackageCardProps = {
 export default function PackageCard({ pkg, isExpanded, onToggle }: PackageCardProps) {
   const stepIndex = STATUS_STEP_INDEX[pkg.status];
   const progressPercent = ((stepIndex + 1) / PACKAGE_STATUSES.length) * 100;
+  // A bill only exists once the package reaches Ready for Pickup — showing a
+  // cost figure before then would look like a charge that isn't real yet.
+  const isBilled = stepIndex >= STATUS_STEP_INDEX["Ready for Pickup"];
   const shippingCost = calculateShippingCost(pkg.weightLb);
   const panelId = `package-panel-${pkg.id}`;
 
@@ -51,7 +54,7 @@ export default function PackageCard({ pkg, isExpanded, onToggle }: PackageCardPr
             {pkg.merchant} — {pkg.description}
           </p>
           <p className="mt-1 text-sm text-fg/50">
-            {pkg.weightLb} lb · {formatCurrency(shippingCost)} · Received {pkg.dateReceived}
+            {pkg.weightLb} lb{isBilled ? ` · ${formatCurrency(shippingCost)}` : ""} · Received {pkg.dateReceived}
           </p>
 
           <div className="mt-4 max-w-xs">

@@ -2,10 +2,11 @@ import type { Metadata } from "next";
 import RateCalculator from "@/components/dashboard/RateCalculator";
 import ScrollReveal from "@/components/ui/ScrollReveal";
 import BackButton from "@/components/ui/BackButton";
+import { CURRENCY, RATE_PER_LB } from "@/lib/quote-config";
 
 export const metadata: Metadata = {
   title: "Get a Quote | Deltra Logistics",
-  description: "Estimate your shipping cost instantly — J$600 per pound, Standard Air.",
+  description: `Estimate your shipping cost instantly — ${CURRENCY}${RATE_PER_LB} per pound, Standard Air.`,
 };
 
 export default function QuotePage() {

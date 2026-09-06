@@ -1,3 +1,5 @@
+import { CURRENCY, RATE_PER_LB } from "@/lib/quote-config";
+
 export const NAV_LINKS = [
   { label: "Services", href: "#services" },
   { label: "Get a Quote", href: "/quote" },
@@ -116,7 +118,7 @@ export const FEATURE_GRID_ITEMS: FeatureGridItem[] = [
   {
     id: "pricing",
     number: "04",
-    title: "Transparent J$600/lb Pricing",
+    title: `Transparent ${CURRENCY}${RATE_PER_LB}/lb Pricing`,
     description: "One flat rate per pound, shown up front on /quote before you ever sign up. No surprise fees at pickup.",
     icon: "tag",
     highlight: true,

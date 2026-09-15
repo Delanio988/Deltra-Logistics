@@ -23,7 +23,7 @@ export default function OverseasAddressCard({ address, firstName, lastName }: Ov
   const [activeTab, setActiveTab] = useState<TabId>("general");
   const [copyState, setCopyState] = useState<"idle" | "copied" | "error">("idle");
 
-  const fullAddress = `${address.name}, ${address.addressLine1}, ${address.city}, ${address.region} ${address.postalCode}, ${address.country}`;
+  const fullAddress = `${address.name}, ${address.addressLine1}, ${address.addressLine2}, ${address.city}, ${address.region} ${address.postalCode}, ${address.country}`;
 
   const handleCopy = async () => {
     try {
@@ -83,6 +83,7 @@ export default function OverseasAddressCard({ address, firstName, lastName }: Ov
               <ShippingNameMeta result={address.nameResult} retailerLabel="most stores" />
             </div>
             <p>{address.addressLine1}</p>
+            <p>{address.addressLine2}</p>
             <p>
               {address.city}, {address.region} {address.postalCode}
             </p>

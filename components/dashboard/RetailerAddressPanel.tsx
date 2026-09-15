@@ -34,7 +34,7 @@ export default function RetailerAddressPanel({ format, customer }: RetailerAddre
     format.nameCharLimit,
     format.nameSeparator ?? "-"
   );
-  const fields = [{ label: "Name", value: nameResult.value }, ...format.getAddressFields()];
+  const fields = [{ label: "Name", value: nameResult.value }, ...format.getAddressFields(customer.accountCode)];
 
   const showCopied = (key: string) => {
     setCopiedKey(key);

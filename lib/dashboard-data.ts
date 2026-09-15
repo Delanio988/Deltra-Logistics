@@ -78,6 +78,10 @@ export type OverseasAddress = {
   nameResult: FormatShippingNameResult;
   accountCode: string;
   addressLine1: string;
+  /** "Unit 8 {accountCode}" — Unit 8 is the fixed suite Deltra holds at the
+   *  warehouse; the account code appended here (as well as fused onto
+   *  `name`) is what the warehouse actually sorts incoming packages by. */
+  addressLine2: string;
   city: string;
   region: string;
   postalCode: string;
@@ -86,11 +90,12 @@ export type OverseasAddress = {
 };
 
 const WAREHOUSE = {
-  addressLine1: "5587 NW 72nd Ave",
-  city: "Miami",
+  addressLine1: "2099 NW 141st Street",
+  unit: "Unit 8",
+  city: "Opa-locka",
   region: "FL",
   regionFull: "Florida",
-  postalCode: "33166",
+  postalCode: "33054",
   country: "USA",
   countryFull: "United States",
 };
@@ -107,6 +112,7 @@ export function getOverseasAddress(firstName: string, lastName: string, accountC
     nameResult,
     accountCode,
     addressLine1: WAREHOUSE.addressLine1,
+    addressLine2: `${WAREHOUSE.unit} ${accountCode}`,
     city: WAREHOUSE.city,
     region: WAREHOUSE.region,
     postalCode: WAREHOUSE.postalCode,
@@ -147,13 +153,16 @@ export type RetailerAddressFormat = {
    *  per retailer in case one rejects hyphens — defaults to "-". The
    *  account code's own characters are never touched either way. */
   nameSeparator?: string;
-  /** The rest of the address fields (everything except Name), in display order. */
-  getAddressFields: () => RetailerAddressField[];
+  /** The rest of the address fields (everything except Name), in display
+   *  order. Takes the account code since Address Line 2 ("Unit 8 {code}")
+   *  is customer-specific, same as the fused name. */
+  getAddressFields: (accountCode: string) => RetailerAddressField[];
 };
 
-function getSheinAddressFields(): RetailerAddressField[] {
+function getSheinAddressFields(accountCode: string): RetailerAddressField[] {
   return [
     { label: "Address Line 1", value: WAREHOUSE.addressLine1 },
+    { label: "Address Line 2", value: `${WAREHOUSE.unit} ${accountCode}` },
     { label: "City", value: WAREHOUSE.city },
     { label: "State", value: WAREHOUSE.regionFull },
     { label: "Zip Code", value: WAREHOUSE.postalCode },
